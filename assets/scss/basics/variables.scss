@@ -1,0 +1,273 @@
+@use "./fonts" as *;
+
+/*
+* Colors
+*/
+
+$black: #000;
+$white: #fff;
+
+$light1: #f2f2f2;
+$light2: #f4f4f4;
+
+$dark1: #0b0d0f;
+$dark2: #141416;
+$dark3: #18191d;
+$dark4: #1b1c1f;
+
+$dark-text: #777e90;
+
+$black08: rgba(0, 0, 0, 0.08);
+$black05: rgba(0, 0, 0, 0.05);
+$black03: rgba(0, 0, 0, 0.03);
+$black01: rgba(0, 0, 0, 0.1);
+$black1: rgba(0, 0, 0, 0.1);
+$black2: rgba(0, 0, 0, 0.2);
+$white8: rgba(255, 255, 255, 0.8);
+
+$btn-border: #e6e8ec;
+$dark-btn-border: #353945;
+$dark-btn: #353945;
+$dark-btn-color: #fcfcfd;
+$menu-btn: #777e90;
+$menu-btn-hover: #23262f;
+$input-border: #e6e8ec;
+$dark-input-border: #777e90;
+
+$custom-dark: #212121;
+$custom-grey: #eeecec;
+$custom-grey2: #efeeec;
+$custom-green: #283734;
+
+// Grey
+$grey-50: #f9fafb;
+$grey-100: #f2f4f7;
+$grey-200: #eaecf0;
+$grey-300: #d0d5dd;
+$grey-400: #98a2b3;
+$grey-500: #667085;
+$grey-600: #475467;
+$grey-700: #344054;
+$grey-800: #1d2939;
+$grey-900: #101828;
+
+// Slate
+$slate-50: #f8fafc;
+$slate-100: #f1f5f9;
+$slate-200: #e2e8f0;
+$slate-300: #cbd5e1;
+$slate-400: #94a3b8;
+$slate-500: #64748b;
+$slate-600: #475569;
+$slate-700: #334155;
+$slate-800: #1e293b;
+$slate-900: #0f172a;
+
+// Red
+$red-50: #fef3f2;
+$red-100: #fee4e2;
+$red-200: #fecdca;
+$red-300: #fda29b;
+$red-400: #f97066;
+$red-500: #f04438;
+$red-600: #d92d20;
+$red-700: #b42318;
+$red-800: #912018;
+$red-900: #7a271a;
+
+// Yellow
+$yellow-50: #fffaeb;
+$yellow-100: #fef0c7;
+$yellow-200: #fedf89;
+$yellow-300: #fec84b;
+$yellow-400: #fdb022;
+$yellow-500: #f79009;
+$yellow-600: #dc6803;
+$yellow-700: #b54708;
+$yellow-800: #93370d;
+$yellow-900: #7a2e0e;
+
+// Green
+$green-50: #ecfdf3;
+$green-100: #d1fadf;
+$green-200: #a6f4c5;
+$green-300: #6ce9a6;
+$green-400: #32d583;
+$green-500: #12b76a;
+$green-600: #039855;
+$green-700: #027a48;
+$green-800: #05603a;
+$green-900: #054f31;
+
+// Blue Gray
+$blue_gray-50: #f8f9fc;
+$blue_gray-100: #eaecf5;
+$blue_gray-200: #d5d9eb;
+$blue_gray-300: #afb5d9;
+$blue_gray-400: #717bbc;
+$blue_gray-500: #4e5ba6;
+$blue_gray-600: #3e4784;
+$blue_gray-700: #363f72;
+$blue_gray-800: #293056;
+$blue_gray-900: #101323;
+
+// Blue Light
+$blue_light-50: #f0f9ff;
+$blue_light-100: #e0f2fe;
+$blue_light-200: #b9e6fe;
+$blue_light-300: #7cd4fd;
+$blue_light-400: #36bffa;
+$blue_light-500: #0ba5ec;
+$blue_light-600: #0086c9;
+$blue_light-700: #026aa2;
+$blue_light-800: #065986;
+$blue_light-900: #0b4a6f;
+
+// Blue
+$blue-50: #eff8ff;
+$blue-100: #d1e9ff;
+$blue-200: #b2ddff;
+$blue-300: #84caff;
+$blue-400: #53b1fd;
+$blue-500: #2e90fa;
+$blue-600: #1570ef;
+$blue-700: #175cd3;
+$blue-800: #1849a9;
+$blue-900: #194185;
+
+// Indigo
+$indigo-50: #eef4ff;
+$indigo-100: #e0eaff;
+$indigo-200: #c7d7fe;
+$indigo-300: #a4bcfd;
+$indigo-400: #8098f9;
+$indigo-500: #6172f3;
+$indigo-600: #444ce7;
+$indigo-700: #3538cd;
+$indigo-800: #2d31a6;
+$indigo-900: #2d3282;
+
+// Purple
+$purple-50: #f4f3ff;
+$purple-100: #ebe9fe;
+$purple-200: #d9d6fe;
+$purple-300: #bdb4fe;
+$purple-400: #9b8afb;
+$purple-500: #7a5af8;
+$purple-600: #6938ef;
+$purple-700: #5925dc;
+$purple-800: #4a1fb8;
+$purple-900: #3e1c96;
+
+// Pink
+$pink-50: #fdf2fa;
+$pink-100: #fce7f6;
+$pink-200: #fcceee;
+$pink-300: #faa7e0;
+$pink-400: #f670c7;
+$pink-500: #ee46bc;
+$pink-600: #dd2590;
+$pink-700: #c11574;
+$pink-800: #9e165f;
+$pink-900: #851651;
+
+// Rosé
+$rose-50: #fdf2fa;
+$rose-100: #fce7f6;
+$rose-200: #fcceee;
+$rose-300: #faa7e0;
+$rose-400: #f670c7;
+$rose-500: #ee46bc;
+$rose-600: #dd2590;
+$rose-700: #c11574;
+$rose-800: #9e165f;
+$rose-900: #851651;
+
+// Orange
+$orange-50: #fff6ed;
+$orange-100: #ffead5;
+$orange-200: #fddcab;
+$orange-300: #feb273;
+$orange-400: #fd853a;
+$orange-500: #fb6514;
+$orange-600: #ec4a0a;
+$orange-700: #c4320a;
+$orange-800: #9c2a10;
+$orange-900: #7e2410;
+
+// Brown
+$brown-100: #f7f2f1;
+$brown-200: #f1e1d7;
+$brown-500: #946142;
+$brown-700: #81441d;
+$brown-800: #341c10;
+
+/*
+* Fonts
+*/
+
+$font1: "SamsungOne", sans-serif;
+$font2: "Montserrat", sans-serif;
+$font3: "Basique", sans-serif;
+$font4: "Holiday", serif;
+
+.font1 {
+  font-family: $font1;
+}
+.font2 {
+  font-family: $font2;
+}
+.font3 {
+  font-family: $font3;
+}
+.font4 {
+  font-family: $font4;
+}
+
+// =====================
+// Variables - Templates
+:root {
+  --primary-color1: #{$black};
+  --primary-color2: #{$black};
+
+  --primary-text1: #{$black};
+
+  --primary-back-light1: #{$custom-grey};
+  --primary-back-light2: #{$dark2};
+
+  --primary-back-dark1: #{$black};
+
+  --ground-background: $black;
+}
+
+// Global Variables
+//======================================================
+$main_background: rgba(0, 0, 0, 0.08);
+$primary_font: $font1;
+$primary_font_size: 14px;
+$primary_font_color: var(--primary-text1);
+$secondary_font: $font3;
+$borderRadius: 15px;
+$generalPadding: 15px;
+
+:root {
+  --p-border-radius-md: 8px;
+  --p-button-primary-background: #000;
+  --p-button-primary-border-color: #000;
+  --p-button-primary-hover-background: #000;
+  --p-button-primary-hover-border-color: #000;
+
+  // Buttons
+  --p-button-label-font-weight: 400;
+}
+.my-app-dark {
+  $main_background: #1b1b1b;
+
+  &:root {
+    --p-button-primary-background: #f3f4f6;
+    --p-button-primary-border-color: #f3f4f6;
+    --p-button-primary-hover-background: #f3f4f6;
+    --p-button-primary-hover-border-color: #f3f4f6;
+  }
+}
+//======================================================

@@ -1,0 +1,155 @@
+@use "../basics/variables" as *;
+
+/*
+* Global
+*/
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  margin: 0;
+  padding: 0;
+  scroll-behavior: smooth;
+}
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+}
+
+/*
+* Pages
+*/
+
+.c-page {
+  margin: 0;
+  min-height: 600px;
+  // padding: 30px 0;
+}
+
+.c-default-template.detailed {
+  .c-page {
+    margin-top: 0;
+    padding: 0;
+
+    .c-banner-header-sub {
+      margin-bottom: 50px;
+    }
+
+    // Mobile & Tablet
+    @media screen and (max-width: 768px) {
+      .container.content {
+        padding: 0 50px;
+      }
+    }
+  }
+}
+
+/*
+* Container
+*/
+
+.container {
+  width: 100%;
+  max-width: 1440px;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 0;
+
+  .row {
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  &.small {
+    max-width: 960px;
+  }
+}
+@media screen and (max-width: 992px) {
+  .container {
+    padding: 0 10px;
+  }
+}
+// Mobile & Tablet
+@media screen and (max-width: 768px) {
+  .container {
+    padding: 0 15px;
+  }
+}
+
+// Layout Views
+.c-contentView {
+  padding: 30px 0;
+}
+
+// Error Pages
+.c-errorPage {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 10000;
+  background: $black;
+  color: $white;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  overflow: hidden;
+
+  h2,
+  h4,
+  p {
+    color: $white;
+  }
+
+  .desc {
+    width: 350px;
+    max-width: 100%;
+    line-height: 21px;
+    margin: 0 auto;
+  }
+
+  .content {
+    position: relative;
+    z-index: 3;
+  }
+  .backDrop {
+    position: absolute;
+    z-index: 1;
+    font-size: 1600px;
+    opacity: 1;
+  }
+}
+// Mobile & Tablet
+@media screen and (max-width: 768px) {
+  .c-errorPage {
+    h2 {
+      font-size: 50px;
+    }
+    .backDrop {
+      display: none;
+    }
+  }
+}
+
+/*
+* Transitions
+*/
+
+.page-enter-active,
+.page-leave-active {
+  transition: all 0.4s;
+}
+.page-enter-from,
+.page-leave-to {
+  opacity: 0;
+  filter: blur(1rem);
+}

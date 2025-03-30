@@ -1,0 +1,87 @@
+@use "../basics/variables" as *;
+
+.paymentArea {
+  .paymentQrImage {
+    border-radius: 15px;
+    margin-bottom: 10px;
+  }
+  .paymentItem {
+    margin-bottom: 15px;
+    text-align: center;
+
+    img {
+      border-radius: 30px;
+    }
+    p {
+      color: #000;
+      font-size: 12px;
+    }
+  }
+
+  .paymentActionBtnArea {
+    width: 400px;
+    max-width: 100%;
+    margin: 0 auto;
+  }
+
+  .paymentQrCodeArea {
+    display: block;
+  }
+  .paymentBankIconsArea {
+    display: none;
+  }
+
+  .c-payment {
+    margin: 0 auto;
+    margin-bottom: 50px;
+    width: 400px;
+    max-width: 100%;
+  }
+}
+
+.qrCodeArea {
+  width: 100%;
+  text-align: center;
+  margin-bottom: 15px;
+
+  img {
+    margin: 0 auto;
+    width: 250px;
+    height: 250px;
+    border-radius: 10px;
+    padding: 10px;
+    background: $white;
+  }
+
+  #qrcode {
+    margin: 0 auto;
+  }
+}
+
+// Mobile & Tablet
+@media screen and (max-width: 768px) {
+  .checkoutArea {
+    flex-direction: column-reverse;
+
+    .col-xs-12 {
+      padding-left: 0;
+      padding-right: 0;
+    }
+  }
+
+  .paymentArea {
+    .paymentQrCodeArea {
+      display: none;
+    }
+    .paymentBankIconsArea {
+      display: flex;
+    }
+  }
+
+  .qrCodeArea {
+    img {
+      width: 150px;
+      height: 150px;
+    }
+  }
+}

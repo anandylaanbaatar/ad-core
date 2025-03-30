@@ -1,0 +1,71 @@
+@use "../basics/variables" as *;
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: $font3;
+  &.c-secondary {
+    opacity: 0.6;
+  }
+}
+
+p {
+  line-height: 22px;
+  font-family: 12px;
+}
+
+/*
+* Text
+*/
+
+.c-page-title {
+  margin-bottom: 50px;
+}
+.c-align-center {
+  text-align: center;
+}
+.c-align-left {
+  text-align: left;
+}
+.c-align-right {
+  text-align: right;
+}
+.c-display-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+}
+.c-justify-center {
+  display: flex;
+  justify-content: center;
+}
+
+.c-para {
+  width: 600px;
+  max-width: 100%;
+  margin: 0 auto;
+  line-height: 21px;
+}
+.c-description {
+  &.large {
+    font-size: 26px;
+    line-height: 40px !important;
+  }
+}
+.c-quote {
+  font-size: 25px;
+  font-family: $font3;
+  width: 100%;
+  text-align: center;
+  margin: 100px 0;
+}
+// Mobile & Tablet
+@media screen and (max-width: 768px) {
+  .c-quote {
+    padding: 0 30px;
+  }
+}

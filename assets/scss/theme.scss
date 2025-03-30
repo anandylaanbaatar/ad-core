@@ -1,0 +1,20 @@
+@use "basics/variables" as *;
+
+/*
+* AD Theme
+* v1.0.0
+*/
+
+// Fonts & Background
+html {
+  font-family: $font2;
+  font-weight: bold;
+  font-size: $primary_font_size;
+}
+body {
+  background-color: $main_background;
+}
+// Dark
+.my-app-dark body {
+  background-color: $main_background;
+}

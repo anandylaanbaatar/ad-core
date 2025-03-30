@@ -1,0 +1,260 @@
+@use "../basics/variables" as *;
+
+$height: 75px;
+
+.c-header-container {
+  width: 100%;
+  max-width: 1440px;
+  margin-left: auto;
+  margin-right: auto;
+  position: relative;
+}
+
+.c-header {
+  background: rgba(255, 255, 255, 0.3);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  height: $height;
+  display: flex;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  width: 100%;
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  backdrop-filter: saturate(180%) blur(20px);
+
+  &-left,
+  &-right {
+    position: absolute;
+    top: 0;
+    height: $height;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+
+    button {
+      display: inline-flex;
+    }
+  }
+  &-left {
+    left: 0;
+  }
+  &-center {
+    position: relative;
+    top: 0;
+    width: 100%;
+    z-index: 1;
+    height: $height;
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
+    display: flex;
+    align-items: center;
+  }
+  &-right {
+    right: 0;
+    justify-content: end;
+  }
+}
+.my-app-dark {
+  .c-header {
+    background: rgba(0, 0, 0, 0.08);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  }
+}
+
+.c-banner-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  background: $black;
+  color: $white;
+  text-align: center;
+  height: 35px;
+  max-height: 35px;
+  font-family: $font1;
+  font-weight: bold;
+  font-size: 12px;
+  white-space: nowrap;
+  padding: 0;
+  overflow: hidden;
+  overflow-x: scroll;
+  -webkit-overflow-scrolling: touch;
+
+  .c-banner-text {
+    height: 35px;
+    width: auto;
+    margin: 0 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+.c-header-menu {
+  position: sticky;
+  top: 75px;
+  left: 0;
+  z-index: 80;
+  width: 100%;
+  min-height: 0;
+
+  &-content {
+    position: absolute;
+    z-index: 3;
+    display: flex;
+    background: var(--p-drawer-background);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.3);
+    top: -20px;
+    left: 0;
+    min-height: 100px;
+    width: 100%;
+    padding: 15px;
+    opacity: 0;
+    visibility: hidden;
+    -webkit-transition:
+      opacity 0.4s ease,
+      top 0.4s ease;
+    transition:
+      opacity 0.4s ease,
+      top 0.4s ease;
+  }
+  &-dimmer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1;
+    opacity: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    visibility: hidden;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(10px);
+    overflow: hidden;
+    -webkit-transition: background 0.4s ease;
+    transition: background 0.4s ease;
+  }
+
+  &.active {
+    .c-header-menu-content {
+      top: 0;
+      opacity: 1;
+      visibility: visible;
+    }
+    .c-header-menu-dimmer {
+      opacity: 1;
+      visibility: visible;
+      min-height: 100%;
+    }
+
+    &.hide {
+      .c-header-menu-content {
+        top: -20px;
+        opacity: 0;
+        visibility: hidden;
+      }
+      .c-header-menu-dimmer {
+        opacity: 0;
+        visibility: hidden;
+      }
+    }
+  }
+
+  &-item {
+    background-color: rgba(0, 0, 0, 0.08);
+    min-height: 300px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 15px;
+    cursor: pointer;
+    position: relative;
+    -webkit-transition: all 0.4s ease;
+    transition: all 0.4s ease;
+
+    .dimmer {
+      position: absolute;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+      color: $white;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 15px;
+      -webkit-transition: all 0.4s ease;
+      transition: all 0.4s ease;
+
+      h4 {
+        color: $white;
+      }
+
+      &:hover {
+        background: rgba(0, 0, 0, 0.3);
+      }
+    }
+    h4 {
+      padding: 0 30px;
+      width: 100%;
+      text-align: center;
+    }
+
+    &.half {
+      min-height: 150px;
+    }
+    &:hover {
+      background-color: rgba(0, 0, 0, 0.03);
+    }
+    &.links {
+      display: inline-block;
+      background: transparent;
+      cursor: initial;
+
+      &:hover {
+        background: transparent;
+      }
+    }
+  }
+}
+.my-app-dark {
+  .c-header-menu {
+    &-content {
+      background: var(--p-drawer-background);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    &-dimmer {
+      background: rgba(0, 0, 0, 0.2);
+    }
+  }
+}
+
+// Mobile & Tablet
+@media screen and (max-width: 1440px) {
+  .c-header {
+    padding: 0 15px;
+  }
+}
+
+@media screen and (max-width: 1200px) {
+  .c-banner-header {
+    justify-content: flex-start;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .c-header-menu {
+    &-item {
+      min-height: 150px;
+      margin-bottom: 15px;
+    }
+  }
+
+  .c-banner-header {
+    .c-banner-text {
+      justify-content: flex-start;
+    }
+  }
+}

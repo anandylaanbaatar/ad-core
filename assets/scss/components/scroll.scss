@@ -1,0 +1,88 @@
+.c-scroll {
+  background: transparent;
+  width: 100%;
+  overflow: hidden;
+  overflow-x: scroll;
+  -webkit-overflow-scrolling: touch;
+  display: flex;
+  align-items: center;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  margin-bottom: 50px;
+  padding: 15px;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+  &_inner {
+    width: auto;
+    padding: 0;
+    padding-left: 0;
+    display: flex;
+    justify-content: center;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+  &_item {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 400px;
+    min-width: 400px;
+    height: 280px;
+    border-radius: 15px;
+    margin-right: 15px;
+    background-position: center center;
+    background-size: cover;
+    background-repeat: no-repeat;
+    position: relative;
+    cursor: pointer;
+
+    .dimmer {
+      position: absolute;
+      z-index: 2;
+      left: 0;
+      top: 0;
+      display: block;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 15px;
+      transition: all 0.4s ease;
+    }
+    .content {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: absolute;
+      z-index: 3;
+      width: 100%;
+      height: 100%;
+      padding: 15px;
+      border-radius: 15px;
+    }
+    .image {
+      position: absolute;
+      top: 0;
+      left: 0;
+      display: block;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      transition: all 0.4s ease;
+    }
+
+    &:hover {
+      .dimmer {
+        background: rgba(0, 0, 0, 0.4);
+      }
+      .image {
+        scale: 1.1;
+      }
+    }
+  }
+}

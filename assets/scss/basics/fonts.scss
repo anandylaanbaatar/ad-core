@@ -1,0 +1,103 @@
+/*
+* Montserrat
+*/
+
+// @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;300;400;500;600;700;800&display=swap');
+
+@font-face {
+  font-family: "montserrat";
+  font-weight: 400;
+  font-display: fallback;
+  src:
+    url("https://ad-ui-pro.vercel.app/fonts/montserrat.woff2") format("woff2"),
+    url("https://ad-ui-pro.vercel.app/fonts/montserrat.woff") format("woff");
+}
+@font-face {
+  font-family: "montserrat";
+  font-weight: 500;
+  font-display: fallback;
+  src:
+    url("https://ad-ui-pro.vercel.app/fonts/montserrat.woff2") format("woff2"),
+    url("https://ad-ui-pro.vercel.app/fonts/montserrat.woff") format("woff");
+}
+@font-face {
+  font-family: "montserrat";
+  font-weight: 600;
+  font-display: fallback;
+  src:
+    url("https://ad-ui-pro.vercel.app/fonts/montserrat.woff2") format("woff2"),
+    url("https://ad-ui-pro.vercel.app/fonts/montserrat.woff") format("woff");
+}
+@font-face {
+  font-family: "montserrat";
+  font-weight: 700;
+  font-display: fallback;
+  src:
+    url("https://ad-ui-pro.vercel.app/fonts/montserrat.woff2") format("woff2"),
+    url("https://ad-ui-pro.vercel.app/fonts/montserrat.woff") format("woff");
+}
+
+/*
+* SamsungOne
+*/
+
+@font-face {
+  font-family: "SamsungOne";
+  font-display: swap;
+  font-style: normal;
+  font-weight: normal;
+  src:
+    url("https://ad-ui-pro.vercel.app/fonts/SamsungOne-400.woff2")
+      format("woff2"),
+    url("https://ad-ui-pro.vercel.app/fonts/SamsungOne-400.woff") format("woff"),
+    url("https://ad-ui-pro.vercel.app/fonts/SamsungOne-400.ttf")
+      format("truetype"),
+    url("https://ad-ui-pro.vercel.app/fonts/SamsungOne-400.eot?#iefix")
+      format("embedded-opentype");
+}
+@font-face {
+  font-family: "SamsungOne";
+  font-display: swap;
+  font-style: normal;
+  font-weight: bold;
+  src:
+    url("https://ad-ui-pro.vercel.app/fonts/SamsungOne-700.woff2")
+      format("woff2"),
+    url("https://ad-ui-pro.vercel.app/fonts/SamsungOne-700.woff") format("woff"),
+    url("https://ad-ui-pro.vercel.app/fonts/SamsungOne-700.ttf")
+      format("truetype"),
+    url("https://ad-ui-pro.vercel.app/fonts/SamsungOne-700.eot?#iefix")
+      format("embedded-opentype");
+}
+
+/*
+* Basique Bold
+*/
+
+@font-face {
+  font-family: "Basique";
+  font-display: swap;
+  font-style: normal;
+  font-weight: bold;
+  src:
+    url("https://ad-ui-pro.vercel.app/fonts/BasiqueBold.woff2") format("woff2"),
+    url("https://ad-ui-pro.vercel.app/fonts/BasiqueBold.woff") format("woff"),
+    url("https://ad-ui-pro.vercel.app/fonts/BasiqueBold.eot?#iefix")
+      format("embedded-opentype");
+}
+
+/*
+* HolidayFree
+*/
+
+@font-face {
+  font-family: "Holiday";
+  font-display: swap;
+  font-style: normal;
+  font-weight: normal;
+  src:
+    url("https://ad-ui-pro.vercel.app/fonts/HolidayFree.woff2") format("woff2"),
+    url("https://ad-ui-pro.vercel.app/fonts/HolidayFree.woff") format("woff"),
+    url("https://ad-ui-pro.vercel.app/fonts/HolidayFree.eot?#iefix")
+      format("embedded-opentype");
+}

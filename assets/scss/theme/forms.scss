@@ -1,0 +1,550 @@
+@use "../basics/variables" as *;
+
+/*
+* Form
+*/
+
+.c-form {
+  .c-field {
+    margin-bottom: 15px;
+    width: 450px;
+    max-width: 100%;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+
+    input {
+      width: 100%;
+      font-family: $font3;
+      font-weight: normal;
+      padding: 10px;
+      color: $black;
+      font-size: 14px;
+    }
+    label {
+      font-family: $font3;
+      font-weight: bold;
+      font-size: 12px;
+      display: block;
+      margin-bottom: 5px;
+    }
+    .p-password {
+      display: block;
+    }
+    .error {
+      color: $red-600;
+      font-family: $font3;
+      font-size: 11px;
+    }
+
+    &.c-transparent {
+      .p-inputtext,
+      .p-inputgroup-addon {
+        background: transparent;
+      }
+    }
+  }
+}
+.my-app-dark .c-form {
+  .c-field {
+    input {
+      color: $white;
+    }
+  }
+}
+
+/*
+* Select
+*/
+
+div.p-select {
+  font-size: 13px;
+  font-weight: bold;
+  min-height: 41px;
+  max-height: 41px;
+  display: inline-flex;
+  align-items: center;
+  font-family: $font3;
+  background: rgba(0, 0, 0, 0.03);
+  border: 1px solid rgba(0, 0, 0, 0.03);
+  border-radius: 10px;
+  box-shadow: none;
+  -webkit-transition: all 0.4s ease;
+  transition: all 0.4s ease;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.08);
+  }
+  &:focus {
+    outline: none;
+    border: 1px solid rgba(0, 0, 0, 0.3);
+  }
+}
+div.p-select-overlay {
+  border-radius: 10px;
+
+  .p-select-list-container {
+    .p-select-list {
+      padding: 5px;
+
+      .p-select-option {
+        border-radius: 8px;
+        font-size: 13px;
+        font-family: $font3;
+        -webkit-transition: all 0.4s ease;
+        transition: all 0.4s ease;
+
+        &-selected {
+          background: $black;
+          color: $white;
+        }
+      }
+    }
+  }
+}
+.my-app-dark {
+  div.p-select {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+
+    &:hover {
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    &:focus {
+      outline: none;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+  }
+  div.p-select-overlay {
+    .p-select-list-container {
+      .p-select-list {
+        .p-select-option {
+          &-selected {
+            background: $white;
+            color: $black;
+          }
+        }
+      }
+    }
+  }
+}
+
+/*
+* Inputs
+*/
+
+.p-inputtext {
+  background: transparent;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 10px;
+  padding: 10px;
+  box-shadow: none;
+  color: $black;
+
+  &::placeholder {
+    color: rgba(0, 0, 0, 0.3);
+  }
+  &:hover {
+    border: 1px solid rgba(0, 0, 0, 0.2);
+  }
+  &:enabled:focus {
+    outline: none;
+    border: 1px solid rgba(0, 0, 0, 0.3);
+  }
+  &.p-invalid {
+    border: 1px solid $red-600;
+  }
+}
+div.p-inputgroup {
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 10px;
+
+  .p-select {
+    border: 1px solid transparent;
+    background: rgba(0, 0, 0, 0.03);
+    border-radius: 10px;
+
+    &:hover {
+      border: 1px solid transparent;
+      background: rgba(0, 0, 0, 0.08);
+    }
+    &:focus {
+      border: 1px solid transparent;
+      background: rgba(0, 0, 0, 0.08);
+    }
+  }
+  .p-inputtext {
+    border: 1px solid transparent;
+
+    &:focus {
+      border: 1px solid transparent;
+    }
+  }
+  .p-inputgroupaddon {
+    background: transparent;
+    border: 1px solid transparent;
+  }
+}
+.my-app-dark {
+  .p-inputtext {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+
+    &::placeholder {
+      color: rgba(255, 255, 255, 0.3);
+    }
+    &:hover {
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    &:enabled:focus {
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+  }
+  div.p-inputgroup {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+
+    .p-select {
+      border: 1px solid transparent;
+      background: rgba(255, 255, 255, 0.03);
+
+      &:hover,
+      &:focus {
+        border: 1px solid transparent;
+        background: rgba(255, 255, 255, 0.08);
+      }
+    }
+    .p-inputtext {
+      border: 1px solid transparent;
+      background: transparent;
+
+      &:focus {
+        border: 1px solid transparent;
+      }
+    }
+    .p-inputgroupaddon {
+      background: transparent;
+      border: 1px solid transparent;
+    }
+  }
+}
+@media screen and (max-width: 768px) {
+  .p-inputtext {
+    font-size: 14px;
+  }
+}
+
+// Phone
+.c-phoneCodeInput {
+  gap: 0;
+
+  input {
+    width: 48px;
+    height: 60px;
+    font-size: 24px;
+    appearance: none;
+    text-align: center;
+    transition: all 0.2s;
+    border-radius: 0;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    background: transparent;
+    outline-offset: -2px;
+    outline-color: transparent;
+    border-right: 0 none;
+    box-shadow: none;
+    transition: outline-color 0.3s;
+    color: #000;
+    margin: 15px 0;
+
+    &:focus {
+      outline: none;
+      box-shadow: none;
+      border: 1px solid rgba(0, 0, 0, 0.4);
+    }
+    &:first-child,
+    &:nth-child(5) {
+      border-top-left-radius: 12px;
+      border-bottom-left-radius: 12px;
+    }
+    &:nth-child(3),
+    &:last-child {
+      border-top-right-radius: 12px;
+      border-bottom-right-radius: 12px;
+      border-right-width: 1px;
+      border-right-style: solid;
+      border-color: rgba(0, 0, 0, 0.2);
+    }
+  }
+}
+.c-phoneDropdown-wrapper {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: auto;
+
+  .p-select {
+    border: 1px solid transparent;
+
+    &:hover,
+    &:focus {
+      border: 1px solid transparent;
+    }
+  }
+}
+.c-phoneDropdown.p-dropdown {
+  min-height: 40px;
+  max-height: 40px;
+
+  .p-inputtext {
+    min-width: 50px;
+    display: flex;
+    align-items: center;
+    padding-right: 0;
+  }
+}
+.c-phoneDropdown-input {
+  border-radius: 6px;
+}
+
+/*
+* Textarea
+*/
+
+.p-textarea {
+  width: 100%;
+  background: transparent;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+
+  &:hover {
+    border: 1px solid rgba(0, 0, 0, 0.2);
+  }
+  &:enabled:focus {
+    border: 1px solid rgba(0, 0, 0, 0.3);
+  }
+}
+.my-app-dark {
+  .p-textarea {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+
+    &:hover {
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    &:enabled:focus {
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+  }
+}
+
+/*
+* AutoComplete
+*/
+
+.p-autocomplete {
+  width: 100%;
+}
+
+/*
+* Checkbox
+*/
+
+.c-checkbox {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+
+  label {
+    cursor: pointer;
+    margin-top: 5px;
+    margin-left: 5px;
+    font-family: $font3 !important;
+  }
+}
+.p-checkbox-checked {
+  .p-checkbox-box {
+    background: $black;
+    border-color: $black;
+  }
+}
+.my-app-dark {
+  .p-checkbox-checked {
+    .p-checkbox-box {
+      background: $white;
+      border-color: $white;
+    }
+  }
+}
+
+/*
+* Toggle Switch
+*/
+
+.p-toggleswitch-handle {
+  transform: translateY(-50%);
+}
+
+/*
+* Dropdown
+*/
+
+div.p-dropdown {
+  font-size: 13px;
+  font-family: $font2;
+  font-weight: bold;
+  min-height: 30px;
+  max-height: 30px;
+  background: rgba(0, 0, 0, 0.03);
+  border: 1px solid rgba(0, 0, 0, 0.03);
+  border-radius: 8px;
+  color: $black;
+  box-shadow: none;
+  outline: none;
+  -webkit-transition: background 0.4s ease;
+  transition: background 0.4s ease;
+
+  .p-inputtext {
+    color: $black;
+    padding: 5px 10px;
+    font-size: 13px;
+  }
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.08);
+    outline: none;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+  }
+}
+div.p-dropdown-panel {
+  border-radius: 8px;
+
+  .p-dropdown-items-wrapper {
+    padding: 6px;
+
+    .p-dropdown-items {
+      .p-dropdown-item {
+        color: $black;
+        font-size: 13px;
+        font-weight: 300;
+        margin-bottom: 3px;
+        border-radius: 8px;
+        transition: all 0.4s ease;
+
+        &:last-child {
+          margin-bottom: 0;
+        }
+        &.p-highlight,
+        &.p-focus {
+          background: rgba(0, 0, 0, 0.08);
+        }
+      }
+    }
+  }
+}
+
+/*
+* Address Form
+*/
+
+.addressForm {
+  position: relative;
+
+  .addressSearchArea {
+    position: relative;
+  }
+  .autocomplete {
+    position: absolute;
+  }
+
+  .addressSelect {
+    cursor: pointer;
+    -webkit-transition: all 0.4s ease;
+    transition: all 0.4s ease;
+
+    &:hover {
+      background: rgba(0, 0, 0, 0.2);
+    }
+  }
+
+  .searchAddressInputGroup {
+    position: relative;
+    z-index: 10;
+  }
+
+  .findAddressInput {
+    min-width: 155px;
+    padding: 0;
+    border: 0;
+  }
+
+  .addressScrollArea {
+    width: 100%;
+    min-height: 0px;
+    max-height: 250px;
+  }
+
+  .contactMap {
+    width: 100%;
+    min-height: 300px;
+    background: rgba(0, 0, 0, 0.08);
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(0, 0, 0, 0.4);
+    margin-bottom: 50px;
+    overflow: hidden;
+
+    .map {
+      width: 100%;
+      height: 300px;
+    }
+  }
+
+  #searchAddress {
+    border-top-right-radius: 8px;
+    border-bottom-right-radius: 8px;
+    margin-right: 10px;
+  }
+  .mapAutocomplete {
+    border-top-right-radius: 8px;
+    border-bottom-right-radius: 8px;
+    margin-right: 10px;
+    width: 400px;
+    max-width: 400px;
+    margin: 10px;
+  }
+  #map {
+    width: 100%;
+    height: 220px;
+    border-radius: 15px;
+    margin-top: 15px;
+    margin-bottom: 15px;
+  }
+
+  .pac-input {
+    position: relative;
+  }
+}
+
+// Google Map
+.pac-container.pac-logo {
+  position: absolute;
+  z-index: 10000 !important;
+  margin-top: -1px;
+  box-shadow: none;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  border-radius: 0 0 8px 8px;
+
+  &:after {
+    display: none;
+  }
+
+  .pac-item {
+    font-family: $font2;
+
+    .pac-item-query {
+      font-weight: 700;
+    }
+  }
+}

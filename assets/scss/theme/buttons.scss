@@ -1,0 +1,356 @@
+@use "../basics/variables" as *;
+
+/*
+* Light Theme
+*/
+
+a {
+  font-family: $font2;
+  font-size: 13px;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  -webkit-transition: all 0.4s ease;
+  transition: all 0.4s ease;
+
+  &:hover {
+    opacity: 0.8;
+  }
+}
+
+// All Buttons
+button.p-button {
+  font-size: 12px;
+  min-height: 40px;
+  max-height: 40px;
+  border-radius: 10px;
+  font-family: $font3;
+  background-color: $black;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  -webkit-transition: all 0.4s ease;
+  transition: all 0.4s ease;
+
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.8);
+  }
+  &:disabled {
+    cursor: not-allowed;
+  }
+}
+
+// Secondary Buttons
+button.p-button.p-button-secondary,
+button.p-button-group.p-button-secondary > button.p-button,
+button.p-splitbutton.p-button-secondary > button.p-button {
+  font-size: 12px;
+  -webkit-transition: all 0.4s ease;
+  transition: all 0.4s ease;
+
+  &.w-full {
+    .p-button-icon-left {
+      margin-right: 0;
+    }
+    .p-button-icon-right {
+      margin-left: 0;
+    }
+  }
+}
+
+// Link Buttons
+button.p-button.p-button-link {
+  background-color: transparent;
+  color: $black;
+  font-weight: bold;
+  height: 40px;
+  -webkit-transition: all 0.4s ease;
+  transition: all 0.4s ease;
+
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.08);
+    text-decoration: none;
+    opacity: 0.7;
+
+    .p-button-label {
+      text-decoration: none;
+    }
+  }
+}
+
+// Icon Button
+button.p-button-icon-only {
+  background-color: rgba(0, 0, 0, 0.03);
+  border: 1px solid rgba(0, 0, 0, 0.03);
+  color: rgba(0, 0, 0, 0.8);
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  -webkit-transition: all 0.4s ease;
+  transition: all 0.4s ease;
+
+  &.p-button-rounded {
+    border-radius: 250px;
+  }
+
+  .p-icon {
+    width: 15px;
+    height: 15px;
+    -webkit-transition: all 0.4s ease;
+    transition: all 0.4s ease;
+  }
+  .p-badge {
+    background-color: $red-600;
+    color: $white;
+    position: absolute;
+    right: 4px;
+    top: 4px;
+    z-index: 4;
+  }
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.1);
+
+    .p-icon {
+      color: $black;
+    }
+  }
+}
+
+// ScrollTop Button
+button.p-scrolltop {
+  border-radius: 10px;
+  font-size: 13px;
+  -webkit-transition: all 0.4s ease;
+  transition: all 0.4s ease;
+
+  .p-scrolltop-icon {
+    width: 15px;
+    height: 15px;
+  }
+}
+
+// Button Sizes
+button.sm {
+  width: 30px;
+  height: 30px;
+  min-height: 25px;
+}
+
+// Button Colors
+button.p-button-secondary {
+  background-color: rgba(0, 0, 0, 0.03);
+  border: 1px solid rgba(0, 0, 0, 0.03);
+  color: rgba(0, 0, 0, 0.8);
+
+  .p-badge {
+    background-color: $black !important;
+    color: $white !important;
+  }
+
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+  }
+}
+button.p-button-success {
+  background-color: $green-100;
+  border: 1px solid $green-100;
+  color: $green-700;
+
+  &:hover {
+    background-color: $green-200;
+    border: 1px solid $green-200;
+  }
+}
+button.p-button-info {
+  background-color: $blue-100;
+  border: 1px solid $blue-100;
+  color: $blue-700;
+
+  &:hover {
+    background-color: $blue-200;
+    border: 1px solid $blue-200;
+  }
+}
+button.p-button-warn {
+  background-color: $yellow-100;
+  border: 1px solid $yellow-100;
+  color: $yellow-700;
+
+  &:hover {
+    background-color: $yellow-200;
+    border: 1px solid $yellow-200;
+  }
+}
+button.p-button-help {
+  background-color: $purple-100;
+  border: 1px solid $purple-100;
+  color: $purple-700;
+
+  &:hover {
+    background-color: $purple-200;
+    border: 1px solid $purple-200;
+  }
+}
+button.p-button-danger {
+  background-color: $red-100;
+  border: 1px solid $red-100;
+  color: $red-700;
+
+  &:hover {
+    background-color: $red-200;
+    border: 1px solid $red-200;
+  }
+}
+
+// Glass Button
+button.p-glass-button {
+  background: rgba(0, 0, 0, 0.3);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  backdrop-filter: saturate(180%) blur(20px);
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.1);
+  }
+}
+
+// Link
+.c-link {
+  color: var(--primary-color2);
+  cursor: pointer;
+  -webkit-transition: all 0.4s ease;
+  transition: all 0.4s ease;
+
+  &:hover {
+    opacity: 0.7;
+  }
+}
+
+/*
+* Dark Theme
+*/
+
+.my-app-dark {
+  button.p-button {
+    background-color: $white;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.8);
+    }
+  }
+  button.p-button-icon-only {
+    background-color: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.8);
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.1);
+
+      .p-icon {
+        color: $white;
+      }
+    }
+  }
+  button.p-button.p-button-link {
+    background-color: transparent;
+    border: 1px solid transparent;
+    color: $white;
+
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.08);
+    }
+  }
+
+  // Button Colors
+  button.p-button-secondary {
+    background-color: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.8);
+
+    .p-badge {
+      background-color: $white !important;
+      color: $black !important;
+    }
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+  }
+  button.p-button-success {
+    background-color: $green-100;
+    border: 1px solid $green-100;
+    color: $green-700;
+
+    &:hover {
+      background-color: $green-200;
+      border: 1px solid $green-200;
+    }
+  }
+  button.p-button-info {
+    background-color: $blue-100;
+    border: 1px solid $blue-100;
+    color: $blue-700;
+
+    &:hover {
+      background-color: $blue-200;
+      border: 1px solid $blue-200;
+    }
+  }
+  button.p-button-warn {
+    background-color: $yellow-100;
+    border: 1px solid $yellow-100;
+    color: $yellow-700;
+
+    &:hover {
+      background-color: $yellow-200;
+      border: 1px solid $yellow-200;
+    }
+  }
+  button.p-button-help {
+    background-color: $purple-100;
+    border: 1px solid $purple-100;
+    color: $purple-700;
+
+    &:hover {
+      background-color: $purple-200;
+      border: 1px solid $purple-200;
+    }
+  }
+  button.p-button-danger {
+    background-color: $red-100;
+    border: 1px solid $red-100;
+    color: $red-700;
+
+    &:hover {
+      background-color: $red-200;
+      border: 1px solid $red-200;
+    }
+  }
+
+  .c-link {
+    color: $white;
+  }
+
+  // Glass Button
+  button.p-glass-button {
+    background: rgba(255, 255, 255, 0.3);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    backdrop-filter: saturate(180%) blur(20px);
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+  }
+}
+
+// Custom Mobile Buttons
+@media screen and (max-width: 768px) {
+  .hideLabelOnMobile {
+    .p-button-label {
+      display: none;
+    }
+  }
+}

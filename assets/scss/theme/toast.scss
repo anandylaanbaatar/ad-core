@@ -1,0 +1,421 @@
+@use "../basics/variables" as *;
+
+// Message
+div.p-message {
+  border-radius: 12px;
+  box-shadow: none;
+  outline-color: transparent;
+  background: rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+
+  .p-message-icon {
+    margin-right: 0;
+  }
+  .p-message-text {
+    margin-right: auto;
+    font-family: $font3;
+    font-size: 12px;
+  }
+  .p-message-close-button {
+    position: absolute;
+    right: 0;
+    margin: 0;
+    border-radius: 8px;
+    background: transparent;
+    -webkit-transition: all 0.4s ease;
+    transition: all 0.4s ease;
+
+    &:hover {
+      background: rgba(0, 0, 0, 0.08);
+    }
+  }
+
+  // Colors
+  &.p-message-secondary {
+    background: $grey-200;
+    color: $grey-700;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+
+    .p-message-icon {
+      color: $grey-700;
+    }
+    .p-message-close-button {
+      &:hover {
+        background: rgba(0, 0, 0, 0.1);
+      }
+    }
+  }
+  &.p-message-success {
+    background: $green-200;
+    color: $green-700;
+    border: 1px solid $green-700;
+
+    .p-message-icon {
+      color: $green-700;
+    }
+    .p-message-close-button {
+      background: transparent;
+
+      &:hover {
+        background: $green-300;
+      }
+    }
+  }
+  &.p-message-info {
+    background: $blue-200;
+    color: $blue-700;
+    border: 1px solid $blue-700;
+
+    .p-message-icon {
+      color: $blue-700;
+    }
+    .p-message-close-button {
+      background: transparent;
+
+      &:hover {
+        background: $blue-300;
+      }
+    }
+  }
+  &.p-message-warn {
+    background: $yellow-200;
+    color: $yellow-700;
+    border: 1px solid $yellow-700;
+
+    .p-message-icon {
+      color: $yellow-700;
+    }
+    .p-message-close-button {
+      background: transparent;
+
+      &:hover {
+        background: $yellow-300;
+      }
+    }
+  }
+  &.p-message-error {
+    background: $red-200;
+    color: $red-700;
+    border: 1px solid $red-700;
+
+    .p-message-icon {
+      color: $red-700;
+    }
+    .p-message-close-button {
+      background: transparent;
+
+      &:hover {
+        background: $red-300;
+      }
+    }
+  }
+  &.p-message-contrast {
+    background: $black;
+    color: $white;
+    border: 1px solid $black;
+
+    .p-message-icon {
+      color: $white;
+    }
+    .p-message-close-button {
+      background: transparent;
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.1);
+      }
+    }
+  }
+}
+.my-app-dark {
+  div.p-message {
+    &.p-message-contrast {
+      background: $white;
+      border: 2px solid $white;
+      color: $black;
+
+      .p-message-icon {
+        color: $black;
+      }
+      .p-message-close-button {
+        background: transparent;
+
+        &:hover {
+          background: rgba(0, 0, 0, 0.1);
+        }
+      }
+    }
+  }
+}
+
+// Toast
+div.p-toast-message {
+  background: $blue-200;
+  color: $blue-700;
+  border-radius: 12px;
+  margin-bottom: 10px;
+  position: relative;
+
+  .p-toast-summary,
+  .p-toast-detail {
+    color: $blue-700;
+    font-family: $font3;
+  }
+  .p-toast-message-wrapper {
+    .p-message-close {
+      border-radius: 8px;
+    }
+  }
+  .p-toast-message-icon {
+    width: auto;
+  }
+  .p-toast-message-content {
+    position: relative;
+  }
+  .p-toast-close-button {
+    border-radius: 8px;
+    transition: all 0.4s ease;
+    position: absolute;
+    top: 0;
+    right: 0;
+  }
+
+  // Colors
+  &-secondary {
+    background-color: $grey-200;
+    color: $grey-700;
+    border: 1px solid $grey-300;
+
+    .p-toast-summary,
+    .p-toast-detail {
+      color: $grey-700;
+    }
+  }
+  &-success {
+    background-color: $green-200;
+    color: $green-700;
+    border: 1px solid $green-700;
+
+    .p-toast-summary,
+    .p-toast-detail {
+      color: $green-700;
+    }
+    .p-toast-close-button {
+      &:hover {
+        background-color: $green-300;
+      }
+    }
+  }
+  &-info {
+    background-color: $blue-200;
+    color: $blue-700;
+    border: 1px solid $blue-700;
+
+    .p-toast-summary,
+    .p-toast-detail {
+      color: $blue-700;
+    }
+    .p-toast-close-button {
+      &:hover {
+        background-color: $blue-300;
+      }
+    }
+  }
+  &-warn {
+    background-color: $yellow-200;
+    color: $yellow-700;
+    border: 1px solid $yellow-700;
+
+    .p-toast-summary,
+    .p-toast-detail {
+      color: $yellow-700;
+    }
+    .p-toast-close-button {
+      &:hover {
+        background-color: $yellow-300;
+      }
+    }
+  }
+  &-error {
+    background-color: $red-200;
+    color: $red-700;
+    border: 1px solid $red-700;
+
+    .p-toast-summary,
+    .p-toast-detail {
+      color: $red-700;
+    }
+    .p-toast-close-button {
+      &:hover {
+        background-color: $red-300;
+      }
+    }
+  }
+  &-contrast {
+    background-color: $black;
+    color: $white;
+    border: 1px solid $black;
+
+    .p-toast-summary,
+    .p-toast-detail {
+      color: $white;
+    }
+  }
+}
+.my-app-dark {
+  div.p-toast-message {
+    &-contrast {
+      background-color: $white;
+      color: $black;
+      border: 1px solid $white;
+
+      .p-toast-detail {
+        color: $black;
+      }
+    }
+  }
+}
+
+// Tag
+span.p-badge,
+span.p-tag {
+  background-color: $black;
+  color: $white;
+  font-size: 11px;
+  font-family: $font3;
+
+  &.p-badge-secondary,
+  &.p-tag-secondary {
+    background-color: $grey-100;
+    color: $grey-700;
+  }
+  &.p-badge-success,
+  &.p-tag-success {
+    background-color: $green-100;
+    color: $green-700;
+  }
+  &.p-badge-info,
+  &.p-tag-info {
+    background-color: $blue-100;
+    color: $blue-700;
+  }
+  &.p-badge-warn,
+  &.p-tag-warn {
+    background-color: $yellow-100;
+    color: $yellow-700;
+  }
+  &.p-badge-danger,
+  &.p-tag-danger {
+    background-color: $red-100;
+    color: $red-700;
+  }
+  &.p-badge-contrast,
+  &.p-tag-contrast {
+    background-color: $black;
+    color: $white;
+  }
+}
+.my-app-dark {
+  span.p-badge,
+  span.p-tag {
+    background-color: $white;
+    color: $black;
+
+    &.p-badge-secondary,
+    &.p-tag-secondary {
+      background-color: $grey-800;
+      color: $grey-400;
+    }
+    &.p-badge-success,
+    &.p-tag-success {
+      background-color: $green-100;
+      color: $green-700;
+    }
+    &.p-badge-info,
+    &.p-tag-info {
+      background-color: $blue-100;
+      color: $blue-700;
+    }
+    &.p-badge-warn,
+    &.p-tag-warn {
+      background-color: $yellow-100;
+      color: $yellow-700;
+    }
+    &.p-badge-danger,
+    &.p-tag-danger {
+      background-color: $red-100;
+      color: $red-700;
+    }
+    &.p-badge-contrast,
+    &.p-tag-contrast {
+      background-color: $white;
+      color: $black;
+    }
+  }
+}
+
+// Chip
+div.p-chip {
+  .p-chip-image {
+    margin-left: -6px;
+  }
+}
+
+// Tooltip
+.p-tooltip {
+  .p-tooltip-text {
+    background-color: $black;
+    color: $white;
+    font-family: $font3;
+    font-size: 12px;
+  }
+
+  &-left {
+    .p-tooltip-arrow {
+      border-left-color: $black;
+    }
+  }
+  &-right {
+    .p-tooltip-arrow {
+      border-right-color: $black;
+    }
+  }
+  &-top {
+    .p-tooltip-arrow {
+      border-top-color: $black;
+    }
+  }
+  &-bottom {
+    .p-tooltip-arrow {
+      border-bottom-color: $black;
+    }
+  }
+}
+.my-app-dark {
+  .p-tooltip {
+    .p-tooltip-text {
+      background-color: $white;
+      color: $black;
+    }
+  }
+
+  &-left {
+    .p-tooltip-arrow {
+      border-left-color: $white;
+    }
+  }
+  &-right {
+    .p-tooltip-arrow {
+      border-right-color: $white;
+    }
+  }
+  &-top {
+    .p-tooltip-arrow {
+      border-top-color: $white;
+    }
+  }
+  &-bottom {
+    .p-tooltip-arrow {
+      border-bottom-color: $white;
+    }
+  }
+}

@@ -1,0 +1,202 @@
+@use "../basics/variables" as *;
+
+div.p-accordion {
+  width: 100%;
+  margin: 0 auto;
+
+  .p-accordion-tab {
+    .p-accordion-header {
+      background: rgba(0, 0, 0, 0.08);
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      border-radius: 15px;
+      margin-bottom: 0;
+      font-family: $font2;
+      font-weight: bold;
+      color: $black;
+      opacity: 1;
+      text-align: left;
+      margin-top: 10px;
+
+      .p-accordion-header-text {
+        color: $black;
+        width: 100%;
+      }
+
+      .p-accordion-header-link {
+        position: relative;
+        background: transparent;
+        border: 0;
+        border-radius: 0;
+
+        .p-icon {
+          position: absolute;
+          right: 15px;
+          float: right;
+        }
+      }
+    }
+    .p-toggleable-content {
+      background: rgba(0, 0, 0, 0.08);
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      border-radius: 0 0 15px 15px;
+      margin-bottom: 10px;
+      min-height: 100px;
+
+      .p-accordion-content {
+        background: transparent;
+        border: 0;
+        border-radius: 0;
+      }
+    }
+    &:first-child {
+      margin-top: 0;
+    }
+    &.p-accordion-tab-active {
+      .p-accordion-header {
+        margin-bottom: 0;
+        border-radius: 15px 15px 0 0;
+        border-bottom: 0;
+        background: $white;
+      }
+      .p-toggleable-content {
+        background: $white;
+      }
+    }
+  }
+
+  &.transparent {
+    .p-accordion-tab {
+      .p-accordion-header-link,
+      .p-accordion-header {
+        background: transparent;
+        border: 0;
+        border-radius: 0;
+        padding: 6px 0;
+        margin: 0;
+      }
+      .p-toggleable-content,
+      .p-accordion-content {
+        background: transparent;
+        border: 0;
+        border-radius: 0;
+        min-height: 0px;
+        margin: 0;
+        padding: 0;
+      }
+    }
+  }
+
+  &.level1,
+  &.level2 {
+    .p-accordion-tab {
+      .p-toggleable-content,
+      .p-accordion-content {
+        padding-left: 15px;
+      }
+    }
+  }
+}
+
+/*
+* Tabs
+*/
+
+div.p-tabview {
+  .p-tabview-nav-container {
+    .p-tabview-nav {
+      background: transparent;
+      border: 0;
+
+      .p-tabview-ink-bar {
+        display: none;
+      }
+
+      .p-tabview-header {
+        margin-right: 10px;
+        border-radius: 0;
+
+        .p-tabview-nav-link {
+          border-radius: 250px;
+          font-size: 13px;
+          padding: 8px;
+          background: transparent;
+          border: 1px solid transparent;
+          color: $white;
+          -webkit-transition: all 0.4s ease;
+          transition: all 0.4s ease;
+        }
+
+        &:hover,
+        &.p-highlight {
+          .p-tabview-nav-link {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+          }
+        }
+      }
+    }
+  }
+  .p-tabview-panels {
+    background: transparent;
+    padding: 15px 0;
+  }
+}
+div.p-tabs {
+  .p-tablist {
+    &-tab-list {
+      border: 0;
+    }
+
+    .p-tab {
+      border-radius: 250px;
+      border: none;
+      margin-right: 10px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      color: $black;
+      font-weight: bold;
+      font-size: 14px;
+      width: auto;
+      min-width: 10px;
+      padding: 15px 12px;
+      -webkit-transition: all 0.4s ease;
+      transition: all 0.4s ease;
+
+      &:last-child {
+        margin-right: 0;
+      }
+
+      &:hover {
+        color: $black;
+        background: rgba(0, 0, 0, 0.08);
+      }
+
+      &-active {
+        color: $black;
+        background: rgba(0, 0, 0, 0.08);
+        border: 0;
+        border-color: transparent;
+      }
+    }
+    .p-tablist-active-bar {
+      display: none;
+    }
+  }
+}
+.my-app-dark {
+  div.p-tabs {
+    .p-tab {
+      color: $white;
+
+      &:hover {
+        color: $white;
+        background: rgba(255, 255, 255, 0.08);
+      }
+      &-active {
+        color: $white;
+        background: rgba(255, 255, 255, 0.08);
+      }
+    }
+  }
+}

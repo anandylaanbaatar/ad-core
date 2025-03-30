@@ -1,0 +1,88 @@
+@use "../basics/variables" as *;
+
+/*
+* Dialog
+*/
+
+.c-dialog {
+  width: 500px;
+  min-width: 300px;
+  max-width: 100%;
+
+  &.md {
+    width: 750px;
+  }
+
+  .p-dialog-header {
+    padding: 30px;
+    padding-bottom: 0;
+
+    .p-dialog-title {
+      font-family: $font3;
+      margin-top: 10px;
+    }
+    .p-dialog-header-icons {
+      .p-dialog-header-icon {
+        width: 35px;
+        height: 35px;
+      }
+      .p-dialog-header-close {
+        border-radius: 10px;
+      }
+    }
+    .p-dialog-header-actions {
+      position: absolute;
+      top: 30px;
+      right: 30px;
+    }
+  }
+  .p-dialog-content {
+    padding: 30px;
+  }
+  .p-dialog-footer {
+    padding: 30px;
+    padding-top: 0;
+  }
+}
+.my-app-dark {
+  .c-dialog {
+    border: 0;
+  }
+}
+div.p-dialog {
+  min-width: 350px;
+
+  .p-dialog-title {
+    font-family: $font3;
+  }
+
+  &.p-confirmdialog {
+    .p-confirmdialog-reject-button {
+      background-color: rgba(0, 0, 0, 0.03);
+      border: 1px solid rgba(0, 0, 0, 0.03);
+      color: rgba(0, 0, 0, 0.8);
+    }
+  }
+}
+.my-app-dark {
+  div.p-dialog {
+    &.p-confirmdialog {
+      .p-confirmdialog-reject-button {
+        background-color: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        color: rgba(255, 255, 255, 0.8);
+      }
+    }
+  }
+}
+
+/*
+* Popover
+*/
+
+div.p-popover {
+  &:before,
+  &:after {
+    display: none;
+  }
+}

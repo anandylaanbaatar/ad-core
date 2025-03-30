@@ -1,0 +1,46 @@
+@use "../basics/variables" as *;
+
+.c-logo {
+  height: 25px;
+  margin: 0 auto;
+  cursor: pointer;
+
+  img {
+    height: 25px;
+  }
+
+  .mobileLogo {
+    display: none;
+    height: 40px;
+  }
+
+  &.c-payment-logo {
+    width: auto;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 5px;
+    background: $white;
+    border-radius: 8px;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+
+    img {
+      border-radius: 6px;
+    }
+  }
+}
+
+// Mobile & Tablet
+@media screen and (max-width: 768px) {
+  .c-logo {
+    height: 40px;
+
+    .desktopLogo {
+      display: none;
+    }
+    .mobileLogo {
+      display: block;
+    }
+  }
+}

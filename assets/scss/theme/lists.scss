@@ -1,0 +1,285 @@
+@use "../basics/variables" as *;
+
+/*
+* List
+*/
+
+ul {
+  padding: 0;
+}
+
+.c-list-nav,
+.c-list {
+  display: inline-block;
+  width: 100%;
+  list-style: none;
+  padding: 0;
+
+  li {
+    margin-bottom: 5px;
+    display: block;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+    &.c-divider {
+      background: rgba(0, 0, 0, 0.1);
+      height: 1px;
+      margin: 0;
+      margin-bottom: 5px;
+    }
+
+    a {
+      font-family: $font3;
+      font-weight: bold;
+      text-decoration: none;
+      color: $black;
+    }
+
+    .d-box {
+      min-height: 100px;
+      margin-bottom: 15px;
+    }
+
+    .c-list-item {
+      display: flex;
+      align-items: center;
+      width: 100%;
+      color: $black;
+      background: transparent;
+      border-radius: 8px;
+      padding: 10px;
+      position: relative;
+      cursor: pointer;
+      -webkit-transition: all 0.4s ease;
+      transition: all 0.4s ease;
+
+      .c-list-item-span {
+        display: block;
+        width: 2px;
+        height: calc(100% - 5px);
+        transform: translateX(-50%);
+        position: absolute;
+        background: $black;
+        left: -15px;
+        border-radius: 250px;
+        opacity: 0;
+        -webkit-transition: all 0.4s ease;
+        transition: all 0.4s ease;
+      }
+
+      i {
+        font-size: 16px;
+        margin-right: 15px;
+        opacity: 0.8;
+      }
+
+      &:hover {
+        background: rgba(0, 0, 0, 0.08);
+
+        i {
+          opacity: 1;
+        }
+      }
+      &.active {
+        .c-list-item-span {
+          opacity: 1;
+        }
+      }
+    }
+  }
+
+  &.sm-icon {
+    li {
+      i {
+        font-size: 12px;
+        margin-right: 8px;
+      }
+    }
+  }
+}
+.c-list-nav {
+  li {
+    display: inline-block;
+    margin-right: 10px;
+    margin-bottom: 0;
+
+    &:last-child {
+      margin-right: 0;
+    }
+    &.c-divider {
+      position: relative;
+      width: 1px;
+      height: 20px;
+      margin: 0;
+      margin-right: 10px;
+      bottom: -5px;
+    }
+
+    .c-list-item {
+      width: auto;
+      display: inline-flex;
+
+      .c-list-item-span {
+        width: 4px;
+        height: 4px;
+        left: 50%;
+        bottom: -10px;
+        transform: translateY(-50%);
+      }
+    }
+  }
+}
+.my-app-dark {
+  .c-list-nav,
+  .c-list {
+    li {
+      .c-list-item {
+        color: $white;
+
+        .c-list-item-span {
+          background: $white;
+        }
+
+        &:hover {
+          background: rgba(255, 255, 255, 0.08);
+        }
+      }
+
+      a {
+        color: $white;
+      }
+
+      &.c-divider {
+        background: rgba(255, 255, 255, 0.1);
+      }
+    }
+  }
+}
+
+/*
+* Radio List
+*/
+
+.c-radio {
+  display: inline-block;
+  width: 100%;
+
+  li {
+    display: flex;
+    align-items: center;
+    margin-bottom: 5px;
+    position: relative;
+    -webkit-transition: all 0.4s ease;
+    transition: all 0.4s ease;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+
+    i.pi-circle,
+    i.pi-circle-fill {
+      position: absolute;
+      left: 25px;
+    }
+
+    .d-block {
+      padding-left: 60px;
+      border: 2px solid transparent;
+      cursor: pointer;
+      -webkit-transition: all 0.4s ease;
+      transition: all 0.4s ease;
+
+      .col-xs-6 {
+        display: flex;
+        align-items: center;
+
+        &.right {
+          justify-content: end;
+          text-align: right;
+        }
+      }
+
+      .c-logo {
+        height: 30px;
+        border-radius: 6px;
+      }
+
+      &.active {
+        border: 2px solid rgba(0, 0, 0, 0.2);
+      }
+      &:hover {
+        border: 2px solid rgba(0, 0, 0, 0.08);
+      }
+    }
+  }
+}
+
+/*
+* Breadcrumb
+*/
+
+.c-breadcrumb {
+  li {
+    display: inline-flex;
+    align-items: center;
+    background: transparent;
+    padding: 5px 10px;
+    height: 35px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: $font3;
+    color: rgba(0, 0, 0, 0.5);
+    -webkit-transition: all 0.4s ease;
+    transition: all 0.4s ease;
+
+    &:hover {
+      color: $black;
+      background: rgba(0, 0, 0, 0.03);
+    }
+
+    &.c-breadcrumb-arrow {
+      padding: 5px 0;
+
+      i {
+        font-size: 10px;
+      }
+      &:hover {
+        color: rgba(0, 0, 0, 0.5);
+        background: transparent;
+        cursor: auto;
+      }
+    }
+  }
+}
+.my-app-dark {
+  .c-breadcrumb {
+    li {
+      color: rgba(255, 255, 255, 0.5);
+
+      &:hover {
+        color: $white;
+        background: rgba(255, 255, 255, 0.03);
+      }
+
+      &.c-breadcrumb-arrow {
+        &:hover {
+          color: rgba(255, 255, 255, 0.5);
+        }
+      }
+    }
+  }
+}
+
+/*
+* Toolbar
+*/
+
+div.p-toolbar {
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+}

@@ -1,0 +1,104 @@
+@use "../basics/variables" as *;
+
+// Splide Slider
+.c-slider {
+  margin-bottom: 0;
+
+  .splide__track {
+    border-radius: 15px;
+
+    li {
+      display: inline-flex;
+    }
+  }
+  .c-slider-progress {
+    margin-top: 20px;
+    background: rgba(0, 0, 0, 0.08);
+    border-radius: 250px;
+
+    .c-slider-progress-bar {
+      background: $black;
+      border-radius: 250px;
+      height: 4px;
+      transition: width 400ms ease;
+      width: 0;
+    }
+  }
+  .splide__arrows {
+    .splide__arrow {
+      height: 30px;
+      width: 30px;
+      top: calc(50% - 10px);
+      // background: rgba(0, 0, 0, 0.08);
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      border-radius: 10px;
+      color: $white;
+      -webkit-transition: all 0.4s ease;
+      transition: all 0.4s ease;
+      -webkit-backdrop-filter: saturate(180%) blur(20px);
+      backdrop-filter: saturate(180%) blur(20px);
+
+      &--prev {
+        left: 10px;
+      }
+      &--next {
+        right: 10px;
+      }
+    }
+  }
+  .splide__pagination {
+    position: absolute;
+    bottom: 10px;
+    padding: 5px;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 250px;
+    width: auto;
+    margin: 0 auto;
+    left: 50%;
+    right: inherit;
+    transform: translateX(-50%);
+
+    li {
+      margin-right: 5px;
+      line-height: 0.1;
+
+      &:last-child {
+        margin-right: 0;
+      }
+    }
+
+    .splide__pagination__page {
+      width: 10px;
+      height: 6px;
+      border-radius: 250px;
+      -webkit-transition: all 0.4s ease;
+      transition: all 0.4s ease;
+      margin: 0;
+      line-height: 0;
+      background: rgba(0, 0, 0, 0.3);
+
+      &:last-child {
+        margin-right: 0;
+      }
+
+      &.is-active {
+        width: 15px;
+        height: 6px;
+        background: $black;
+        transform: none;
+      }
+    }
+  }
+}
+
+.splide:not(.is-overflow) .splide__pagination {
+  display: flex;
+}
+
+@media screen and (max-width: 768px) {
+  .c-slider {
+    .splide__arrows {
+      display: none;
+    }
+  }
+}
