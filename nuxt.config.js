@@ -4,7 +4,7 @@ import { createResolver } from "@nuxt/kit"
 import { defineNuxtConfig } from "nuxt/config"
 import Aura from "@primevue/themes/aura"
 const { resolve } = createResolver(import.meta.url)
-const { siteRuntimeConfig, siteConfig } = import(
+const { siteRuntimeConfig, siteConfig } = await import(
   path.resolve("./v1/core/site.config.js")
 )
 
@@ -23,7 +23,6 @@ const middlewares = defineNuxtConfig({
  */
 
 const app = defineNuxtConfig({
-  compatibilityDate: "2025-06-06",
   target: "static",
   components: true,
 
