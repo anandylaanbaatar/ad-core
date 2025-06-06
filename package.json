@@ -8,6 +8,9 @@
   "exports": {
     ".": "./"
   },
+  "files": [
+    "site.config.json"
+  ],
   "author": "Anand Davaasuren",
   "scripts": {
     "build": "nuxt build",
