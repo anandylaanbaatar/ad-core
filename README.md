@@ -1,1 +1,1 @@
-# AD Core v2
+# AD Core v2.0.0
