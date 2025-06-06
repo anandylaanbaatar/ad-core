@@ -24,7 +24,6 @@
     "@nuxtjs/prismic": "^4.0.1",
     "@primevue/nuxt-module": "^4.2.5",
     "@slicemachine/adapter-nuxt": "^0.3.66",
-    "nuxt": "^3.10.3",
     "sass": "^1.85.0",
     "sass-loader": "^10.1.1",
     "slice-machine-ui": "^2.12.3",
