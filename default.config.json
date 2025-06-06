@@ -1,0 +1,137 @@
+{
+  "defaults": {
+    "version": "v2.0.0",
+    "siteUrl": "https://www.adoriginalstudio.com",
+    "name": "AD Original Studio",
+    "name_short": "AD",
+    "description": "Premium athletic and daily clothing.",
+    "full_description": "Brand for sports good and daily casual wear designed and developed in Ulaanbaatar Mongolia.",
+    "keywords": "sport, clothing, fashion, anand, davaasuren, ad, athletic, wear",
+    "slogan": "By makers of AD Creative Studio"
+  },
+  "logo": {
+    "desktop": "https://images.prismic.io/adoriginalstudio/Z-QtUXdAxsiBv8Fm_ADOriginalStudio-HorizontalBlack.png",
+    "desktop_dark": "https://images.prismic.io/adoriginalstudio/Z-QtV3dAxsiBv8Fr_ADOriginalStudio-HorizontalWhite.png?auto=format,compress",
+    "mobile": "https://images.prismic.io/adoriginalstudio/Zvv2v7VsGrYSwOI1_AD-Circle-Brand-v2-.png?auto=format,compress",
+    "mobile_dark": "https://images.prismic.io/adoriginalstudio/Zvv2ybVsGrYSwOI3_AD-Circle-Brand-v1-.png?auto=format,compress"
+  },
+  "contact": {
+    "email": "info@adoriginalstudio.com",
+    "phone": null,
+    "facebook": "https://www.facebook.com/profile.php?id=61566874245821",
+    "instagram": "https://www.instagram.com/adoriginalstudio/"
+  },
+  "theme": {
+    "type": "commerce",
+    "splash": "https://images.prismic.io/adoriginalstudio/Zzn-Ea8jQArT08hI_ad_loader-3.gif",
+    "darkLightMode": null,
+    "language": "en",
+    "country": "MN",
+    "currency": "MNT",
+    "timezone": "Asia/Ulaanbaatar",
+    "header": {
+      "position": "center",
+      "links": []
+    },
+    "footer": null,
+    "rules": {
+      "redirect": false,
+      "maintenance": false
+    }
+  },
+  "commerce": {
+    "location": "Ulaanbaatar",
+    "allowTax": false,
+    "shipping": {
+      "local": 5000,
+      "city": 25000,
+      "provincial": 40000,
+      "international": 100000
+    }
+  },
+  "payment": {
+    "payments": {
+      "qpay": {
+        "active": true,
+        "invoiceCode": "AD_INVOICE"
+      },
+      "storepay": {
+        "active": true,
+        "storeId": 21364,
+        "username": "80818016",
+        "password": "80818016"
+      },
+      "card": true
+    }
+  },
+  "config": {
+    "compatibilityDate": "2025-03-31",
+    "extends": [
+      "./app"
+    ],
+    "firebaseConfig": {
+      "apiKey": "AIzaSyDKi0dx9gXz9SyIHbtoR1qxdlw9Ys4t0nM",
+      "authDomain": "ad-community.firebaseapp.com",
+      "databaseURL": "https://ad-community-default-rtdb.firebaseio.com",
+      "projectId": "ad-community",
+      "storageBucket": "ad-community.firebasestorage.app",
+      "messagingSenderId": "55975263633",
+      "appId": "1:55975263633:web:489a2fc127df9abbd2ee30",
+      "measurementId": "G-PYRDP8T72V"
+    },
+    "firebaseServiceAccount": false,
+    "firebaseWebPushKey": "BMvDFmyf-LcgX0VGuPLWujM-T1oW5mQsFtbYdmxVuXf3EKgfp9eCrS4QyPz6LqPQLwBwbktx27Ts10S5zDn9tG8"
+  },
+  "integrations": {
+    "prismic": true,
+    "onesignal": false,
+    "shopify": true,
+    "firebase": true,
+    "storepay": true,
+    "qpay": true,
+    "stripe": true,
+    "algolia": false,
+    "loops": true,
+    "shippo": false
+  },
+  "features": {
+    "googleMaps": true,
+    "currency": true,
+    "i18n": true,
+    "robots": true,
+    "speedInsights": false,
+    "analytics": true,
+    "auth": {
+      "type": "firebase",
+      "socialLogins": true,
+      "phoneVerify": false,
+      "connect": {
+        "shopify": true
+      }
+    },
+    "algolia": null,
+    "prismic": "adoriginalstudio",
+    "shopify": {
+      "apiVersion": "2024-10",
+      "domain": "ad-original-studio.myshopify.com"
+    },
+    "multitenancy": {
+      "parentId": "adcommunity",
+      "tenantId": "adcommunity"
+    },
+    "notifications": {
+      "loops": {
+        "listId": "cmahoxst202r40iyc1sobb2r3",
+        "mailingFormId": "cm8jurmp80z57ou4wymhec9mr",
+        "mailingListId": "cmahoxst202r40iyc1sobb2r3"
+      }
+    },
+    "fileSystem": {
+      "bunny": {
+        "storageUrl": "https://storage.bunnycdn.com/melodu",
+        "cdnUrl": "https://melodu.b-cdn.net",
+        "filesPath": "adcommunity"
+      }
+    }
+  }
+}
