@@ -18,7 +18,7 @@
         <div class="c-align-center">
           <Button
             link
-            :label="$utils.t(linkText)"
+            :label="$utils.t(data.primary.link.text)"
             icon="pi pi-arrow-right"
             iconPos="right"
             @click="$bus.$emit('goTo', data.primary.link.url)"
@@ -67,14 +67,6 @@ export default {
       }
 
       return filters
-    },
-    linkText() {
-      if (this.data) {
-        if (this.data.primary.link_text) {
-          return this.data.primary.link_text
-        }
-      }
-      return this.$utils.t("View All Products")
     },
   },
 }

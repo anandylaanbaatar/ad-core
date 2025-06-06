@@ -4,22 +4,11 @@ import { createResolver } from "@nuxt/kit"
 import { defineNuxtConfig } from "nuxt/config"
 import Aura from "@primevue/themes/aura"
 const { resolve } = createResolver(import.meta.url)
-const siteConfigPath = path.resolve("./site.config.js")
-const { siteRuntimeConfig } = await import(siteConfigPath)
+const { siteRuntimeConfig, siteConfig } = await import(
+  path.resolve("./v1/core/site.config.js")
+)
 
-console.log("[Layer] :: Adding AD Core - v1.3.2")
-
-/**
- * Config
- */
-
-const config = defineNuxtConfig({
-  runtimeConfig: {
-    public: {
-      BASE_URL: process.env.BASE_URL,
-    },
-  },
-})
+console.log("[Layer] :: Adding AD Core - v2.1.0")
 
 /**
  * Middleware
@@ -55,12 +44,7 @@ const app = defineNuxtConfig({
  */
 
 let modulesConfig = {
-  modules: [
-    "@pinia/nuxt",
-    "@primevue/nuxt-module",
-    "@nuxtjs/i18n",
-    "@nuxtjs/robots",
-  ],
+  modules: ["@pinia/nuxt", "@primevue/nuxt-module"],
 
   pinia: {
     storesDirs: [resolve("stores/**")],
@@ -82,33 +66,33 @@ let modulesConfig = {
       ripple: true,
     },
   },
+}
 
-  i18n: {
-    vueI18n: resolve("./i18n.config.js"),
-  },
+// i18n
+if (siteRuntimeConfig.public.features.i18n) {
+  modulesConfig.modules.push("@nuxtjs/i18n")
+  modulesConfig.i18n = {
+    vueI18n: resolve("../../config/i18n.config.js"),
+  }
+}
 
-  robots: {
+// Robots
+if (siteRuntimeConfig.public.features.robots) {
+  modulesConfig.modules.push("@nuxtjs/robots")
+  modulesConfig.robots = {
     UserAgent: "*",
     Disallow: "",
-  },
+  }
 }
 
 // Firebase
 if (siteRuntimeConfig.public.integrations.firebase) {
-  if (!modulesConfig.modules) {
-    modulesConfig.modules = ["nuxt-vuefire"]
-  } else {
-    modulesConfig.modules.push("nuxt-vuefire")
-  }
+  modulesConfig.modules.push("nuxt-vuefire")
 }
 
 // Prismic
 if (siteRuntimeConfig.public.integrations.prismic) {
-  if (!modulesConfig.modules) {
-    modulesConfig.modules = ["@nuxtjs/prismic"]
-  } else {
-    modulesConfig.modules.push("@nuxtjs/prismic")
-  }
+  modulesConfig.modules.push("@nuxtjs/prismic")
   modulesConfig.prismic = {
     endpoint: siteRuntimeConfig.public.features.prismic,
   }
@@ -127,10 +111,9 @@ const plugins = defineNuxtConfig({
     resolve("./plugins/currency.js"),
     resolve("./plugins/algolia.js"),
     resolve("./plugins/firebase.client.js"),
-    resolve("./plugins/mitt.client.js"),
-    resolve("./plugins/splide.client.js"),
     resolve("./plugins/forms.client.js"),
-    resolve("./plugins/infinite.client.js"),
+    resolve("./plugins/general.client.js"),
+    resolve("./plugins/notifications.js"),
     resolve("./plugins/core.client.js"),
   ],
 })
@@ -169,6 +152,25 @@ const build = defineNuxtConfig({
       },
     },
   },
+
+  vue: {
+    compilerOptions: {
+      // Ignore media-controller player tag
+      isCustomElement: (tag) => {
+        if (
+          tag.startsWith("media-") ||
+          tag.startsWith("mux-") ||
+          tag.startsWith("youtube-") ||
+          tag.startsWith("vimeo-") ||
+          (siteConfig.appConfig.theme.type !== "commerce" &&
+            tag.startsWith("CommerceSidebar"))
+        ) {
+          return tag
+        }
+        return
+      },
+    },
+  },
 })
 
-export default defu(config, middlewares, modules, build, app, plugins)
+export default defu(middlewares, modules, build, app, plugins)

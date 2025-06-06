@@ -1,0 +1,132 @@
+@use "../basics/variables" as *;
+
+.c-table {
+  .p-datatable-table-container {
+    border-radius: 15px;
+  }
+  // .p-datatable-header-cell {
+  //   background: rgba(0, 0, 0, 0.03);
+  // }
+}
+
+.c-calendar {
+  max-width: 100%;
+
+  &.fc {
+    .fc-header-toolbar {
+      margin-bottom: 0;
+      padding: 15px;
+    }
+  }
+  // Event Calendar
+  .ec {
+    height: 100%;
+
+    // Toolbar
+    .ec-toolbar {
+      margin-bottom: 0;
+      padding: 15px;
+
+      // Button
+      .ec-button-group {
+        .ec-button {
+          border: 1px solid transparent;
+          background-color: transparent;
+
+          &.ec-prev {
+            width: 31px;
+            height: 31px;
+            margin-right: 4px;
+            background-color: rgba(0, 0, 0, 0.03);
+            border: 1px solid rgba(0, 0, 0, 0.08);
+
+            i {
+              margin-left: -4px;
+            }
+          }
+          &.ec-next {
+            width: 31px;
+            height: 31px;
+            background-color: rgba(0, 0, 0, 0.03);
+            border: 1px solid rgba(0, 0, 0, 0.08);
+
+            i {
+              margin-right: -4px;
+            }
+          }
+        }
+      }
+      .ec-button {
+        font-family: $font3;
+        font-size: 12px;
+        text-transform: capitalize;
+        border-radius: 250px;
+        background-color: rgba(0, 0, 0, 0.03);
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        transition: all 0.4s ease;
+
+        &.ec-prev {
+          width: 31px;
+          height: 31px;
+          margin-right: 4px;
+
+          i {
+            margin-left: -4px;
+          }
+        }
+        &.ec-next {
+          width: 31px;
+          height: 31px;
+
+          i {
+            margin-right: -4px;
+          }
+        }
+        &:hover {
+          background-color: rgba(0, 0, 0, 0.08);
+        }
+        &.ec-active {
+          background-color: $black;
+          color: $white;
+        }
+        &:disabled {
+          cursor: not-allowed;
+        }
+      }
+    }
+    // Calendar Header
+    .ec-header {
+      .ec-day {
+        font-family: $font3;
+        font-size: 12px;
+      }
+    }
+    // Sidebar
+    .ec-sidebar {
+      .ec-sidebar-title {
+        font-family: $font3;
+        font-size: 12px;
+      }
+      .ec-time {
+        font-family: $font3;
+        font-size: 12px;
+      }
+    }
+
+    // Event
+    .ec-events {
+      .ec-event {
+        .ec-event-title {
+          font-size: 12px;
+        }
+      }
+    }
+  }
+}
+.my-app-dark {
+  .c-calendar {
+    .ec {
+      --ec-border-color: rgba(255, 255, 255, 0.08);
+    }
+  }
+}

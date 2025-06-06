@@ -1,7 +1,7 @@
 import { GoogleMap, Marker } from "vue3-google-map"
 
 export default defineNuxtPlugin((nuxtApp) => {
-  const cors = `https://cors.melodu.com/`
+  const cors = useCoreStore().cors
   const MAIN_KEY = useState(
     "googleMapKey",
     () => process.env.NUXT_GOOGLE_MAPS_TOKEN
@@ -92,7 +92,7 @@ export default defineNuxtPlugin((nuxtApp) => {
   const typeSearchGoogle = async (value) => {
     return new Promise(async (resolve, reject) => {
       let address = encodeURIComponent(value)
-      let url = `${cors}https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${address}&types=geocode&key=${KEY}` // components=country:mn &types=establishment&location=37.76999%2C-122.44696
+      let url = `${cors}/https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${address}&types=geocode&key=${KEY}` // components=country:mn &types=establishment&location=37.76999%2C-122.44696
 
       await $fetch(url, {
         method: "get",
@@ -109,7 +109,7 @@ export default defineNuxtPlugin((nuxtApp) => {
   const addressToLatLng = async (value) => {
     return new Promise(async (resolve, reject) => {
       let address = encodeURIComponent(value)
-      let url = `${cors}https://maps.googleapis.com/maps/api/geocode/json?address=${address}&key=${KEY}` // &components=country:MN
+      let url = `${cors}/https://maps.googleapis.com/maps/api/geocode/json?address=${address}&key=${KEY}` // &components=country:MN
 
       await $fetch(url, {
         method: "get",
@@ -131,7 +131,7 @@ export default defineNuxtPlugin((nuxtApp) => {
     return new Promise(async (resolve, reject) => {
       let faddress1 = address1.replace(/ /g, "+")
       let faddress2 = address2.replace(/ /g, "+")
-      let url = `${cors}https://maps.googleapis.com/maps/api/directions/json?origin=${faddress1}&destination=${faddress2}&key=${KEY}` // &components=country:MN
+      let url = `${cors}/https://maps.googleapis.com/maps/api/directions/json?origin=${faddress1}&destination=${faddress2}&key=${KEY}` // &components=country:MN
 
       await $fetch(url, {
         method: "get",

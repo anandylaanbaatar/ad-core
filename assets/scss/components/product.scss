@@ -12,12 +12,20 @@
   }
 
   .c-product-content {
-    padding: 10px;
+    padding: 5px 10px 10px 10px;
     font-family: $font3;
   }
 
   .c-product-images {
     position: relative;
+
+    .c-block {
+      aspect-ratio: 4/4;
+      min-height: 0;
+      height: auto;
+      width: 100%;
+      margin: 0;
+    }
   }
 
   .p-glass-button {
@@ -42,6 +50,7 @@
       padding-left: 0;
     }
     .content {
+      padding: 10px;
       padding-left: 0;
     }
     &:hover {
@@ -529,6 +538,8 @@ div.p-dataview {
   padding: 5px;
   min-width: 50px;
   max-width: 110px;
+  display: inline-flex;
+  align-items: center;
 
   input {
     width: auto;

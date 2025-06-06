@@ -1,0 +1,113 @@
+@use "../basics/variables" as *;
+
+// Player
+.c-player {
+  width: 100%;
+  position: relative;
+  aspect-ratio: 16/9;
+  border-radius: 15px;
+  overflow: hidden;
+
+  media-controller {
+    position: relative;
+    width: 100%;
+    height: 100%;
+  }
+  media-control-bar {
+    border-radius: 15px;
+    width: calc(100% - 30px);
+    margin: 15px;
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    backdrop-filter: saturate(180%) blur(20px);
+    background: rgba(0, 0, 0, 0.5);
+    padding: 5px;
+    position: relative;
+    top: 20px;
+    transition: all 0.4s ease;
+
+    [role="button"] {
+      background: transparent;
+      transition: all 0.4s ease;
+    }
+    media-play-button {
+      svg {
+        height: 28px;
+        width: 28px;
+      }
+    }
+    media-captions-button,
+    media-volume-range {
+      background: transparent;
+    }
+    .control-bar-divider {
+      margin-left: auto;
+    }
+    media-mute-button {
+    }
+    media-live-button[role="button"] {
+      color: rgba(255, 255, 255, 0.6);
+      height: 32px;
+      margin: auto 3px;
+      border-radius: 10px;
+      font-family: $font3;
+      -webkit-backdrop-filter: saturate(180%) blur(20px);
+      backdrop-filter: saturate(180%) blur(20px);
+      background: rgba(255, 255, 255, 0.2);
+
+      &[aria-label="playing live"] {
+        background: $red-600;
+        color: $white;
+        --media-live-button-indicator-color: #fff;
+      }
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.3);
+      }
+    }
+    media-time-display {
+      background: transparent;
+    }
+    .media-time-range {
+      background: transparent;
+    }
+    media-cast-button[role="button"] {
+      svg {
+        height: 20px !important;
+        width: 20px !important;
+      }
+    }
+    [mediacastunavailable="unsupported"] {
+      display: none;
+    }
+  }
+  media-controller[userinactive] {
+    media-control-bar {
+      top: 0;
+      transition: all 0.4s ease;
+    }
+  }
+  media-controller[mediastreamtype="live"] {
+    media-time-range {
+      display: none;
+    }
+  }
+
+  &:hover {
+    media-control-bar {
+      top: 0;
+      opacity: 1;
+    }
+  }
+}
+
+// Mobile & Tablet
+@media screen and (max-width: 768px) {
+  .c-player {
+    .media-time-range {
+      display: none;
+    }
+    media-volume-range {
+      display: none;
+    }
+  }
+}

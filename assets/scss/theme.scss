@@ -13,6 +13,10 @@ html {
 }
 body {
   background-color: $main_background;
+
+  &.no-user-select {
+    user-select: none !important;
+  }
 }
 // Dark
 .my-app-dark body {

@@ -1,4 +1,5 @@
-import moment from "moment"
+// import moment from "moment"
+import moment from "moment-timezone"
 import { parsePhoneNumber } from "libphonenumber-js"
 import { findFlagUrlByIso2Code } from "country-flags-svg"
 import { getCountry } from "country-from-iso2"
@@ -81,6 +82,7 @@ export default defineNuxtPlugin((nuxtApp) => {
         },
 
         // Date & Time
+        moment,
         formatDateTime(date) {
           return moment(date).format("MMM DD, YYYY - h:mm a")
         },
@@ -112,6 +114,19 @@ export default defineNuxtPlugin((nuxtApp) => {
           let dateTime = moment(parseInt(time))
           return dateTime.format("MMM DD, YYYY - h:mm a")
         },
+        utcSecToDate(time) {
+          let date = moment.utc(time * 1000)
+          return date.format("MMM DD, YYYY - h:mm a")
+        },
+        timestamp() {
+          return moment().valueOf()
+        },
+        timezones() {
+          if (Intl.supportedValuesOf) {
+            return Intl.supportedValuesOf("timeZone")
+          }
+          return
+        },
 
         // Images
         setBackImage(image) {
@@ -131,12 +146,28 @@ export default defineNuxtPlugin((nuxtApp) => {
           return
         },
         async gravatar(email) {
-          if (!email) return
+          return new Promise(async (resolve) => {
+            if (!email) {
+              resolve(null)
+              return
+            }
 
-          const address = String(email).trim().toLowerCase()
-          const userHash = await hash(address)
+            const address = String(email).trim().toLowerCase()
+            const userHash = await hash(address)
+            const url = `https://gravatar.com/avatar/${userHash}?s=200`
 
-          return `https://gravatar.com/avatar/${userHash}`
+            try {
+              const res = await $fetch(`${url}&d=404`)
+
+              if (res.status !== 404) {
+                resolve(url)
+              } else {
+                resolve(null)
+              }
+            } catch (err) {
+              resolve(null)
+            }
+          })
         },
 
         // Numbers & Prices
@@ -193,7 +224,45 @@ export default defineNuxtPlugin((nuxtApp) => {
             lastName: fullName.split(" ").slice(-1).join(" "),
           }
         },
+        firstLetterFromName(name) {
+          if (!name) return
+          return name.charAt(0)
+        },
+        copyToClipboard(text) {
+          if (window.clipboardData && window.clipboardData.setData) {
+            return window.clipboardData.setData("Text", text)
+          } else if (
+            document.queryCommandSupported &&
+            document.queryCommandSupported("copy")
+          ) {
+            var textarea = document.createElement("textarea")
+            textarea.textContent = text
+            textarea.style.position = "fixed" // Prevent scrolling to bottom of page in Microsoft Edge.
+            document.body.appendChild(textarea)
+            textarea.select()
+            try {
+              return document.execCommand("copy") // Security exception may be thrown by some browsers.
+            } catch (ex) {
+              console.warn("Copy to clipboard failed.", ex)
+              return prompt("Copy to clipboard: Ctrl+C, Enter", text)
+            } finally {
+              document.body.removeChild(textarea)
+            }
+          }
+        },
+        processFileName(filename) {
+          let fileNameBase = filename.replace(/ /g, "_")
+          let fileSplit = fileNameBase.split(".")
+          let fileName_noExt = fileSplit.slice(0, -1).join(".")
+          fileName_noExt = fileName_noExt.replaceAll(".", "_")
+          fileName_noExt = fileName_noExt.replaceAll(" ", "_")
+          let fileExtension = fileSplit.pop()
+          let fileTimestamp = Math.floor(Date.now() / 1000)
+          let fileName = `${fileName_noExt}_${fileTimestamp}.${fileExtension}`
+          return encodeURI(fileName)
+        },
 
+        // Country
         getFlagByCode,
         getCountryName,
         getCountryStyle,

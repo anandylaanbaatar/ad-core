@@ -35,12 +35,11 @@ const translate = (value) => {
         <Button
           label="Go Back"
           icon="pi pi-arrow-left"
-          severity="contrast"
           @click="handleError"
         ></Button>
       </div>
     </div>
 
-    <h1 class="backDrop">{{ statusCode }}</h1>
+    <!-- <h1 class="backDrop">{{ statusCode }}</h1> -->
   </div>
 </template>

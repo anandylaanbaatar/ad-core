@@ -1,5 +1,5 @@
 <template>
-  <div :style="'display:inline-flex;'">
+  <div class="inline-flex">
     <Select
       v-model="currency"
       :options="currencies"

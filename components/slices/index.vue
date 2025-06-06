@@ -4,6 +4,12 @@
       <!--Hero-->
       <SlicesHero v-if="slice.slice_type === 'hero'" :data="slice"></SlicesHero>
 
+      <!--Blocks-->
+      <SlicesBlocks
+        v-else-if="slice.slice_type === 'blocks'"
+        :data="slice"
+      ></SlicesBlocks>
+
       <!--Sliders-->
       <SlicesSlider
         v-else-if="slice.slice_type === 'slider'"
@@ -11,10 +17,10 @@
       ></SlicesSlider>
 
       <!--Products Grid-->
-      <SlicesProductsGrid
+      <SlicesProducts
         v-else-if="slice.slice_type === 'products_grid'"
         :data="slice"
-      ></SlicesProductsGrid>
+      ></SlicesProducts>
 
       <!--Quote-->
       <SlicesQuote
@@ -33,6 +39,36 @@
         v-else-if="slice.slice_type === 'scroll'"
         :data="slice"
       ></SlicesScroll>
+
+      <!--Images-->
+      <SlicesImages
+        v-else-if="slice.slice_type === 'image'"
+        :data="slice"
+      ></SlicesImages>
+
+      <!--Description-->
+      <SlicesDescription
+        v-if="slice.slice_type === 'description'"
+        :data="slice"
+      ></SlicesDescription>
+
+      <!--Embed-->
+      <SlicesEmbed
+        v-if="slice.slice_type === 'embed'"
+        :data="slice"
+      ></SlicesEmbed>
+
+      <!--Mailing List-->
+      <SlicesFormsMailingList
+        v-if="slice.slice_type === 'mailing_list'"
+        :data="slice"
+      ></SlicesFormsMailingList>
+
+      <!--Testimonials-->
+      <SlicesTestimonials
+        v-if="slice.slice_type === 'testimonials'"
+        :data="slice"
+      ></SlicesTestimonials>
     </div>
   </div>
 </template>
@@ -45,9 +81,5 @@ export default {
       default: null,
     },
   },
-
-  // created() {
-  //   console.log("[Prismic] ::: Slices ::: ", this.slices)
-  // },
 }
 </script>

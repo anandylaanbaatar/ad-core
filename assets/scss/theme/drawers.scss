@@ -38,6 +38,10 @@ div.p-drawer {
     }
   }
 
+  &.dragging {
+    cursor: grabbing;
+  }
+
   .p-drawer-close {
     width: 40px;
     height: 40px;
@@ -68,6 +72,7 @@ div.p-drawer {
   }
   .p-drawer-content {
     padding: 0 30px;
+    // padding-bottom: 130px;
   }
 
   &-top,
@@ -109,6 +114,8 @@ div.p-drawer {
     left: 0;
     bottom: 0;
     border-top: 1px solid rgba(0, 0, 0, 0.08);
+    background: $white;
+    border-radius: 0 0 15px 15px;
     padding: 30px;
     font-family: $font3;
 
@@ -135,6 +142,7 @@ div.p-drawer {
 
     .bottom {
       border-top: 1px solid rgba(255, 255, 255, 0.08);
+      background: var(--p-drawer-background);
     }
   }
 }
@@ -195,6 +203,11 @@ div.p-drawer.menuSidebar {
   }
 }
 
+// Auth Sidebar
+div.p-drawer.authSidebar {
+  padding-bottom: 80px;
+}
+
 // Account Sidebar
 div.p-drawer.accountSidebar {
   // h3 {
@@ -223,6 +236,7 @@ div.p-drawer.cartSidebar {
         z-index: 1;
         height: 100%;
         width: 100%;
+        margin-bottom: 240px;
       }
     }
     .bottom {
@@ -314,12 +328,155 @@ div.p-drawer.addressSidebar {
   width: 800px;
 }
 
+// Verify Email Sidebar
+div.p-drawer.verifyEmail {
+  .p-drawer-header {
+    padding: 0;
+  }
+  .p-drawer-content {
+    display: flex;
+    align-items: center;
+
+    .verifyEmailBlock {
+      background-color: transparent;
+    }
+  }
+}
+
 div.p-scrollpanel .p-scrollpanel-bar {
   background: $main_background;
   border-radius: 250px;
   border: 1px solid $yellow-800;
   -webkit-transition: opacity 0.4s ease;
   transition: opacity 0.4s ease;
+}
+
+// Image Preview
+div.p-drawer.imagePreview {
+  border: none;
+  background-color: transparent;
+  border-radius: 15px;
+
+  .p-button {
+    background-color: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: saturate(180%) blur(50px);
+    color: $white;
+    border-radius: 250px;
+
+    &:hover {
+      color: $white;
+      background-color: rgba(255, 255, 255, 0.2);
+
+      .p-icon {
+        color: $white;
+      }
+    }
+  }
+
+  .p-drawer-header {
+    padding: 0;
+    position: absolute;
+    z-index: 5;
+    top: 15px;
+    right: 15px;
+
+    .p-drawer-close-button {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+    }
+  }
+  .p-drawer-content {
+    padding: 0;
+    margin: 15px;
+    border-radius: 15px;
+    background-color: $white;
+  }
+
+  .content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    width: 100%;
+    height: 100%;
+
+    .top {
+      position: absolute;
+      z-index: 5;
+      left: 0;
+      bottom: 0;
+      width: 100%;
+      display: flex;
+      align-items: center;
+
+      .menu {
+        margin: 0 auto;
+        margin-bottom: 15px;
+        padding: 5px;
+        background: rgba(0, 0, 0, 0.8);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 250px;
+        backdrop-filter: saturate(180%) blur(50px);
+        background-color: #0006;
+
+        .p-button {
+          margin-right: 5px;
+          border: 0;
+          background-color: transparent;
+          backdrop-filter: none;
+
+          &:hover {
+            border: 0;
+            background-color: rgba(255, 255, 255, 0.08);
+          }
+          &:last-child {
+            margin-right: 0;
+          }
+        }
+      }
+    }
+    .center {
+      position: absolute;
+      z-index: 3;
+      display: block;
+      height: 100%;
+      width: 100%;
+      top: 0;
+      left: 0;
+      text-align: center;
+      border-radius: 0;
+      overflow: hidden;
+      overflow-x: scroll;
+      -webkit-overflow-scrolling: touch;
+
+      img {
+        height: 100%;
+        max-width: auto;
+        border-radius: 0;
+        margin: 0 auto;
+      }
+    }
+    .back {
+      display: block;
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      z-index: 1;
+      background-position: center center;
+      background-repeat: no-repeat;
+      background-size: cover;
+
+      .dimmer {
+        display: block;
+        width: 100%;
+        height: 100%;
+        backdrop-filter: saturate(180%) blur(50px);
+        background-color: #0006;
+      }
+    }
+  }
 }
 
 .emptyArea {

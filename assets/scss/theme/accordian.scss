@@ -64,6 +64,14 @@ div.p-accordion {
     }
   }
 
+  .p-accordionpanel {
+    border-color: rgba(0, 0, 0, 0.08);
+
+    &:last-child {
+      border-bottom: 0;
+    }
+  }
+
   &.transparent {
     .p-accordion-tab {
       .p-accordion-header-link,
@@ -145,6 +153,7 @@ div.p-tabs {
   .p-tablist {
     &-tab-list {
       border: 0;
+      background: transparent;
     }
 
     .p-tab {
@@ -182,6 +191,9 @@ div.p-tabs {
     .p-tablist-active-bar {
       display: none;
     }
+  }
+  .p-tabpanels {
+    background: transparent;
   }
 }
 .my-app-dark {

@@ -1,5 +1,5 @@
 <template>
-  <div class="loadingBlock" :class="type">
+  <div class="loadingBlock" :class="getClass">
     <svg
       version="1.1"
       id="L9"
@@ -34,6 +34,27 @@ export default {
     type: {
       type: String,
       default: "md",
+    },
+    color: {
+      type: String,
+      default: null,
+    },
+  },
+
+  computed: {
+    getClass() {
+      let classItems = ""
+
+      if (this.type) {
+        if (classItems) classItems += " "
+        classItems += this.type
+      }
+      if (this.color) {
+        if (classItems) classItems += " "
+        classItems += this.color
+      }
+
+      return classItems
     },
   },
 }

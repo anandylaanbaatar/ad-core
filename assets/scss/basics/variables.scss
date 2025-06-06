@@ -1,43 +1,35 @@
 @use "./fonts" as *;
 
 /*
-* Colors
+* Fonts
 */
 
-$black: #000;
-$white: #fff;
+$font1: "SamsungOne", sans-serif;
+$font2: "Averta", sans-serif;
+$font3: "Basique", sans-serif;
+$font4: "Holiday", serif;
+$font5: "Montserrat", sans-serif;
+$font6: "Gotham SSm B 300", "Gotham SSm A 300", sans-serif;
 
-$light1: #f2f2f2;
-$light2: #f4f4f4;
+.font1 {
+  font-family: $font1;
+}
+.font2 {
+  font-family: $font2;
+}
+.font3 {
+  font-family: $font3;
+}
+.font4 {
+  font-family: $font4;
+}
+.font5 {
+  font-family: $font4;
+}
 
-$dark1: #0b0d0f;
-$dark2: #141416;
-$dark3: #18191d;
-$dark4: #1b1c1f;
-
-$dark-text: #777e90;
-
-$black08: rgba(0, 0, 0, 0.08);
-$black05: rgba(0, 0, 0, 0.05);
-$black03: rgba(0, 0, 0, 0.03);
-$black01: rgba(0, 0, 0, 0.1);
-$black1: rgba(0, 0, 0, 0.1);
-$black2: rgba(0, 0, 0, 0.2);
-$white8: rgba(255, 255, 255, 0.8);
-
-$btn-border: #e6e8ec;
-$dark-btn-border: #353945;
-$dark-btn: #353945;
-$dark-btn-color: #fcfcfd;
-$menu-btn: #777e90;
-$menu-btn-hover: #23262f;
-$input-border: #e6e8ec;
-$dark-input-border: #777e90;
-
-$custom-dark: #212121;
-$custom-grey: #eeecec;
-$custom-grey2: #efeeec;
-$custom-green: #283734;
+/*
+* Colors
+*/
 
 // Grey
 $grey-50: #f9fafb;
@@ -203,26 +195,43 @@ $brown-700: #81441d;
 $brown-800: #341c10;
 
 /*
-* Fonts
+* Custom Colors
 */
 
-$font1: "SamsungOne", sans-serif;
-$font2: "Montserrat", sans-serif;
-$font3: "Basique", sans-serif;
-$font4: "Holiday", serif;
+$black: #000;
+$white: #fff;
 
-.font1 {
-  font-family: $font1;
-}
-.font2 {
-  font-family: $font2;
-}
-.font3 {
-  font-family: $font3;
-}
-.font4 {
-  font-family: $font4;
-}
+$light1: #f2f2f2;
+$light2: #f4f4f4;
+
+$dark1: #0b0d0f;
+$dark2: #141416;
+$dark3: #18191d;
+$dark4: #1b1c1f;
+
+$dark-text: #777e90;
+
+$black08: rgba(0, 0, 0, 0.08);
+$black05: rgba(0, 0, 0, 0.05);
+$black03: rgba(0, 0, 0, 0.03);
+$black01: rgba(0, 0, 0, 0.1);
+$black1: rgba(0, 0, 0, 0.1);
+$black2: rgba(0, 0, 0, 0.2);
+$white8: rgba(255, 255, 255, 0.8);
+
+$btn-border: #e6e8ec;
+$dark-btn-border: #353945;
+$dark-btn: #353945;
+$dark-btn-color: #fcfcfd;
+$menu-btn: #777e90;
+$menu-btn-hover: #23262f;
+$input-border: #e6e8ec;
+$dark-input-border: #777e90;
+
+$custom-dark: #212121;
+$custom-grey: #eeecec;
+$custom-grey2: #efeeec;
+$custom-green: #283734;
 
 // =====================
 // Variables - Templates
@@ -249,25 +258,62 @@ $primary_font_color: var(--primary-text1);
 $secondary_font: $font3;
 $borderRadius: 15px;
 $generalPadding: 15px;
+$sectionMargin: 70px;
 
 :root {
-  --p-border-radius-md: 8px;
-  --p-button-primary-background: #000;
-  --p-button-primary-border-color: #000;
-  --p-button-primary-hover-background: #000;
-  --p-button-primary-hover-border-color: #000;
+  // Base
+  --ad-background: $white;
+  --ad-text-color: $black;
 
-  // Buttons
+  // Backgrounds
+  --ad-background1: rgba(0, 0, 0, 0.1);
+  --ad-background2: rgba(0, 0, 0, 0.2);
+  --ad-background3: rgba(0, 0, 0, 0.3);
+  --ad-background5: rgba(0, 0, 0, 0.5);
+  --ad-background03: rgba(0, 0, 0, 0.03);
+  --ad-background05: rgba(0, 0, 0, 0.05);
+  --ad-background06: rgba(0, 0, 0, 0.06);
+  --ad-background08: rgba(0, 0, 0, 0.08);
+
+  // Overrides
+  --p-border-radius-md: 8px;
+  --p-button-primary-background: $black;
+  --p-button-primary-border-color: $black;
+  --p-button-primary-hover-background: $black;
+  --p-button-primary-hover-border-color: $black;
   --p-button-label-font-weight: 400;
+  --p-togglebutton-color: $black;
+  --p-select-color: $black;
+  --p-accordion-header-color: $black;
+  --p-accordion-content-color: $black;
 }
 .my-app-dark {
   $main_background: #1b1b1b;
 
   &:root {
+    // Base
+    --ad-background: $black;
+    --ad-text-color: $white;
+
+    // Backgrounds
+    --ad-background1: rgba(255, 255, 255, 0.1);
+    --ad-background2: rgba(255, 255, 255, 0.2);
+    --ad-background3: rgba(255, 255, 255, 0.3);
+    --ad-background5: rgba(255, 255, 255, 0.5);
+    --ad-background03: rgba(255, 255, 255, 0.03);
+    --ad-background05: rgba(255, 255, 255, 0.05);
+    --ad-background06: rgba(255, 255, 255, 0.06);
+    --ad-background08: rgba(255, 255, 255, 0.08);
+
+    // Overrides
     --p-button-primary-background: #f3f4f6;
     --p-button-primary-border-color: #f3f4f6;
     --p-button-primary-hover-background: #f3f4f6;
     --p-button-primary-hover-border-color: #f3f4f6;
+    --p-togglebutton-color: $white;
+    --p-select-color: $white;
+    --p-accordion-header-color: $white;
+    --p-accordion-content-color: $white;
   }
 }
 //======================================================

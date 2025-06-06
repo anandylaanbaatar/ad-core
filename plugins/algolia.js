@@ -29,9 +29,8 @@ export default defineNuxtPlugin(() => {
   const APP_ID = APP_ID_.value
   const APP_KEY = APP_KEY_.value
   const client = algoliasearch(APP_ID, APP_KEY)
-  const channelIndex = client.initIndex(
-    useRuntimeConfig().public.features.algolia
-  )
+  const indexName = useRuntimeConfig().public.features.algolia
+  const mainIndex = client.initIndex(indexName)
 
   /**
    * Channels
@@ -41,27 +40,19 @@ export default defineNuxtPlugin(() => {
   const channelFilters = () => {
     return new Promise(async (resolve, reject) => {
       try {
-        const countries = await channelIndex.searchForFacetValues(
-          "country",
-          "",
-          {
-            page: 0,
-          }
-        )
-        const categories = await channelIndex.searchForFacetValues(
+        const countries = await mainIndex.searchForFacetValues("country", "", {
+          page: 0,
+        })
+        const categories = await mainIndex.searchForFacetValues(
           "categories",
           "",
           {
             page: 0,
           }
         )
-        const providers = await channelIndex.searchForFacetValues(
-          "provider",
-          "",
-          {
-            page: 0,
-          }
-        )
+        const providers = await mainIndex.searchForFacetValues("provider", "", {
+          page: 0,
+        })
 
         resolve({
           countries: countries.facetHits,
@@ -73,7 +64,43 @@ export default defineNuxtPlugin(() => {
       }
     })
   }
-  // Search Channels
+
+  // Search
+  const search = async (filters) => {
+    return new Promise((resolve) => {
+      let limit = filters.limit || 30
+      let query = filters.query || ""
+      let options = {
+        page: filters.page,
+        hitsPerPage: limit,
+      }
+
+      if (filters.options) {
+        options.filters = ""
+        options.filters += `(`
+
+        for (const key in filters.options) {
+          let option = filters.options[key]
+          if (options.filters.length > 1) options.filters += ` AND `
+          options.filters += `${key}:${option}`
+        }
+
+        options.filters += `)`
+      }
+
+      // console.log("[Algolia] ::: Search :: ", options)
+
+      mainIndex
+        .search(query, options)
+        .then((res) => {
+          resolve(res)
+        })
+        .catch((err) => {
+          console.log("[Algolia] ::: Error :: ", err.message)
+          resolve(null)
+        })
+    })
+  }
   const searchChannels = async (filters) => {
     let limit = 30
     let page = filters.page
@@ -112,7 +139,7 @@ export default defineNuxtPlugin(() => {
     }
 
     return new Promise((resolve, reject) => {
-      channelIndex
+      mainIndex
         .search(query, searchOptions)
         .then((res) => {
           resolve(res)
@@ -122,11 +149,37 @@ export default defineNuxtPlugin(() => {
         })
     })
   }
+
   // Indexing
   const saveObject = async (record) => {
-    await channelIndex.saveObject(record).wait()
+    return new Promise(async (resolve) => {
+      try {
+        await mainIndex
+          .saveObject(record, {
+            autoGenerateObjectIDIfNotExist: true,
+          })
+          .wait()
+        await client.clearCache()
 
-    console.log(`Algolia ::: Save Record :: `, record.objectID)
+        resolve(true)
+      } catch (err) {
+        console.log("[Algolia] ::: Error :: ", err.message)
+        resolve(null)
+      }
+    })
+  }
+  const deleteObject = async (recordId) => {
+    return new Promise(async (resolve) => {
+      try {
+        await mainIndex.deleteObject(recordId).wait()
+        await client.clearCache()
+
+        resolve(true)
+      } catch (err) {
+        console.log("[Algolia] ::: Error :: ", err.message)
+        resolve(null)
+      }
+    })
   }
   const bulkSaveObjects = async (records) => {
     const newClient = algoliasearch(APP_ID, APP_KEY)
@@ -139,7 +192,7 @@ export default defineNuxtPlugin(() => {
 
       batchObjects.push({
         action: "updateObject",
-        indexName: "channels",
+        indexName: indexName,
         body: channel,
       })
     }
@@ -158,7 +211,7 @@ export default defineNuxtPlugin(() => {
 
       batchObjects.push({
         action: "deleteObject",
-        indexName: "channels",
+        indexName: indexName,
         body: {
           objectID: channel.id,
         },
@@ -177,8 +230,12 @@ export default defineNuxtPlugin(() => {
         channelFilters,
         searchChannels,
 
+        // Search
+        search,
+
         // Indexing
         saveObject,
+        deleteObject,
         bulkSaveObjects,
         bulkDeleteObjects,
       },

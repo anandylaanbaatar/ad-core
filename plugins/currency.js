@@ -123,30 +123,36 @@ export default defineNuxtPlugin((nuxtApp) => {
    * Format
    */
 
-  const format = (amount) => {
-    let toCurrency = CURRENCY
+  const formatCurrency = (currency, amount) => {
+    let formattedPrice = parseFloat(amount)
+    formattedPrice = nuxtApp.$utils.formatPrice(formattedPrice)
 
-    if (toCurrency === "MNT") {
-      return `${nuxtApp.$utils.formatPrice(amount)}₮`
-    }
-
-    let formattedPrice = convert(parseFloat(amount))
-
-    if (toCurrency === "MNT") {
+    if (currency === "MNT") {
       formattedPrice = `${formattedPrice}₮`
-    } else if (toCurrency === "USD") {
+    } else if (currency === "USD") {
       formattedPrice = `$${formattedPrice}`
-    } else if (toCurrency === "CAD") {
+    } else if (currency === "CAD") {
       formattedPrice = `CA$${formattedPrice}`
-    } else if (toCurrency === "AUD") {
+    } else if (currency === "AUD") {
       formattedPrice = `A$${formattedPrice}`
-    } else if (toCurrency === "GBP") {
+    } else if (currency === "GBP") {
       formattedPrice = `£${formattedPrice}`
-    } else if (toCurrency === "EUR") {
+    } else if (currency === "EUR") {
       formattedPrice = `€${formattedPrice}`
     }
 
     return formattedPrice
+  }
+  const format = (amount) => {
+    let toCurrency = CURRENCY
+
+    // Currency is Base Currency then just format
+    if (toCurrency === BASE_CURRENCY) {
+      return `${formatCurrency(toCurrency, amount)}`
+    }
+
+    // Convert Currency and Format
+    return formatCurrency(toCurrency, convert(parseFloat(amount)))
   }
 
   if (import.meta.client) {

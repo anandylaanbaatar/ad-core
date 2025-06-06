@@ -1,10 +1,9 @@
 <template>
   <div
-    v-if="useAppConfig().theme.splash"
     class="c-pageLoader"
-    :class="{ active: show }"
+    :class="{ enabled: theme.splash, active: show, hide: hide }"
   >
-    <div class="image"></div>
+    <div class="image" :style="urlWithBackground"></div>
   </div>
 </template>
 
@@ -13,34 +12,56 @@ export default {
   data() {
     return {
       show: true,
+      hide: false,
     }
   },
 
   computed: {
+    theme() {
+      return useAppConfig().theme
+    },
     url() {
-      return ""
+      if (this.theme && this.theme.splash) {
+        return `${this.theme.splash}`
+      }
+      return
     },
     urlWithBackground() {
       if (this.url) {
         return `background-image: url("${this.url}");`
       }
-      return ""
+      return `background-image: url(/images/logos/splash.gif);`
     },
   },
 
   mounted() {
+    if (!this.theme.splash) {
+      this.show = false
+    }
+
     this.$bus.$on("pageLoading", (showOrHide) => {
       this.show = showOrHide
+
+      if (showOrHide) {
+        this.hide = false
+      }
     })
+
+    // Timer
+    let timer = 1300
+    if (this.theme.splash) {
+      if (this.theme.splashTimer) {
+        timer = this.theme.splashTimer
+      }
+    }
+
     setTimeout(() => {
-      this.show = false
-    }, 1300)
+      this.hide = true
+
+      setTimeout(() => {
+        this.show = false
+      }, 300)
+    }, timer)
   },
 }
 </script>
-
-<style lang="scss">
-.c-pageLoader .image {
-  background-image: url("https://images.prismic.io/adoriginalstudio/Zzn-Ea8jQArT08hI_ad_loader-3.gif");
-}
-</style>

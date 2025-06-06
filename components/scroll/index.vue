@@ -3,7 +3,7 @@
     <Loader v-if="!active" type="sm"></Loader>
 
     <template v-else>
-      <div class="container">
+      <div v-if="hasHeader" class="container">
         <div class="row">
           <div class="col-xs-12 col-md-6">
             <h2 v-if="title">{{ $utils.t(title) }}</h2>
@@ -28,7 +28,12 @@
         </div>
       </div>
 
-      <div class="c-scroll" ref="sliderScroll" @scroll="setScroll">
+      <div
+        class="c-scroll"
+        :class="{ 'mb-0 p-0': !hasPadding }"
+        ref="sliderScroll"
+        @scroll="setScroll"
+      >
         <div class="c-scroll_inner" :style="`padding-left:${marginLeft};`">
           <slot></slot>
         </div>
@@ -45,6 +50,22 @@ export default {
       default: null,
     },
     showArrows: {
+      type: Boolean,
+      default: true,
+    },
+    hasPadding: {
+      type: Boolean,
+      default: true,
+    },
+    hasHeader: {
+      type: Boolean,
+      default: true,
+    },
+    itemWidth: {
+      type: Number,
+      default: 400,
+    },
+    autoInit: {
       type: Boolean,
       default: true,
     },
@@ -74,13 +95,14 @@ export default {
   },
 
   mounted() {
-    this.init()
+    if (this.autoInit) {
+      this.init()
+    }
   },
 
   methods: {
     init() {
       this.active = true
-
       this.setStyle()
 
       setTimeout(() => {
@@ -93,7 +115,7 @@ export default {
     setStyle() {
       const containerEl = document.querySelector(".container")
 
-      if (containerEl) {
+      if (this.hasPadding && containerEl) {
         let style = getComputedStyle(containerEl)
         this.marginLeft = style.marginLeft
       }
@@ -139,7 +161,7 @@ export default {
         if (itemEl) {
           this.scroll.scrollAmount = itemEl.offsetWidth
         } else {
-          this.scroll.scrollAmount = 400
+          this.scroll.scrollAmount = this.itemWidth
         }
         this.scroll.init = true
       }

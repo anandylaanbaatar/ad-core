@@ -7,14 +7,25 @@ h4,
 h5,
 h6 {
   font-family: $font3;
+
   &.c-secondary {
     opacity: 0.6;
   }
 }
-
+h1 {
+  font-size: 2em;
+}
+div {
+  font-weight: 400;
+}
 p {
   line-height: 22px;
-  font-family: 12px;
+  font-weight: 400;
+
+  strong {
+    font-family: $font2;
+    font-weight: bold;
+  }
 }
 
 /*
@@ -50,12 +61,29 @@ p {
   margin: 0 auto;
   line-height: 21px;
 }
+
 .c-description {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    margin-bottom: 10px;
+  }
+  p {
+    margin-bottom: 10px;
+  }
+  strong {
+    font-weight: bold;
+  }
+
   &.large {
     font-size: 26px;
     line-height: 40px !important;
   }
 }
+
 .c-quote {
   font-size: 25px;
   font-family: $font3;
@@ -63,6 +91,7 @@ p {
   text-align: center;
   margin: 100px 0;
 }
+
 // Mobile & Tablet
 @media screen and (max-width: 768px) {
   .c-quote {

@@ -57,6 +57,9 @@ div.p-dialog {
   }
 
   &.p-confirmdialog {
+    width: 400px;
+    max-width: 100%;
+
     .p-confirmdialog-reject-button {
       background-color: rgba(0, 0, 0, 0.03);
       border: 1px solid rgba(0, 0, 0, 0.03);
@@ -84,5 +87,18 @@ div.p-popover {
   &:before,
   &:after {
     display: none;
+  }
+}
+
+// Calendar Popover
+div.p-datepicker-panel {
+  button.p-button-icon-only {
+    width: 30px;
+    height: 30px;
+    min-height: 30px;
+  }
+
+  .p-datepicker-day-selected {
+    background: $black;
   }
 }

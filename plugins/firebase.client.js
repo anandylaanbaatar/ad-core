@@ -1,3 +1,4 @@
+import { watch } from "vue"
 import { initializeApp } from "firebase/app"
 import {
   getAuth,
@@ -5,11 +6,12 @@ import {
   GoogleAuthProvider,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
+  signInWithCustomToken,
   sendEmailVerification,
   updateProfile,
   signOut,
-  onAuthStateChanged,
   getAdditionalUserInfo,
+  applyActionCode,
 } from "firebase/auth"
 import { getFirestore } from "firebase/firestore"
 import {
@@ -17,33 +19,36 @@ import {
   ref,
   ref as vdbRef,
   child,
+  onChildAdded,
+  onChildChanged,
+  off,
   get,
+  set,
   onValue,
   push,
   update,
   remove,
+  onDisconnect,
+  serverTimestamp,
   // runTransaction
 } from "firebase/database"
-
 import {
-  useCurrentUser,
   useDatabaseList,
   useDatabaseObject,
-  useFirebaseAuth,
   VueFire,
-  VueFireAuth,
   VueFireDatabaseOptionsAPI,
   VueFireFirestoreOptionsAPI,
 } from "vuefire"
+import { getMessaging, onMessage, getToken } from "firebase/messaging"
 
-export default defineNuxtPlugin((nuxtApp) => {
+export default defineNuxtPlugin(async (nuxtApp) => {
   const CONFIG = useState(
     "firebaseConfig",
     () => useRuntimeConfig().public.firebase
   )
 
-  if (!useRuntimeConfig().public.features.firebase) {
-    // console.log("[Plugins] ::: [Firebase] ::: Not Initialized!")
+  if (!useRuntimeConfig().public.integrations.firebase) {
+    console.log("[Plugins] ::: [Firebase] ::: Not Initialized!")
     return
   }
   if (!CONFIG.value) {
@@ -51,25 +56,21 @@ export default defineNuxtPlugin((nuxtApp) => {
     return
   }
 
+  console.log("[Plugins] ::: [Firebase] ::: Initialized!")
+
   const config = CONFIG.value
   const firebaseConfig = config
   const app = initializeApp(firebaseConfig)
   const auth = getAuth(app)
-  // const auth = useFirebaseAuth()
   const firestore = getFirestore(app)
   const database = getDatabase(app)
   const dbRef = ref(getDatabase(app))
-
-  // console.log("[Firebase] ::: Initialized! :: User ", auth.currentUser)
+  const messaging = getMessaging(app)
 
   // Setup VueFire
   nuxtApp.vueApp.use(VueFire, {
     firebaseApp: app,
-    modules: [
-      VueFireAuth(),
-      VueFireDatabaseOptionsAPI(),
-      VueFireFirestoreOptionsAPI(),
-    ],
+    modules: [VueFireDatabaseOptionsAPI(), VueFireFirestoreOptionsAPI()],
   })
 
   /**
@@ -83,13 +84,13 @@ export default defineNuxtPlugin((nuxtApp) => {
           if (snapshot.exists()) {
             resolve(snapshot.val())
           } else {
-            console.log("[Firebase] ::: Data :: Nothing Found!")
-            reject(null)
+            // console.log("[Firebase] ::: Data :: Nothing Found!")
+            resolve(null)
           }
         })
         .catch((err) => {
           console.log("[Firebase] ::: Error ::", err)
-          reject(null)
+          resolve(null)
         })
     })
   }
@@ -108,7 +109,30 @@ export default defineNuxtPlugin((nuxtApp) => {
         update(ref(database, path), data)
         resolve(true)
       } catch (err) {
-        reject(null)
+        console.log("[Firebase] ::: Error :: ", err.message)
+        resolve(null)
+      }
+    })
+  }
+  const pushDb = (path, data) => {
+    return new Promise((resolve, reject) => {
+      try {
+        const newPostKey = push(child(ref(database), path)).key
+
+        let updates = {}
+        let newData = data
+
+        if (!newData.id) {
+          newData.id = newPostKey
+        }
+
+        updates[`${path}/${newPostKey}`] = newData
+        update(ref(database), updates)
+
+        resolve(newPostKey)
+      } catch (err) {
+        console.log("[Firebase] ::: Error :: ", err.message)
+        resolve(null)
       }
     })
   }
@@ -118,7 +142,7 @@ export default defineNuxtPlugin((nuxtApp) => {
         remove(ref(database, path))
         resolve(true)
       } catch (err) {
-        reject(null)
+        resolve(null)
       }
     })
   }
@@ -127,6 +151,85 @@ export default defineNuxtPlugin((nuxtApp) => {
    * Auth
    */
 
+  const usePresence = (user) => {
+    const uid = user.uid
+    let tenantId = null
+    let mainPath = `/status/${uid}`
+
+    if (!import.meta.client) {
+      return
+    }
+    const router = useRouter()
+    const path = router.currentRoute.value.fullPath
+
+    // Multitenancy
+    if (
+      useRuntimeConfig().public.features.multitenancy &&
+      useRuntimeConfig().public.features.multitenancy.tenantId
+    ) {
+      tenantId = useRuntimeConfig().public.features.multitenancy.tenantId
+      mainPath = `/status/${tenantId}/${uid}`
+    }
+
+    let userStatusRef = child(dbRef, `${mainPath}/state`)
+    let userPageRef = child(dbRef, `${mainPath}/page`)
+
+    // Disconnect cleanup
+    onDisconnect(userPageRef).remove()
+
+    // Page Presence
+    watch(
+      () => path,
+      (newPath) => {
+        set(userPageRef, {
+          path: newPath,
+          last_changed: serverTimestamp(),
+        })
+      },
+      { immediate: true }
+    )
+    // User Online Presence
+    const isOfflineForDatabase = {
+      state: "offline",
+      last_changed: serverTimestamp(),
+    }
+    const isOnlineForDatabase = {
+      state: "online",
+      last_changed: serverTimestamp(),
+    }
+    const connectedRef = child(dbRef, ".info/connected")
+
+    onValue(connectedRef, (snapshot) => {
+      if (snapshot.val() === false) return
+
+      onDisconnect(userStatusRef)
+        .set(isOfflineForDatabase)
+        .then(() => {
+          set(userStatusRef, isOnlineForDatabase)
+        })
+    })
+  }
+  const authState = async () => {
+    return new Promise(async (resolve, reject) => {
+      auth.onAuthStateChanged((user) => {
+        console.log(
+          "[Plugins] ::: [Firebase] ::: [Auth State Changed] ::: User: ",
+          user
+        )
+
+        if (user) {
+          useInAppNotifications().listen(user.uid)
+          usePresence(user)
+          resolve(user)
+        } else {
+          useInAppNotifications().stop()
+          useAuthStore().set("user", null)
+          useAuthStore().set("userLoggedIn", false)
+          resolve(null)
+        }
+      })
+    })
+  }
   const signUp = (data) => {
     return new Promise((resolve, reject) => {
       createUserWithEmailAndPassword(auth, data.email, data.password)
@@ -180,16 +283,48 @@ export default defineNuxtPlugin((nuxtApp) => {
         .catch((err) => reject(null))
     })
   }
-  const loginWithGoogle = () => {
-    return new Promise(async (resolve, reject) => {
-      const gogoleAuthProvider = new GoogleAuthProvider()
-      gogoleAuthProvider.addScope(
-        "https://www.googleapis.com/auth/contacts.readonly"
-      )
+  const loginWithToken = (token) => {
+    return new Promise(async (resolve) => {
+      signInWithCustomToken(auth, token)
+        .then((userCredential) => {
+          const user = userCredential.user
 
-      signInWithPopup(auth, gogoleAuthProvider)
+          console.log(
+            "[Firebase] ::: Login With Token ::: Success :: ",
+            userCredential
+          )
+
+          resolve(user)
+        })
+        .catch((err) => {
+          console.log(
+            "[Firebase] ::: Login With Token ::: Error :: ",
+            err.message
+          )
+          resolve(null)
+        })
+    })
+  }
+  const loginWithProvider = (id) => {
+    return new Promise(async (resolve, reject) => {
+      let provider = null
+
+      if (id === "google") {
+        provider = new GoogleAuthProvider()
+      }
+
+      // provider.addScope(
+      //   "https://www.googleapis.com/auth/contacts.readonly"
+      // )
+
+      signInWithPopup(auth, provider)
         .then((result) => {
-          const credential = GoogleAuthProvider.credentialFromResult(result)
+          let credential = null
+
+          if (id === "google") {
+            credential = GoogleAuthProvider.credentialFromResult(result)
+          }
+
           // const token = credential.accessToken
           const user = result.user
           const additionalUserInfo = getAdditionalUserInfo(result)
@@ -204,7 +339,12 @@ export default defineNuxtPlugin((nuxtApp) => {
           resolve(user)
         })
         .catch((err) => {
-          const credential = GoogleAuthProvider.credentialFromError(err)
+          let credential = null
+
+          if (id === "google") {
+            credential = GoogleAuthProvider.credentialFromError(err)
+          }
+
           console.log("[Firebase] ::: Google Sign In Error ::", err, credential)
 
           reject({
@@ -215,26 +355,44 @@ export default defineNuxtPlugin((nuxtApp) => {
         })
     })
   }
-  const authState = () => {
-    console.log("[Firebase] ::: Plugins :: Auth State Initialized!")
+  const loginAnonymous = () => {
+    return new Promise(async (resolve) => {
+      auth
+        .signInAnonymously()
+        .then((userCredential) => {
+          const user = userCredential.user
+          console.log("[Firebase] ::: Anonymous User ::: ", user)
+          resolve(user)
+        })
+        .catch((err) => {
+          console.log("[Firebase] ::: Error ::: ", err.message)
+          resolve(null)
+        })
+    })
+  }
+  const verifyEmail = async (code) => {
+    return new Promise(async (resolve) => {
+      const user = auth.currentUser
 
-    // const store = useAuthStore()
+      if (!user) {
+        console.log("[Plugins] ::: [Firebase] ::: User not logged In!")
+        resolve(null)
+        return
+      }
 
-    // onAuthStateChanged(auth, async (user) => {
-    //   if (user) {
-    //     console.log("[Firebase] ::: Plugins :: Logged In!")
+      applyActionCode(auth, code)
+        .then(() => {
+          resolve(true)
+        })
+        .catch((err) => {
+          console.log(
+            "[Plugins] ::: [Firebase] ::: Error verifying user email!",
+            err
+          )
 
-    //     // const user = await getUser()
-
-    //     // if (user) {
-    //     //   await store.set("user", user)
-    //     // }
-    //     // await store.set("userLoggedIn", true)
-    //   } else {
-    //     console.log("[Firebase] ::: Plugins :: Logged Out!")
-    //     // await store.set("userLoggedIn", false)
-    //   }
-    // })
+          resolve(null)
+        })
+    })
   }
 
   /**
@@ -242,17 +400,56 @@ export default defineNuxtPlugin((nuxtApp) => {
    */
 
   const isLoggedIn = () => {
-    const user = useCurrentUser()
-    return user
+    // const user = useCurrentUser()
+    return auth.currentUser
   }
   const getUser = () => {
     return new Promise(async (resolve, reject) => {
-      const user = await getCurrentUser()
+      const user = await auth.currentUser
+
+      // console.log("[Plugins] ::: [Firebase] ::: User Profile :: ", user)
 
       if (user) {
         const userData = await read(`/users/${user.uid}`)
 
-        resolve(userData)
+        // console.log("User Data ::: ", userData)
+
+        // Save Initial User Data
+        if (!userData) {
+          let updates = {
+            acceptsMarketing: true,
+            createdAt: null,
+            email: null,
+            emailVerified: user.emailVerified,
+            firstName: null,
+            lastName: null,
+            phone: null,
+            uid: user.uid,
+            photoURL: null,
+          }
+          if (user.email) {
+            updates.email = user.email
+          }
+          if (user.photoURL) {
+            updates.photoURL
+          }
+          if (user.displayName) {
+            let name = nuxtApp.$utils.splitDisplayName(user.displayName)
+            updates.firstName = name.firstName
+            updates.lastName = name.lastName
+          }
+          if (user.phoneNumber) {
+            updates.phone = user.phoneNumber
+          }
+          if (user.metadata) {
+            updates.createdAt = user.metadata.createdAt
+          }
+          await updateDb(`/users/${user.uid}`, updates)
+
+          resolve(updates)
+        } else {
+          resolve(userData)
+        }
       } else {
         reject(null)
       }
@@ -286,6 +483,61 @@ export default defineNuxtPlugin((nuxtApp) => {
   }
 
   /**
+   * Notifications
+   */
+
+  onMessage(messaging, (payload) => {
+    console.log("[Firebase] ::: Foreground messaging :: ", payload)
+    useInAppNotifications().add(payload.notification)
+  })
+
+  const getUserToken = async () => {
+    return new Promise(async (resolve) => {
+      const key = useRuntimeConfig().public.features.firebaseWebPushKey
+
+      if (!key) {
+        console.log(
+          "[Plugins] ::: [Firebase] ::: Not Setup Yet. Firebase Web Push Key Missing!"
+        )
+        resolve(null)
+        return
+      }
+
+      getToken(messaging, { vapidKey: key })
+        .then(async (token) => {
+          console.log(
+            "[Plugins] ::: [Firebase] ::: FCM Token Success ::",
+            token
+          )
+          resolve(token)
+        })
+        .catch((err) => {
+          console.log(
+            "[Plugins] ::: [Firebase] ::: FCM Token Error ::",
+            err.message
+          )
+          resolve(null)
+        })
+    })
+  }
+  const saveUserToken = async (token) => {
+    return new Promise(async (resolve) => {
+      const user = await auth.currentUser
+
+      console.log("[Plugins] ::: [Firebase] ::: Save User Token :: ", user)
+
+      if (user) {
+        await updateDb(`/users/${user.uid}`, {
+          fcmToken: token,
+        })
+        resolve(true)
+      } else {
+        resolve(null)
+      }
+    })
+  }
+
+  /**
    * VueFire
    */
 
@@ -305,26 +557,41 @@ export default defineNuxtPlugin((nuxtApp) => {
         dbRef,
         vdbRef,
         ref,
+        onChildAdded,
+        onChildChanged,
         child,
+        off,
         get,
         onValue,
         push,
         bind,
-        onAuthStateChanged,
         actions: {
+          // Database
           read,
           listen,
+          add: pushDb,
           update: updateDb,
           remove: deleteDb,
-          signUp: signUp,
-          login: login,
-          loginWithGoogle: loginWithGoogle,
-          logout: logout,
+
+          // Auth
+          signUp,
+          login,
+          loginWithToken,
+          loginWithProvider,
+          loginAnonymous,
+          verifyEmail,
+          logout,
           isLoggedIn,
-          user: getUser,
-          currentUser: useCurrentUser,
-          updateUser,
           resendEmailVerification,
+
+          // User
+          user: getUser,
+          authState,
+          updateUser,
+
+          // Notifications
+          getUserToken,
+          saveUserToken,
         },
       },
     },

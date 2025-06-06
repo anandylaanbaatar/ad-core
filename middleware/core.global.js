@@ -4,9 +4,9 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
   const siteName = appConfig.name
   const siteDesc = appConfig.description
 
-  if (import.meta.client) {
-    console.log("[Middleware] ::: [Core] ::: Initialized!")
-  }
+  // if (import.meta.client) {
+  //   console.log("[Middleware] ::: [Core] ::: Initialized!")
+  // }
 
   let meta = {
     url: siteUrl,
@@ -127,6 +127,29 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
         ],
       })
     }
+
+    useHead({
+      link: [
+        {
+          rel: "stylesheet",
+          href: "https://cdn.jsdelivr.net/npm/@event-calendar/build@4.0.2/dist/event-calendar.min.css",
+        },
+        {
+          rel: "stylesheet",
+          href: "https://cdn.quilljs.com/1.3.6/quill.snow.css",
+        },
+        {
+          rel: "stylesheet",
+          href: "https://cdn.quilljs.com/1.3.6/quill.bubble.css",
+        },
+      ],
+      script: [
+        {
+          src: "https://cdn.jsdelivr.net/npm/@event-calendar/build@4.0.2/dist/event-calendar.min.js",
+        },
+        { src: "https://cdn.quilljs.com/1.3.6/quill.min.js", defer: true },
+      ],
+    })
   }
 
   // Client Only
@@ -156,18 +179,7 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
       }
     }
 
-    // Layouts
-    if (to.path.includes("/secure") || to.path.includes("/full")) {
-      if (coreStore.layout === "regular") {
-        coreStore.set("loading", true)
-        coreStore.set("layout", "app")
-      }
-    } else {
-      if (coreStore.layout === "app") {
-        coreStore.set("loading", true)
-        coreStore.set("layout", "regular")
-      }
-    }
+    // Main Splash Loading
     if (coreStore.loading) {
       setTimeout(() => {
         coreStore.set("loading", false)

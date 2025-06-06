@@ -1,0 +1,17 @@
+@use "../basics/variables" as *;
+
+// Testimonials
+.c-testimonials {
+  margin-bottom: $sectionMargin;
+
+  .c-testimonialsScroll {
+    margin-bottom: 30px;
+    cursor: grab;
+  }
+}
+.c-testimonial {
+  background-color: rgba(0, 0, 0, 0.08);
+  padding: 30px;
+  border-radius: $borderRadius;
+  text-align: center;
+}

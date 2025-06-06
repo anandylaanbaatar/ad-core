@@ -1,0 +1,210 @@
+@use "../basics/variables" as *;
+
+.c-editor {
+  position: relative;
+  background: rgba(0, 0, 0, 0.03);
+  border: 1px solid rgba(0, 0, 0, 0.03);
+  border-radius: 15px;
+  padding: 5px;
+  transition: all 0.4s ease;
+
+  .ql-toolbar {
+    border: 0;
+    padding: 0;
+
+    .ql-picker {
+      .ql-picker-label {
+        border-radius: 10px;
+        opacity: 0.7;
+        transition: all 0.4s ease;
+
+        &.ql-active,
+        &:hover {
+          opacity: 1;
+          color: $black;
+          border-color: rgba(0, 0, 0, 0.03);
+
+          .ql-stroke {
+            stroke: $black;
+          }
+          .ql-fill {
+            fill: $black;
+          }
+        }
+      }
+      &.ql-expanded {
+        .ql-picker-label {
+          opacity: 1;
+          color: $black;
+          border-color: rgba(0, 0, 0, 0.08);
+          background-color: rgba(0, 0, 0, 0.08);
+        }
+      }
+      .ql-picker-options {
+        border-radius: 15px;
+        background-color: rgba(0, 0, 0, 0.03);
+        border-color: rgba(0, 0, 0, 0.03);
+        -webkit-backdrop-filter: saturate(180%) blur(20px);
+        backdrop-filter: saturate(180%) blur(20px);
+
+        .ql-picker-item {
+          opacity: 0.5;
+          transition: all 0.4s ease;
+
+          &.ql-selected,
+          &:hover {
+            opacity: 1;
+            color: $black;
+          }
+        }
+      }
+    }
+    button {
+      opacity: 0.7;
+      transition: all 0.4s ease;
+
+      &.ql-active,
+      &:hover {
+        .ql-stroke {
+          transition: all 0.4s ease;
+          stroke: $black;
+        }
+        .ql-fill {
+          transition: all 0.4s ease;
+          fill: $black;
+        }
+      }
+    }
+  }
+  .ql-container.ql-snow {
+    border: 0;
+
+    .ql-editor {
+      padding: 10px;
+    }
+  }
+  .ql-container.ql-bubble {
+    .ql-tooltip {
+      background-color: $black;
+      border-radius: 15px;
+      color: $white;
+
+      .ql-tooltip-arrow {
+        border-top: 6px solid $black;
+      }
+    }
+  }
+
+  p {
+    font-family: $font2;
+  }
+
+  &:hover {
+    border: 1px solid rgba(0, 0, 0, 0.08);
+  }
+}
+.mention-dropdown {
+  position: absolute;
+  z-index: 1000;
+  color: $white;
+  border-radius: 15px;
+  background-color: rgba(255, 255, 255, 0.03);
+  border-color: rgba(255, 255, 255, 0.03);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  backdrop-filter: saturate(180%) blur(20px);
+  width: 250px;
+  max-height: 150px;
+  overflow-y: auto;
+  list-style: none;
+  margin: 0;
+  padding: 10px;
+
+  li {
+    border-radius: 10px;
+    padding: 5px 10px;
+    cursor: pointer;
+
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.08);
+    }
+  }
+}
+.mentionUser {
+  display: inline;
+  background-color: $yellow-300;
+  color: $black;
+  border-radius: 10px;
+  padding: 0 4px;
+  cursor: pointer;
+  transition: all 0.4s ease;
+
+  &:hover {
+    opacity: 0.7;
+  }
+}
+
+.my-app-dark {
+  .c-editor {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.03);
+
+    &:hover {
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .ql-toolbar {
+      .ql-picker {
+        .ql-picker-label {
+          opacity: 1;
+
+          &.ql-active,
+          &:hover {
+            color: $white;
+            border-color: rgba(255, 255, 255, 0.03);
+            background-color: rgba(255, 255, 255, 0.03);
+
+            .ql-stroke {
+              stroke: $white;
+            }
+            .ql-fill {
+              fill: $white;
+            }
+          }
+        }
+        &.ql-expanded {
+          .ql-picker-label {
+            color: $white;
+            border-color: rgba(255, 255, 255, 0.08);
+            background-color: rgba(255, 255, 255, 0.08);
+          }
+        }
+        .ql-picker-options {
+          background-color: rgba(255, 255, 255, 0.03);
+          border-color: rgba(255, 255, 255, 0.03);
+
+          .ql-picker-item {
+            opacity: 1;
+
+            &.ql-selected,
+            &:hover {
+              color: $white;
+            }
+          }
+        }
+      }
+      button {
+        opacity: 1;
+
+        &.ql-active,
+        &:hover {
+          .ql-stroke {
+            stroke: $white;
+          }
+          .ql-fill {
+            fill: $white;
+          }
+        }
+      }
+    }
+  }
+}

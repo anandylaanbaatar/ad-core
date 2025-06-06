@@ -10,6 +10,7 @@ a {
   text-decoration: none;
   display: inline-flex;
   align-items: center;
+  color: inherit;
   -webkit-transition: all 0.4s ease;
   transition: all 0.4s ease;
 
@@ -137,6 +138,7 @@ button.sm {
   width: 30px;
   height: 30px;
   min-height: 25px;
+  min-width: 30px;
 }
 
 // Button Colors
@@ -204,6 +206,20 @@ button.p-button-danger {
     border: 1px solid $red-200;
   }
 }
+button.p-button-contrast {
+  background-color: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.8);
+
+  .p-badge {
+    background-color: $white !important;
+    color: $black !important;
+  }
+
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+  }
+}
 
 // Glass Button
 button.p-glass-button {
@@ -239,6 +255,9 @@ button.p-glass-button {
 
     &:hover {
       background-color: rgba(255, 255, 255, 0.8);
+    }
+    &:disabled {
+      background-color: rgba(255, 255, 255, 0.3);
     }
   }
   button.p-button-icon-only {

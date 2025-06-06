@@ -1,1 +1,1 @@
-# ad-core
+# core

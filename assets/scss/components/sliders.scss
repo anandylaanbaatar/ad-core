@@ -1,7 +1,7 @@
 @use "../basics/variables" as *;
 
 // Splide Slider
-.c-slider {
+div.c-slider {
   margin-bottom: 0;
 
   .c-box.md {
@@ -12,9 +12,16 @@
     max-width: 100%;
   }
 
+  .splide__track {
+    border-radius: 15px 15px 0 0;
+
+    li {
+      display: inline-flex;
+    }
+  }
   .c-slider-progress {
     margin-top: 20px;
-    background: rgba(0, 0, 0, 0.08);
+    background: var(--ad-background08);
     border-radius: 250px;
 
     .c-slider-progress-bar {
@@ -30,7 +37,14 @@
       height: 30px;
       width: 30px;
       top: calc(50% - 10px);
+      background: rgba(0, 0, 0, 0.1);
       border: 1px solid rgba(0, 0, 0, 0.08);
+      border-radius: 10px;
+      color: $white;
+      -webkit-transition: all 0.4s ease;
+      transition: all 0.4s ease;
+      -webkit-backdrop-filter: saturate(180%) blur(20px);
+      backdrop-filter: saturate(180%) blur(20px);
 
       &--prev {
         left: 10px;
@@ -44,14 +58,15 @@
     position: absolute;
     bottom: 10px;
     padding: 5px;
-    background: #f4f4f4;
-    border: 1px solid rgba(0, 0, 0, 0.08);
+    background: rgba(0, 0, 0, 0.4);
     border-radius: 250px;
     width: auto;
     margin: 0 auto;
     left: 50%;
     right: inherit;
     transform: translateX(-50%);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    backdrop-filter: saturate(180%) blur(20px);
 
     li {
       margin-right: 5px;
@@ -61,26 +76,66 @@
         margin-right: 0;
       }
     }
-
     .splide__pagination__page {
-      width: 10px;
+      width: 6px;
       height: 6px;
       border-radius: 250px;
       -webkit-transition: all 0.4s ease;
       transition: all 0.4s ease;
       margin: 0;
       line-height: 0;
+      opacity: 1;
+      background: rgba(255, 255, 255, 0.3);
 
+      &:hover {
+        background: $white;
+      }
       &:last-child {
         margin-right: 0;
       }
-
       &.is-active {
         width: 15px;
         height: 6px;
-        background: $black;
+        background: $white;
         transform: none;
       }
+    }
+  }
+
+  // Product
+  &.c-product-slider {
+    .splide__arrows {
+      opacity: 0;
+      visibility: hidden;
+      -webkit-transition: opacity 0.4s ease;
+      transition: opacity 0.4s ease;
+    }
+    .c-image {
+      border-radius: 15px;
+      margin: 0;
+    }
+
+    &:hover {
+      .splide__arrows {
+        opacity: 1;
+        visibility: visible;
+      }
+    }
+  }
+  &.c-product-detailed-slider {
+    .c-block.c-image.size-m {
+      min-height: 600px;
+    }
+  }
+}
+.splide:not(.is-overflow) .splide__pagination {
+  display: flex;
+}
+
+@media screen and (max-width: 768px) {
+  .c-slider {
+    .splide__arrows {
+      display: none;
     }
   }
 }
@@ -215,37 +270,6 @@ div.p-carousel {
     }
   }
 }
-
-div.c-slider {
-  .splide__track {
-    border-radius: 15px 15px 0 0;
-  }
-
-  &.c-product-slider {
-    .splide__arrows {
-      opacity: 0;
-      visibility: hidden;
-      -webkit-transition: opacity 0.4s ease;
-      transition: opacity 0.4s ease;
-    }
-    .c-image {
-      border-radius: 15px 15px 0 0;
-    }
-
-    &:hover {
-      .splide__arrows {
-        opacity: 1;
-        visibility: visible;
-      }
-    }
-  }
-  &.c-product-detailed-slider {
-    .c-block.c-image.size-m {
-      min-height: 600px;
-    }
-  }
-}
-
 // Image Collage
 .c-imageCollage {
   margin: 50px auto;

@@ -66,8 +66,29 @@ body {
     margin-right: 0;
   }
 
-  &.small {
+  &.sm {
+    max-width: 700px;
+  }
+  &.md {
     max-width: 960px;
+  }
+
+  &.blog {
+    max-width: 850px;
+    padding: 30px 0;
+
+    .c-description {
+      max-width: 630px;
+      margin: 0 auto;
+    }
+    .c-image {
+      width: 100%;
+      margin: 15px 0;
+
+      img {
+        border-radius: 15px;
+      }
+    }
   }
 }
 @media screen and (max-width: 992px) {

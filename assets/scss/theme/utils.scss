@@ -1,5 +1,25 @@
 @use "../basics/variables" as *;
 
+// Float
+.float-left {
+  float: left;
+}
+.float-right {
+  float: right;
+}
+
+// Aspect Ratio
+.aspect-ratio-16 {
+  aspect-ratio: 16/9;
+  min-height: none;
+  height: none;
+}
+.aspect-ratio-4 {
+  aspect-ratio: 4/4;
+  min-height: none;
+  height: none;
+}
+
 // Loading
 .loadingBlock {
   display: flex;
@@ -43,6 +63,13 @@
   &.xxl {
     min-height: 840px;
   }
+  &.white {
+    svg {
+      path: {
+        fill: $white !important;
+      }
+    }
+  }
 
   .p-progress-spinner {
     width: 40px;
@@ -65,7 +92,7 @@
   z-index: 1000;
   top: -9999px;
   left: -9999px;
-  display: flex;
+  display: none;
   align-items: center;
   justify-content: center;
   width: 0px;
@@ -95,6 +122,9 @@
     transition: opacity 0.4s ease;
   }
 
+  &.enabled {
+    display: flex;
+  }
   &.active {
     opacity: 1;
     visibility: visible;
@@ -102,6 +132,10 @@
     height: 100%;
     top: 0;
     left: 0;
+  }
+  &.hide {
+    opacity: 0;
+    visibility: hidden;
   }
 }
 
@@ -119,12 +153,22 @@
   height: 1px;
   background-color: rgba(0, 0, 0, 0.08);
   margin: 50px 0;
+  position: relative;
 
   &.sm {
     margin: 15px 0;
   }
   &.md {
     margin: 25px 0;
+  }
+
+  span {
+    position: absolute;
+    font-size: 12px;
+    left: 50%;
+    top: -9px;
+    transform: translateX(-50%);
+    opacity: 0.6;
   }
 }
 .my-app-dark {

@@ -12,7 +12,7 @@
         </div>
 
         <div
-          v-if="item.image.url"
+          v-if="item.image && item.image.url"
           class="image"
           :style="$utils.setBackImage(item.image.url)"
         ></div>
