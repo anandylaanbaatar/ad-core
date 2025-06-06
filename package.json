@@ -4,12 +4,10 @@
   "private": true,
   "version": "1.0.0",
   "main": "./nuxt.config.js",
-  "packageManager": "pnpm@9.10.0",
-  "author": "Anand Davaasuren",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/anandylaanbaatar/core"
+  "exports": {
+    ".": "./"
   },
+  "author": "Anand Davaasuren",
   "scripts": {
     "build": "nuxt build",
     "dev": "nuxt dev",
