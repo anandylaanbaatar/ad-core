@@ -121,8 +121,9 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
       useHead({
         script: [
           {
-            src: `//maps.googleapis.com/maps/api/js?key=${process.env.NUXT_GOOGLE_MAPS_TOKEN}&libraries=places&marker&v=weekly`,
+            src: `//maps.googleapis.com/maps/api/js?key=${process.env.NUXT_GOOGLE_MAPS_TOKEN}&libraries=places&marker&v=weekly&loading=async`,
             async: true,
+            defer: true,
           },
         ],
       })
