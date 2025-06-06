@@ -1,5 +1,5 @@
 {
-  "name": "core",
+  "name": "ad-core",
   "type": "module",
   "private": true,
   "packageManager": "pnpm@9.10.0",
