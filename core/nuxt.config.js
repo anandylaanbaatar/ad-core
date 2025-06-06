@@ -8,7 +8,7 @@ const { siteRuntimeConfig, siteConfig } = await import(
   path.resolve("./v1/core/site.config.js")
 )
 
-console.log("[Layer] :: Adding AD Core - v2.1.0")
+console.log("[Layer] :: Adding AD Core - v2.1.1")
 
 /**
  * Middleware
