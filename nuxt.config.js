@@ -23,6 +23,7 @@ const middlewares = defineNuxtConfig({
  */
 
 const app = defineNuxtConfig({
+  compatibilityDate: "2025-06-06",
   target: "static",
   components: true,
 
