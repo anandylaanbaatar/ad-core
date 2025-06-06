@@ -2,25 +2,7 @@ import { initializeApp, cert, getApps } from "firebase-admin/app"
 import { getDatabase } from "firebase-admin/database"
 import path from "node:path"
 import { readFile } from "fs/promises"
-import { readFileSync, existsSync } from "fs"
-import { defu } from "defu"
-
-/**
- * Set Config File
- */
-
-const baseConfigPath = path.resolve("default.config.json")
-const baseConfig = import(baseConfigPath)
-const mainSiteConfigPath = path.resolve("config/site.config.json")
-let config = {}
-
-if (baseConfig) {
-  config = baseConfig
-}
-if (existsSync(mainSiteConfigPath)) {
-  const mainSiteConfig = import(mainSiteConfigPath)
-  config = defu(mainSiteConfig, baseConfig)
-}
+const config = await import(path.resolve("config/site.config.json"))
 
 /**
  * Variables
