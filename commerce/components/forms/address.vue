@@ -396,16 +396,20 @@ export default {
         //   this.errors["zip"] = "Зип код оруулаагүй байна."
         // }
 
-        if (this.account.firstName) {
-          this.formData.firstName = this.account.firstName
-        }
+        console.log("Account :::", this.account)
 
-        if (this.account.lastName) {
-          this.formData.lastName = this.account.lastName
-        }
+        if (this.account) {
+          if (this.account.firstName) {
+            this.formData.firstName = this.account.firstName
+          }
 
-        if (this.account.phone) {
-          this.formData.phone = this.account.phone
+          if (this.account.lastName) {
+            this.formData.lastName = this.account.lastName
+          }
+
+          if (this.account.phone) {
+            this.formData.phone = this.account.phone
+          }
         }
 
         // console.log("Validation ::: Errors :: ", this.errors, this.account)

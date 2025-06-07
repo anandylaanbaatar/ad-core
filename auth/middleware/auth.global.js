@@ -24,6 +24,11 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
         authStore.set("user", newUserData)
         authStore.set("userLoggedIn", true)
 
+        // Commerce User
+        if (useCommerceStore()) {
+          await useCommerceStore().setUser()
+        }
+
         // console.log("[Middleware] ::: [Auth] ::: User Set! ", newUserData)
       }
       // Check if email verified!
