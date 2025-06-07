@@ -213,10 +213,10 @@ export default defineNuxtPlugin(async (nuxtApp) => {
   const authState = async () => {
     return new Promise(async (resolve, reject) => {
       auth.onAuthStateChanged((user) => {
-        console.log(
-          "[Plugins] ::: [Firebase] ::: [Auth State Changed] ::: User: ",
-          user
-        )
+        // console.log(
+        //   "[Plugins] ::: [Firebase] ::: [Auth State Changed] ::: User: ",
+        //   user
+        // )
 
         if (user) {
           useInAppNotifications().listen(user.uid)
