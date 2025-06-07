@@ -191,7 +191,7 @@
           label="SignUp with Google"
           class="w-full"
           icon="pi pi-google"
-          @click="signUpWithGoogle"
+          @click="signUpWithProvider('google')"
         ></Button>
       </div>
     </template>
@@ -366,7 +366,7 @@ export default {
         if (this.isShopifyConnect) {
           await this.signUpWithShopify()
         } else {
-          await this.signUpFirebase()
+          await this.signUpWithEmail()
         }
 
         this.loading = false
@@ -409,7 +409,7 @@ export default {
     },
 
     // Signup Methods
-    async signUpFirebase() {
+    async signUpWithEmail() {
       const formData = this.getFormData()
 
       try {
@@ -434,7 +434,7 @@ export default {
           newUser.phoneNumber = formData.phone
         }
         // Connect
-        if (features().auth.connect && features().auth.connect.shopify) {
+        if (this.isShopifyConnect) {
           let connectOptions = {
             email: formData.email,
             password: `${emailId}_${user.uid}`,
@@ -463,7 +463,7 @@ export default {
         await useAuthStore().saveUserFirebase(newUser)
 
         // Connect
-        if (features().auth.connect && features().auth.connect.shopify) {
+        if (this.isShopifyConnect) {
           await useCommerceStore().setUser()
         }
 
@@ -475,17 +475,19 @@ export default {
         this.isValid = false
       }
     },
-    async signUpWithGoogle() {
+    async signUpWithProvider(id) {
       try {
-        const user = await this.$fire.actions.loginWithGoogle()
+        const signUpData = await this.$fire.actions.loginWithProvider(id)
+        const userData = await this.$fire.actions.user()
+        const newUserData = await useAuthStore().userDataCheck(userData)
 
-        if (user) {
-          await useAuthStore().saveUserFirebase(user)
-          this.afterSignUp()
-        }
+        await useAuthStore().setUser(newUserData)
+        this.afterSignUp()
       } catch (err) {
         console.log("Login ::: Error :: ", err)
+
         this.errors["system"] = err.msg
+        this.isValid = false
       }
     },
     async signUpWithShopify() {
