@@ -26,6 +26,10 @@ const app = defineNuxtConfig({
   target: "static",
   components: true,
 
+  alias: {
+    "@core": resolve("./assets/scss"),
+  },
+
   css: [
     "primeflex/primeflex.css",
     "flexboxgrid/css/flexboxgrid.min.css",
@@ -130,6 +134,7 @@ const build = defineNuxtConfig({
       preprocessorOptions: {
         scss: {
           api: "modern-compiler",
+          additionalData: `@use "@core/basics/variables" as *;`,
         },
       },
     },

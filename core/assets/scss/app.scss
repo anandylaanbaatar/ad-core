@@ -1,6 +1,6 @@
 // Base
-@use "./basics/variables" as *;
-@use "./basics/fonts" as *;
+@use "@core/basics/variables" as *;
+@use "@core/basics/fonts" as *;
 
 // Theme
 @use "./theme";
