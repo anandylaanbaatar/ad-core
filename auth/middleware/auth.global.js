@@ -25,7 +25,7 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
         authStore.set("userLoggedIn", true)
 
         // Commerce User
-        if (useCommerceStore()) {
+        if (theme().type === "commerce") {
           await useCommerceStore().setUser()
         }
 
