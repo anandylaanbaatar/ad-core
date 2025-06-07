@@ -53,36 +53,24 @@ export default defineNuxtPlugin(async (nuxtApp) => {
    * https://loops.so/docs/api-reference/send-transactional-email
    */
 
-  const cors = useCoreStore().cors
-  const loopsApiKey = LOOPS_KEY.value
-  const loopsBaseUrl = `${cors}/https://app.loops.so/api/v1`
-
   // User
   const loopsUserSearch = async (email) => {
     return new Promise(async (resolve) => {
-      // const res = await loops.findContact({ email: email })
-      // console.log("[Loops] ::: ", res)
-
-      const dataFetch = await fetch(
-        `${loopsBaseUrl}/contacts/find?email=${email}`,
-        {
-          method: "GET",
-          headers: {
-            Accept: "application/json",
-            Authorization: `Bearer ${loopsApiKey}`,
-          },
-        }
-      )
-      const res = await dataFetch.json()
-
-      if (res && res.length === 0) {
+      if (!email) {
+        console.log("[Loops] ::: No email provided!")
         resolve(null)
-      } else {
-        const contact = res.find((i) => i.email === email)
+      }
 
-        if (contact) {
-          resolve(contact)
-        }
+      const res = await $fetch("/api/loops", {
+        method: "POST",
+        body: {
+          type: "loopsUserSearch",
+          email: email,
+        },
+      })
+
+      if (res && res.success) {
+        resolve(res.results)
       }
 
       resolve(null)
@@ -90,18 +78,21 @@ export default defineNuxtPlugin(async (nuxtApp) => {
   }
   const loopsUserCreate = async (data) => {
     return new Promise(async (resolve) => {
-      const dataFetch = await fetch(`${loopsBaseUrl}/contacts/create`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${loopsApiKey}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      })
-      const res = await dataFetch.json()
+      if (!data) {
+        console.log("[Loops] ::: No data provided!")
+        resolve(null)
+      }
 
-      if (res) {
-        resolve(res.id)
+      const res = await $fetch("/api/loops", {
+        method: "POST",
+        body: {
+          type: "loopsUserCreate",
+          data: data,
+        },
+      })
+
+      if (res && res.success) {
+        resolve(res.results)
       }
 
       resolve(null)
@@ -109,18 +100,21 @@ export default defineNuxtPlugin(async (nuxtApp) => {
   }
   const loopsUserUpdate = async (data) => {
     return new Promise(async (resolve) => {
-      const dataFetch = await fetch(`${loopsBaseUrl}/contacts/update`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${loopsApiKey}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      })
-      const res = await dataFetch.json()
+      if (!data) {
+        console.log("[Loops] ::: No data provided!")
+        resolve(null)
+      }
 
-      if (res) {
-        resolve(res.id)
+      const res = await $fetch("/api/loops", {
+        method: "POST",
+        body: {
+          type: "loopsUserUpdate",
+          data: data,
+        },
+      })
+
+      if (res && res.success) {
+        resolve(res.results)
       }
 
       resolve(null)
@@ -129,40 +123,38 @@ export default defineNuxtPlugin(async (nuxtApp) => {
 
   // Mailing
   const loopsSubscribeToMailingList = async (data) => {
-    const formData = `email=${encodeURIComponent(data.email)}&mailingLists=${encodeURIComponent(data.listId)}`
-
     return new Promise(async (resolve) => {
-      const dataFetch = await fetch(
-        `${cors}/https://app.loops.so/api/newsletter-form/${data.formId}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
-          },
-          body: formData,
-        }
-      )
-      const res = await dataFetch.json()
-
-      if (res) {
-        resolve(res)
-      } else {
+      if (!data) {
+        console.log("[Loops] ::: No data provided!")
         resolve(null)
       }
+
+      const res = await $fetch("/api/loops", {
+        method: "POST",
+        body: {
+          type: "loopsSubscribeToMailingList",
+          data: data,
+        },
+      })
+
+      if (res && res.success) {
+        resolve(res.results)
+      }
+
+      resolve(null)
     })
   }
   const loopsMailingLists = async () => {
     return new Promise(async (resolve) => {
-      const dataFetch = await fetch(`${loopsBaseUrl}/lists`, {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${loopsApiKey}`,
+      const res = await $fetch("/api/loops", {
+        method: "POST",
+        body: {
+          type: "loopsMailingLists",
         },
       })
-      const res = await dataFetch.json()
 
-      if (res) {
-        resolve(res)
+      if (res && res.success) {
+        resolve(res.results)
       }
 
       resolve(null)
@@ -170,15 +162,18 @@ export default defineNuxtPlugin(async (nuxtApp) => {
   }
   const loopsTransactionalEmailSend = async (data) => {
     return new Promise(async (resolve) => {
-      const dataFetch = await fetch(`${loopsBaseUrl}/transactional`, {
+      if (!data) {
+        console.log("[Loops] ::: No data provided!")
+        resolve(null)
+      }
+
+      const res = await $fetch(`/api/loops`, {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${loopsApiKey}`,
-          "Content-Type": "application/json",
+        body: {
+          type: "loopsTransactionalEmailSend",
+          data: data,
         },
-        body: JSON.stringify(data),
       })
-      const res = await dataFetch.json()
 
       if (res) {
         resolve(res)
@@ -189,17 +184,13 @@ export default defineNuxtPlugin(async (nuxtApp) => {
   const loopsTransactionalEmailList = async () => {
     return new Promise(async (resolve) => {
       const limit = 50
-      const dataFetch = await fetch(
-        `${loopsBaseUrl}/transactional?perPage=${limit}`,
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${loopsApiKey}`,
-          },
-          body: JSON.stringify(data),
-        }
-      )
-      const res = await dataFetch.json()
+      const res = await $fetch("/api/loops", {
+        method: "POST",
+        body: {
+          type: "loopsTransactionalEmailList",
+          limit: limit,
+        },
+      })
 
       if (res) {
         resolve(res)
@@ -209,6 +200,11 @@ export default defineNuxtPlugin(async (nuxtApp) => {
   }
   const loopsSendEvents = async (data) => {
     return new Promise(async (resolve) => {
+      if (!data) {
+        console.log("[Loops] ::: No data provided!")
+        resolve(null)
+      }
+
       let formData = {
         email: data.email,
         eventName: data.eventName,
@@ -220,21 +216,19 @@ export default defineNuxtPlugin(async (nuxtApp) => {
         formData.mailingLists = data.mailingLists
       }
 
-      const dataFetch = await fetch(`${loopsBaseUrl}/events/send`, {
+      const res = await $fetch("/api/loops", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${loopsApiKey}`,
+        body: {
+          type: "loopsSendEvents",
+          data: data,
         },
-        body: JSON.stringify(formData),
       })
-      const res = await dataFetch.json()
 
-      if (res) {
-        resolve(res)
-      } else {
-        resolve(null)
+      if (res && res.success) {
+        resolve(res.results)
       }
+
+      resolve(null)
     })
   }
 

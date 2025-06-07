@@ -27,7 +27,7 @@ export const useAuthStore = defineStore("auth", {
       this.set("user", null)
       this.set("userLoggedIn", false)
 
-      if (useCommerceStore()) {
+      if (theme().type === "commerce") {
         if (useCommerceStore().shopifyUser) {
           useCommerceStore().set("shopifyUser", null)
         }

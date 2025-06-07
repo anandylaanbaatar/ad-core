@@ -106,6 +106,8 @@ export const useInAppNotifications = () => {
     })
   }
   const handle = async (type, notify) => {
+    if (!user) return
+
     const userStatus = await $fire.actions.read(
       `status${tenantPath()}/${user.uid}`
     )

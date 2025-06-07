@@ -4,6 +4,7 @@ import {
   getAuth,
   signInWithPopup,
   signInWithRedirect,
+  getRedirectResult,
   GoogleAuthProvider,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
@@ -310,13 +311,14 @@ export default defineNuxtPlugin(async (nuxtApp) => {
     return new Promise(async (resolve, reject) => {
       let provider = null
 
+      // Set Auth Provider
       if (id === "google") {
         provider = new GoogleAuthProvider()
-      }
 
-      // provider.addScope(
-      //   "https://www.googleapis.com/auth/contacts.readonly"
-      // )
+        // provider.addScope(
+        //   "https://www.googleapis.com/auth/contacts.readonly"
+        // )
+      }
 
       signInWithPopup(auth, provider)
         .then((result) => {
@@ -342,17 +344,65 @@ export default defineNuxtPlugin(async (nuxtApp) => {
         .catch((err) => {
           let credential = null
 
-          if (id === "google") {
-            credential = GoogleAuthProvider.credentialFromError(err)
+          // Redirect Fallback
+          if (err.code === "auth/popup-blocked") {
+            signInWithRedirect(auth, provider)
+              .then((result1) => {
+                let credential1 = null
+
+                if (id === "google") {
+                  credential1 = GoogleAuthProvider.credentialFromResult(result1)
+                }
+
+                // const token = credential.accessToken
+                const user1 = result1.user
+                const additionalUserInfo1 = getAdditionalUserInfo(result1)
+
+                console.log(
+                  "[Firebase] ::: Google Sign In Success :: ",
+                  user1,
+                  credential1,
+                  additionalUserInfo1
+                )
+
+                resolve(user1)
+              })
+              .catch((err1) => {
+                let credential1 = null
+
+                if (id === "google") {
+                  credential1 = GoogleAuthProvider.credentialFromError(err1)
+                }
+
+                console.log(
+                  "[Firebase] ::: Google Sign In Error ::",
+                  err1,
+                  credential1
+                )
+
+                reject({
+                  code: err1.code,
+                  msg: err1.message,
+                  error: err1,
+                })
+              })
+          } else {
+            if (id === "google") {
+              credential = GoogleAuthProvider.credentialFromError(err)
+            }
+
+            console.log(
+              "[Firebase] ::: Google Sign In Error ::",
+              err,
+              credential
+            )
+
+            reject({
+              code: err.code,
+              msg: err.message,
+              error: err,
+            })
           }
-
-          console.log("[Firebase] ::: Google Sign In Error ::", err, credential)
-
-          reject({
-            code: err.code,
-            msg: err.message,
-            error: err,
-          })
         })
     })
   }
@@ -370,6 +420,16 @@ export default defineNuxtPlugin(async (nuxtApp) => {
           resolve(null)
         })
     })
+  }
+  const checkProviderRedirect = async () => {
+    try {
+      const result = await getRedirectResult(auth)
+
+      if (result.user) {
+      }
+    } catch (err) {
+      console.log("[Firebase] ::: Error checking redirect result!", err.message)
+    }
   }
   const verifyEmail = async (code) => {
     return new Promise(async (resolve) => {
