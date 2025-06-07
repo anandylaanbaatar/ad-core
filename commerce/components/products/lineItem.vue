@@ -29,7 +29,7 @@
               item.variantTitle !== 'Default' &&
               item.variantTitle !== 'default'
             "
-            class="font5 font-bold description"
+            class="description"
           >
             {{ item.variantTitle }}
           </p>
