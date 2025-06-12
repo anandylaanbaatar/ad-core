@@ -20,21 +20,15 @@ export default {
     }
   },
 
-  computed: {
-    isLoggedIn() {
-      return useAuthStore().user
-    },
-  },
-
   async created() {
-    if (this.page === null) {
-      await this.getPage()
-    }
+    // if (this.page === null) {
+    //   await this.getPage()
+    // }
   },
   async mounted() {
-    if (this.page === null) {
-      await this.getPage(true)
-    }
+    // if (this.page === null) {
+    //   await this.getPage(true)
+    // }
   },
 
   methods: {
