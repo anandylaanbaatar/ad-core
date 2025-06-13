@@ -1,5 +1,52 @@
 <template>
   <div class="c-form row">
+    <!--Avatar-->
+    <div v-if="isFirebase" class="c-field col-xs-12">
+      <label for="avatar"
+        >{{ $utils.t("Avatar") }} ({{ $utils.t("Optional") }})</label
+      >
+
+      <div class="w-full flex align-items-center mb-3">
+        <Avatar
+          v-if="formOptional.photoURL"
+          :image="formOptional.photoURL"
+          class="mr-2 c-link"
+          size="large"
+          shape="circle"
+        />
+        <Avatar
+          v-else
+          icon="pi pi-image"
+          class="mr-2"
+          size="large"
+          shape="circle"
+        />
+
+        <Loader v-if="uploading" type="none"></Loader>
+
+        <FileUpload
+          v-else
+          mode="basic"
+          name="uploadImage"
+          accept="image/*"
+          :maxFileSize="1000000"
+          chooseLabel="Upload Image"
+          @select="uploader"
+          customUpload
+          auto
+          severity="secondary"
+          class="p-button-secondary"
+        ></FileUpload>
+      </div>
+
+      <InputText
+        v-if="false"
+        v-model="formOptional.photoURL"
+        placeholder="Avatar"
+        @change="validation"
+      ></InputText>
+    </div>
+
     <!--First Name-->
     <div class="c-field col-xs-6 mb-3">
       <label for="firstName">{{ $utils.t("First Name") }}</label>
@@ -147,6 +194,7 @@ export default {
   data() {
     return {
       updating: false,
+      uploading: false,
 
       form: {
         firstName: null,
@@ -156,6 +204,7 @@ export default {
         acceptsMarketing: true,
       },
       formOptional: {
+        photoURL: null,
         phoneCode: null,
         selectedCountry: null,
       },
@@ -236,7 +285,6 @@ export default {
       this.errors = validation.errors
     },
     editProfileInfo() {},
-
     fillForm() {
       let newForm = {
         acceptsMarketing: this.account.acceptsMarketing,
@@ -248,6 +296,7 @@ export default {
       let newFormOptional = {
         phoneCode: this.account.phoneCode ? this.account.phoneCode : null,
         selectedCountry: null,
+        photoURL: this.account.photoURL ? this.account.photoURL : null,
       }
 
       if (this.account.phone) {
@@ -288,6 +337,23 @@ export default {
       }
 
       this.updating = false
+    },
+    async uploader(e) {
+      if (!e.files) return
+      if (!this.account) return
+      this.uploading = true
+
+      // Upload to user folder
+      const userUid = this.account.uid
+      const images = await this.$forms.upload(e.files, userUid)
+
+      // Set Images to fields
+      if (images) {
+        this.formOptional.photoURL = images[0]
+        this.validation()
+      }
+
+      this.uploading = false
     },
 
     /**
@@ -358,10 +424,8 @@ export default {
       let formData = this.form
 
       if (!this.isShopify) {
-        formData.phone = `${this.form.selectedCountry.dialCode}${this.form.phone}`
+        formData.phone = `${this.formOptional.selectedCountry.dialCode}${this.form.phone}`
       }
-
-      console.log("Form Data ::: ", formData)
 
       try {
         let updates = {
@@ -370,6 +434,7 @@ export default {
           lastName: formData.lastName,
           phone: formData.phone,
           phoneCode: this.formOptional.phoneCode,
+          photoURL: this.formOptional.photoURL,
         }
         await this.$fire.actions.update(`/users/${this.account.uid}`, updates)
 

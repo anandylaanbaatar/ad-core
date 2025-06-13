@@ -2,12 +2,27 @@ import { countries } from "country-codes-flags-phone-codes"
 import { isValidPhoneNumber } from "libphonenumber-js"
 
 export default defineNuxtPlugin((app) => {
+  const UPLOADER_KEY = useState(
+    "uploaderKey",
+    () => process.env.NUXT_BUNNY_API_KEY
+  )
+  if (!import.meta.client) return
+
+  /**
+   * Phone
+   */
+
   const phoneCountries = () => {
     return countries
   }
   const phoneCountryByCode = (code) => {
     return countries.find((i) => i.code === code.toUpperCase())
   }
+
+  /**
+   * Validations
+   */
+
   const validateEmail = (email) => {
     let emailRegex = /\S+@\S+\.\S+/
     if (emailRegex.test(email.trim().toLowerCase())) {
@@ -115,6 +130,72 @@ export default defineNuxtPlugin((app) => {
     }
   }
 
+  /**
+   * Uploader
+   */
+
+  const uploader = async (file, filePath) => {
+    return new Promise(async (resolve) => {
+      const apiKey = UPLOADER_KEY.value
+      let storageUrl = "https://storage.bunnycdn.com/melodu"
+      let cdnUrl = "https://melodu.b-cdn.net"
+
+      if (features().fileSystem.bunny.storageUrl) {
+        storageUrl = features().fileSystem.bunny.storageUrl
+      }
+      if (features().fileSystem.bunny.cdnUrl) {
+        cdnUrl = features().fileSystem.bunny.cdnUrl
+      }
+
+      try {
+        const filename = app.$utils.processFileName(file.name)
+        const filesPath = `${features().fileSystem.bunny.filesPath}/${filePath}`
+        const requestUrl = `${storageUrl}/${filesPath}/${filename}`
+        const downloadUrl = `${cdnUrl}/${filesPath}/${filename}`
+
+        const res = await $fetch(requestUrl, {
+          method: "PUT",
+          headers: {
+            "content-type": "application/octet-stream",
+            AccessKey: apiKey,
+          },
+          body: file,
+        })
+
+        if (res && res.Message === "File uploaded.") {
+          resolve(downloadUrl)
+        } else {
+          resolve(null)
+        }
+      } catch (err) {
+        console.log("Error uploading file ::: ", err.message)
+        resolve(null)
+      }
+    })
+  }
+  const upload = async (files, filePath) => {
+    if (!UPLOADER_KEY.value) return
+    if (!features().fileSystem) return
+    if (!features().fileSystem.bunny) return
+    if (!features().fileSystem.bunny.filesPath) return
+
+    let results = []
+
+    for (let i = 0; i < files.length; i++) {
+      const downloadUrl = await uploader(files[i], filePath)
+
+      if (downloadUrl) {
+        results.push(downloadUrl)
+      }
+    }
+
+    if (results.length > 0) {
+      return results
+    }
+
+    return null
+  }
+
   return {
     provide: {
       forms: {
@@ -122,6 +203,7 @@ export default defineNuxtPlugin((app) => {
         phoneCountryByCode,
         validateForm,
         validateEmail,
+        upload,
       },
     },
   }

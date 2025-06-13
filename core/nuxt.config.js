@@ -115,7 +115,7 @@ const plugins = defineNuxtConfig({
     resolve("./plugins/currency.js"),
     resolve("./plugins/algolia.js"),
     resolve("./plugins/firebase.client.js"),
-    resolve("./plugins/forms.client.js"),
+    resolve("./plugins/forms.js"),
     resolve("./plugins/general.client.js"),
     resolve("./plugins/notifications.js"),
     resolve("./plugins/core.client.js"),
