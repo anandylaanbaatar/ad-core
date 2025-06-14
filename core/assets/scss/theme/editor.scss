@@ -81,6 +81,11 @@
 
     .ql-editor {
       padding: 10px;
+
+      code {
+        background: var(--ad-background1);
+        border-radius: 8px;
+      }
     }
   }
   .ql-container.ql-bubble {
@@ -203,6 +208,13 @@
           .ql-fill {
             fill: $white;
           }
+        }
+      }
+    }
+    .ql-container.ql-snow {
+      .ql-editor {
+        code {
+          color: rgba(255, 255, 255, 0.7);
         }
       }
     }
