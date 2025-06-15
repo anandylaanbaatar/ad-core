@@ -129,6 +129,128 @@ export default defineNuxtPlugin((app) => {
       errors: errors,
     }
   }
+  // Validate Form v2 - Supports objects input fields with rules
+  const validateFormV2 = (fields) => {
+    let isValid = true
+    let errors = {}
+
+    for (const [key, field] of Object.entries(fields)) {
+      const fieldKey = key.toLowerCase()
+
+      // Check Only Required Fields
+      if (field.required) {
+        // 1. Empty Fields
+        if (!field.value) {
+          errors[key] = app.$utils.t(`This field must not be empty.`)
+          isValid = false
+        }
+
+        // 2. General Fields Check
+        // Names
+        if (
+          fieldKey === "firstname" ||
+          fieldKey === "lastname" ||
+          fieldKey === "fullname"
+        ) {
+          const lettersRegex = /^[a-zA-Zа-яА-ЯүҮөӨ]+$/
+
+          if (!lettersRegex.test(field.value)) {
+            errors[key] = app.$utils.t(`Enter only letters!`)
+            isValid = false
+          } else if (field.value.length < 2) {
+            errors[key] = app.$utils.t(`Please enter at least 2 letters!`)
+            isValid = false
+          }
+        }
+        // Email Address
+        if (fieldKey === "email" || fieldKey === "emailaddress") {
+          if (!validateEmail(field.value)) {
+            errors[key] = app.$utils.t(
+              `Email must be a full valid email address.`
+            )
+            isValid = false
+          }
+        }
+        // Phone Number
+        if (fieldKey === "phone" || fieldKey === "phonenumber") {
+          const phoneCountry = field.country
+            ? field.country.toUpperCase()
+            : useAppConfig().theme.country
+
+          if (!isValidPhoneNumber(field.value, phoneCountry)) {
+            errors[key] =
+              `${phoneCountry} - ${app.$utils.t(`Please enter valid phone number!`)}`
+            isValid = false
+          }
+        }
+        // Password
+        if (fieldKey === "password") {
+          let msg = ``
+
+          if (!/^\S*$/.test(field.value)) {
+            if (msg) msg += `<br>`
+            msg += app.$utils.t("Password cannot have spaces!")
+          }
+          if (!/^(?=.*[A-Z]).*$/.test(field.value)) {
+            if (msg) msg += `<br>`
+            msg += app.$utils.t("Include 1 uppercase letter!")
+          }
+          if (!/^(?=.*[a-z]).*$/.test(field.value)) {
+            if (msg) msg += `<br>`
+            msg += app.$utils.t("Include 1 lowercase letter!")
+          }
+          if (!/^(?=.*[0-9]).*$/.test(field.value)) {
+            if (msg) msg += `<br>`
+            msg += app.$utils.t("Include 1 number!")
+          }
+          if (
+            !/^(?=.*[~`!@#$%^&*()--+={}\[\]|\\:;"'<>,.?/_₹]).*$/.test(
+              field.value
+            )
+          ) {
+            if (msg) msg += `<br>`
+            msg += app.$utils.t("Include 1 special character!")
+          }
+          if (!/^.{10,16}$/.test(field.value)) {
+            if (msg) msg += `<br>`
+            msg += app.$utils.t("Password length must be between 10 - 16!")
+          }
+
+          if (msg) {
+            errors[key] = msg
+            isValid = false
+          }
+        }
+        // Confirm Password
+        if (fieldKey === "confirmpassword") {
+          if (fields["password"] !== field.value) {
+            errors[key] = app.$utils.t(
+              `Password and Confirm Password does not match!`
+            )
+            isValid = false
+          }
+        }
+
+        // 3. All other fields check
+        if (field.rule) {
+          const regex = field.rule
+
+          if (!regex.test(field.value)) {
+            const msg = field.errorMsg
+              ? field.errorMsg
+              : `This field does not match the requirements.`
+            errors[key] = app.$utils.t(msg)
+            isValid = false
+          }
+        }
+      }
+    }
+
+    return {
+      isValid: isValid,
+      errors: errors,
+    }
+  }
 
   /**
    * Uploader
@@ -202,6 +324,7 @@ export default defineNuxtPlugin((app) => {
         phoneCountries,
         phoneCountryByCode,
         validateForm,
+        validateFormV2,
         validateEmail,
         upload,
       },
