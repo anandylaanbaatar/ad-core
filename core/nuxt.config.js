@@ -4,6 +4,11 @@ import { createResolver } from "@nuxt/kit"
 import { defineNuxtConfig } from "nuxt/config"
 import Aura from "@primevue/themes/aura"
 const { resolve } = createResolver(import.meta.url)
+
+/**
+ * Site Config
+ */
+
 const { siteRuntimeConfig, siteConfig } = await import(
   path.resolve("./v1/core/site.config.js")
 )
@@ -126,6 +131,14 @@ const plugins = defineNuxtConfig({
 })
 
 /**
+ * Server
+ */
+
+const servers = defineNuxtConfig({
+  server: [resolve("server/**")],
+})
+
+/**
  * Build
  */
 
@@ -181,4 +194,4 @@ const build = defineNuxtConfig({
   },
 })
 
-export default defu(middlewares, modules, build, app, plugins)
+export default defu(middlewares, modules, build, app, plugins, servers)

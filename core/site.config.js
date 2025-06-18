@@ -1,8 +1,98 @@
-import { initializeApp, cert, getApps } from "firebase-admin/app"
+import { initializeApp, cert, getApps, getApp } from "firebase-admin/app"
 import { getDatabase } from "firebase-admin/database"
+import { getAuth } from "firebase-admin/auth"
 import path from "node:path"
 import { readFile } from "fs/promises"
-const config = await import(path.resolve("config/site.config.json"))
+
+// Get default site config
+const configData = await readFile(
+  path.resolve(`config/site.config.json`),
+  "utf-8"
+)
+let config = JSON.parse(configData)
+
+/**
+ * Firebase Setup
+ */
+
+let privateKey = process.env.NUXT_FIREBASE_PRIVATE_KEY
+privateKey = privateKey.replace(/\\n/g, "\n").replace(/\\/g, "")
+
+// Init Firebase
+const app = getApps().length
+  ? getApp()
+  : initializeApp({
+      credential: cert({
+        projectId: process.env.NUXT_FIREBASE_PROJECT_ID,
+        clientEmail: process.env.NUXT_FIREBASE_CLIENT_EMAIL,
+        privateKey: privateKey,
+      }),
+      databaseURL: process.env.NUXT_FIREBASE_DATABASE_URL,
+    })
+const db = getDatabase(app)
+const auth = getAuth(app)
+
+// Init Use Credential Utility
+const cache = new Map()
+
+async function useAllCredentials(tenantId, storeId) {
+  const ref = db.ref(`${tenantId}/stores/${storeId}/integrations`)
+  const snapshot = await ref.once("value")
+  if (!snapshot.exists()) return null
+  return snapshot.val()
+}
+async function useCredential(tenantId, storeId, integrationId) {
+  const key = `${tenantId}:${storeId}:${integrationId}`
+
+  if (cache.has(key)) return cache.get(key)
+
+  const ref = db.ref(
+    `${tenantId}/stores/${storeId}/integrations/${integrationId}`
+  )
+  const snapshot = await ref.once("value")
+  if (!snapshot.exists()) return null
+
+  const creds = snapshot.val()
+  cache.set(key, creds)
+
+  return creds
+}
+
+if (config.storeId) {
+  const tenantId = config.features.multitenancy.tenantId
+  const storeId = config.storeId
+  const allCredentials = await useAllCredentials(tenantId, storeId)
+
+  console.log("Site Config ::: Store Id ::: ", allCredentials)
+
+  if (allCredentials) {
+    // Shopify
+    if (allCredentials.shopify) {
+      const version = "2025-04"
+      const storeDomain = `${allCredentials.shopify.store_domain}.myshopify.com`
+
+      process.env.NUXT_SHOPIFY_API_VERSION = version
+      process.env.NUXT_SHOPIFY_STORE_DOMAIN = storeDomain
+      process.env.NUXT_SHOPIFY_GRAPH_ADMIN_ACCESS_TOKEN =
+        allCredentials.shopify.graph_admin_access_token
+      process.env.NUXT_SHOPIFY_STOREFRONT_ACCESS_TOKEN =
+        allCredentials.shopify.NUXT_SHOPIFY_STOREFRONT_ACCESS_TOKEN
+
+      config.integrations.shopify = true
+      config.features.shopify = {
+        apiVersion: version,
+        domain: storeDomain,
+      }
+    }
+    // Prismic
+    if (allCredentials.prismic) {
+      config.integrations.prismic = true
+      config.features.prismic = allCredentials.prismic.repo
+    }
+  }
+
+  console.log("Shopify Domain ::: ", process.env.NUXT_SHOPIFY_STORE_DOMAIN)
+}
 
 /**
  * Variables
@@ -71,13 +161,14 @@ let siteRuntimeConfig = {
 
 // Firebase
 if (config.integrations.firebase) {
-  let serviceAccount = null
+  // let serviceAccount = null
 
-  // Setup Firebase Service Account
-  if (config.config.firebaseServiceAccount) {
-    serviceAccount = path.resolve("config/serviceAccount.json")
-    process.env.GOOGLE_APPLICATION_CREDENTIALS = serviceAccount
-  }
+  // // Setup Firebase Service Account
+  // if (config.config.firebaseServiceAccount) {
+  //   serviceAccount = path.resolve("config/serviceAccount.json")
+  //   process.env.GOOGLE_APPLICATION_CREDENTIALS = serviceAccount
+  // }
+
   // Setup Firebase App Config
   if (config.config.firebaseConfig) {
     siteRuntimeConfig.public.firebase = config.config.firebaseConfig
@@ -97,11 +188,11 @@ if (config.integrations.firebase) {
         sessionCookie: false,
       },
     }
-    if (serviceAccount) {
-      siteConfig.vuefire.admin = {
-        serviceAccount: serviceAccount,
-      }
-    }
+    // if (serviceAccount) {
+    //   siteConfig.vuefire.admin = {
+    //     serviceAccount: serviceAccount,
+    //   }
+    // }
   }
 
   // // Setup Site Settings from Firebase remotely
@@ -298,4 +389,4 @@ siteConfig.appConfig.theme = theme
 siteConfig.app.head = siteHead
 siteConfig.runtimeConfig = siteRuntimeConfig
 
-export { siteConfig, siteRuntimeConfig }
+export { siteConfig, siteRuntimeConfig, db, auth, useCredential }

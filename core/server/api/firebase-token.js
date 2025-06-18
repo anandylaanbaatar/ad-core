@@ -1,6 +1,7 @@
 import { defineEventHandler, readBody } from "h3"
-import { initializeApp, cert, getApps } from "firebase-admin/app"
-import { getAuth } from "firebase-admin/auth"
+import path from "node:path"
+
+const { auth } = await import(path.resolve("v1/core/site.config.js"))
 
 export default defineEventHandler(async (event) => {
   try {
@@ -14,27 +15,16 @@ export default defineEventHandler(async (event) => {
     if (
       !process.env.NUXT_FIREBASE_PROJECT_ID ||
       !process.env.NUXT_FIREBASE_CLIENT_EMAIL ||
-      !process.env.NUXT_FIREBASE_PRIVATE_KEY
+      !process.env.NUXT_FIREBASE_PRIVATE_KEY ||
+      !process.env.NUXT_FIREBASE_DATABASE_URL
     ) {
-      console.log("[Firebase] ::: Project id, client email or key missing!")
+      console.log(
+        "[Firebase] ::: Project id, client email, key or database url missing!"
+      )
       return
     }
 
-    // Initialize once
-    if (!getApps().length) {
-      let privateKey = process.env.NUXT_FIREBASE_PRIVATE_KEY
-      privateKey = privateKey.replace(/\\n/g, "\n").replace(/\\/g, "")
-      initializeApp({
-        credential: cert({
-          projectId: process.env.NUXT_FIREBASE_PROJECT_ID,
-          clientEmail: process.env.NUXT_FIREBASE_CLIENT_EMAIL,
-          privateKey: privateKey,
-        }),
-      })
-    }
-
-    // Generate a custom token for this user
-    const customToken = await getAuth().createCustomToken(uid)
+    const customToken = await auth.createCustomToken(uid)
 
     return { userToken: customToken }
   } catch (err) {
