@@ -2,14 +2,7 @@ import { initializeApp, cert, getApps, getApp } from "firebase-admin/app"
 import { getDatabase } from "firebase-admin/database"
 import { getAuth } from "firebase-admin/auth"
 import path from "node:path"
-import { readFile } from "fs/promises"
-
-// Get default site config
-const configData = await readFile(
-  path.resolve(`config/site.config.json`),
-  "utf-8"
-)
-let config = JSON.parse(configData)
+let config = await import(path.resolve("config/site.config.json"))
 
 /**
  * Firebase Setup
