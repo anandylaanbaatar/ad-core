@@ -58,12 +58,14 @@ async function useCredential(tenantId, storeId, integrationId) {
   return creds
 }
 
+/**
+ * Setup Remote Config
+ */
+
 if (config.storeId) {
-  const tenantId = config.features.multitenancy.tenantId
+  const tenantId = config.features.multitenancy.parentId
   const storeId = config.storeId
   const allCredentials = await useAllCredentials(tenantId, storeId)
-
-  console.log("Site Config ::: Store Id ::: ", allCredentials)
 
   if (allCredentials) {
     // Shopify
@@ -76,7 +78,7 @@ if (config.storeId) {
       process.env.NUXT_SHOPIFY_GRAPH_ADMIN_ACCESS_TOKEN =
         allCredentials.shopify.graph_admin_access_token
       process.env.NUXT_SHOPIFY_STOREFRONT_ACCESS_TOKEN =
-        allCredentials.shopify.NUXT_SHOPIFY_STOREFRONT_ACCESS_TOKEN
+        allCredentials.shopify.storefront_access_token
 
       config.integrations.shopify = true
       config.features.shopify = {
@@ -90,8 +92,6 @@ if (config.storeId) {
       config.features.prismic = allCredentials.prismic.repo
     }
   }
-
-  console.log("Shopify Domain ::: ", process.env.NUXT_SHOPIFY_STORE_DOMAIN)
 }
 
 /**
