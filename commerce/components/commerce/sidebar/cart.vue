@@ -58,7 +58,7 @@
             <label class="font-bold font3 text-md">{{ $utils.t("Tax") }}</label>
           </div>
           <div class="col-xs-6">
-            <div class="w-full text-right">
+            <div v-if="theme().type === 'commerce'" class="w-full text-right">
               <h4 v-if="useCommerceStore().allowTax">
                 {{ $currency.format(cart.cost.totalTaxAmount.amount) }}
               </h4>
@@ -94,7 +94,7 @@
             <h3 class="font-bold font3 text-md">{{ $utils.t("Total") }}</h3>
           </div>
           <div class="col-xs-6">
-            <div class="w-full text-right">
+            <div v-if="theme().type === 'commerce'" class="w-full text-right">
               <h3 v-if="useCommerceStore().allowTax">
                 {{ $currency.format(cart.cost.totalAmount.amount) }}
               </h3>

@@ -102,7 +102,7 @@
         <label class="font-bold font3 text-md">{{ $utils.t("Tax") }}</label>
       </div>
       <div class="col-xs-6">
-        <div class="w-full text-right">
+        <div v-if="theme().type === 'commerce'" class="w-full text-right">
           <h3 v-if="useCommerceStore().allowTax">
             {{ $currency.format(cart.cost.totalTaxAmount.amount) }}
           </h3>
@@ -258,7 +258,7 @@ export default {
       let discountAmount = 0
 
       if (this.cart && this.cart.cost && this.cart.cost.totalAmount) {
-        if (useCommerceStore().allowTax) {
+        if (theme().type === "commerce" && useCommerceStore().allowTax) {
           cartAmount = parseFloat(this.cart.cost.totalAmount.amount)
         } else {
           cartAmount = parseFloat(this.cart.cost.subtotalAmount.amount)

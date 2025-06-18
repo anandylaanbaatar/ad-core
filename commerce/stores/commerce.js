@@ -24,14 +24,23 @@ export const useCommerceStore = defineStore("commerce", {
     collectionsCount: 0,
     advancedCollections: false,
 
-    allowTax: useAppConfig().theme.commerce.allowTax,
+    allowTax:
+      theme().type === "commerce"
+        ? useAppConfig().theme.commerce.allowTax
+        : null,
 
     // Location
     locations: null,
-    selectedLocation: useAppConfig().theme.commerce.location,
+    selectedLocation:
+      theme().type === "commerce"
+        ? useAppConfig().theme.commerce.location
+        : null,
 
     // Shipping
-    shippingLines: useAppConfig().theme.commerce.shippingLines,
+    shippingLines:
+      theme().type === "commerce"
+        ? useAppConfig().theme.commerce.shippingLines
+        : null,
   }),
 
   actions: {

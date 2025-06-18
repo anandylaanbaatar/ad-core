@@ -288,7 +288,7 @@ export default {
       let discountAmount = 0
 
       if (this.cart && this.cart.cost && this.cart.cost.totalAmount) {
-        if (useCommerceStore().allowTax) {
+        if (theme().type === "commerce" && useCommerceStore().allowTax) {
           cartAmount = parseFloat(this.cart.cost.totalAmount.amount)
         } else {
           cartAmount = parseFloat(this.cart.cost.subtotalAmount.amount)
