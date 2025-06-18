@@ -48,20 +48,21 @@
           <p class="title">
             {{ item.product.title }}
           </p>
-          <p class="price">
-            {{ $currency.format(item.price.amount) }}
-          </p>
 
-          <p
+          <span class="price">
+            {{ $currency.format(item.price.amount) }}
+          </span>
+
+          <span
             v-if="
               item.title !== 'Default Title' &&
               item.title !== 'Default' &&
               item.title !== 'default'
             "
-            class="description"
+            class="description font3 ml-3"
           >
             {{ this.$utils.addDots(item.title, 23) }}
-          </p>
+          </span>
 
           <div v-if="!preview" class="buttonsArea">
             <div>

@@ -37,7 +37,7 @@
       font-size: 12px;
       display: block;
       margin-bottom: 5px;
-      opacity: 0.5;
+      opacity: 1;
     }
     .p-password {
       display: block;
@@ -60,6 +60,9 @@
   .c-field {
     input {
       color: $white;
+    }
+    label {
+      opacity: 0.5;
     }
   }
 }

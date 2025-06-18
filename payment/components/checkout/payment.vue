@@ -62,7 +62,7 @@
     <UiEmpty
       v-else
       icon="pi-dollar"
-      :desc="'No Payment Providers Setup'"
+      :desc="$utils.t('No Payment Providers Setup')"
     ></UiEmpty>
 
     <!--QPay-->

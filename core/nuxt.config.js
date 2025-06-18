@@ -77,6 +77,9 @@ if (siteRuntimeConfig.public.features.i18n) {
   modulesConfig.modules.push("@nuxtjs/i18n")
   modulesConfig.i18n = {
     vueI18n: resolve("../../config/i18n.config.js"),
+    bundle: {
+      optimizeTranslationDirective: false,
+    },
   }
 }
 
