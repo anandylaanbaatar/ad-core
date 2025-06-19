@@ -47,6 +47,7 @@ export default async function siteConfigModule(moduleOptions, nuxt) {
       }
 
       db.goOffline()
+      await app.delete()
     }
   } else {
     console.log("✅ Site config loaded!", config.defaults.siteUrl)
