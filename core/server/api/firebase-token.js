@@ -1,9 +1,9 @@
 import { defineEventHandler, readBody } from "h3"
 import path from "node:path"
 
-const { auth } = await import(path.resolve("v1/core/site.config.js"))
-
 export default defineEventHandler(async (event) => {
+  const { auth } = await import(path.resolve("v1/core/site.config.js"))
+
   try {
     const body = await readBody(event)
     const { uid } = body

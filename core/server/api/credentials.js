@@ -1,9 +1,8 @@
 import { defineEventHandler, readBody } from "h3"
 import path from "node:path"
 
-const { useCredential } = await import(path.resolve("v1/core/site.config.js"))
-
 export default defineEventHandler(async (event) => {
+  const { useCredential } = await import(path.resolve("v1/core/site.config.js"))
   const body = await readBody(event)
 
   const integrationId = body.integrationId
