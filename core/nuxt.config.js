@@ -56,7 +56,7 @@ let modulesConfig = {
   modules: [
     "@pinia/nuxt",
     "@primevue/nuxt-module",
-    // resolve("./modules/siteConfig"),
+    resolve("./modules/siteConfig"),
   ],
 
   pinia: {
