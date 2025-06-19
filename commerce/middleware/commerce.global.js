@@ -3,9 +3,26 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
 
   const nuxtApp = useNuxtApp()
   const appConfig = useAppConfig().theme
-  const siteUrl = appConfig.siteUrl
-  const siteName = appConfig.name
-  const siteDesc = appConfig.description
+  let siteUrl = appConfig.siteUrl
+  let siteName = appConfig.name
+  let siteDesc = appConfig.description
+
+  // Site Settings
+  if (useRuntimeConfig().public.features.prismic) {
+    const { client } = usePrismic()
+    const siteSettings = await client.getSingle("website_settings")
+
+    if (siteSettings && siteSettings.data) {
+      const siteConfig = siteSettings.data
+
+      if (siteConfig.name) {
+        siteName = siteConfig.name
+      }
+      if (siteConfig.description) {
+        siteDesc = siteConfig.description
+      }
+    }
+  }
 
   let meta = {
     url: siteUrl,
