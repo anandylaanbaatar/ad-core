@@ -100,7 +100,10 @@ export default async function siteConfigModule(moduleOptions, nuxt) {
     console.log("✅ Site config loaded!", process.env.NUXT_SHOPIFY_STORE_DOMAIN)
 
     db.goOffline?.()
+
+    return
   } catch (err) {
     console.log("Module error ::: ", err.message)
+    return
   }
 }
