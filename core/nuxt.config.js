@@ -56,7 +56,7 @@ let modulesConfig = {
   modules: [
     "@pinia/nuxt",
     "@primevue/nuxt-module",
-    resolve("./modules/siteConfig"),
+    // resolve("./modules/siteConfig"),
   ],
 
   pinia: {
@@ -111,6 +111,7 @@ if (siteRuntimeConfig.public.integrations.prismic) {
   modulesConfig.modules.push("@nuxtjs/prismic")
   modulesConfig.prismic = {
     endpoint: siteRuntimeConfig.public.features.prismic,
+    preview: false,
   }
 }
 
