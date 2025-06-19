@@ -1,19 +1,12 @@
-import { initializeApp, cert, getApps, getApp } from "firebase-admin/app"
-import { getDatabase } from "firebase-admin/database"
 import path from "node:path"
-let config = await import(path.resolve("config/site.config.json"))
 
 export default async function siteConfigModule(moduleOptions, nuxt) {
-  // const { nuxt } = this
-
-  // Use Firebase Admin credentials from env
   const {
     NUXT_FIREBASE_PROJECT_ID,
     NUXT_FIREBASE_CLIENT_EMAIL,
     NUXT_FIREBASE_PRIVATE_KEY,
     NUXT_FIREBASE_DATABASE_URL,
   } = process.env
-
   if (
     !NUXT_FIREBASE_PROJECT_ID ||
     !NUXT_FIREBASE_CLIENT_EMAIL ||
@@ -26,6 +19,18 @@ export default async function siteConfigModule(moduleOptions, nuxt) {
   }
 
   try {
+    const { initializeApp, cert, getApps, getApp } = await import(
+      "firebase-admin/app"
+    )
+    const { getDatabase } = await import("firebase-admin/database")
+    const siteConfigData = await import(
+      path.resolve("config/site.config.json"),
+      {
+        with: { type: "json" },
+      }
+    )
+    let config = siteConfigData.default
+
     const credentials = {
       projectId: NUXT_FIREBASE_PROJECT_ID,
       clientEmail: NUXT_FIREBASE_CLIENT_EMAIL,
