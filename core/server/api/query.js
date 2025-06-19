@@ -1,6 +1,6 @@
-import { restClient } from "../restAdmin.js"
-import { client } from "../graphClient.js"
-import { gqlClient } from "../graphAdmin.js"
+import { createAdminRestApiClient } from "@shopify/admin-api-client"
+import { createGraphQLClient } from "@shopify/graphql-client"
+import { createAdminApiClient } from "@shopify/admin-api-client"
 import { defineEventHandler, readBody } from "h3"
 
 // https://github.com/Shopify/shopify-app-js/tree/565d1142edbfabba8ad516214f597778f7cfb521/packages/api-clients/admin-api-client#rest-client
@@ -1167,6 +1167,30 @@ const getQuery = (type, body) => {
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
+  const config = useRuntimeConfig(event)
+
+  if (!config.private.shopify) return
+
+  const keys = config.private.shopify
+
+  const gqlClient = createAdminApiClient({
+    storeDomain: keys.store_domain,
+    apiVersion: keys.api_version,
+    accessToken: keys.graph_admin_access_token,
+  })
+  const client = createGraphQLClient({
+    url: `https://${keys.store_domain}/api/${keys.api_version}/graphql.json`,
+    headers: {
+      "Content-Type": "application/json",
+      "X-Shopify-Storefront-Access-Token": keys.storefront_access_token,
+    },
+    retries: 1,
+  })
+  const restClient = createAdminRestApiClient({
+    storeDomain: keys.store_domain,
+    apiVersion: keys.api_version,
+    accessToken: keys.graph_admin_access_token,
+  })
 
   // GraphQL Admin
   if (body.graphqlAdmin) {

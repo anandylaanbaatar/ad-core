@@ -23,6 +23,10 @@ const modules = defineNuxtConfig({
   },
 })
 
+const servers = defineNuxtConfig({
+  server: [resolve("server/**")],
+})
+
 const plugins = defineNuxtConfig({
   plugins: [
     resolve("./plugins/shopify.js"),
@@ -31,4 +35,4 @@ const plugins = defineNuxtConfig({
   ],
 })
 
-export default defu(config, middlewares, modules, plugins)
+export default defu(config, middlewares, modules, servers, plugins)

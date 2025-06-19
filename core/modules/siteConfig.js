@@ -37,6 +37,10 @@ export default async function siteConfigModule(moduleOptions, nuxt) {
       const integrations = snapshot.val()
 
       if (integrations) {
+        if (!nuxt.options.runtimeConfig.private) {
+          nuxt.options.runtimeConfig.private = {}
+        }
+
         // Shopify
         if (integrations.shopify) {
           const version = "2025-04"
@@ -49,6 +53,14 @@ export default async function siteConfigModule(moduleOptions, nuxt) {
           process.env.NUXT_SHOPIFY_STOREFRONT_ACCESS_TOKEN =
             integrations.shopify.storefront_access_token
 
+          nuxt.options.runtimeConfig.private.shopify = {
+            api_version: version,
+            store_domain: storeDomain,
+            storefront_access_token:
+              integrations.shopify.storefront_access_token,
+            graph_admin_access_token:
+              integrations.shopify.graph_admin_access_token,
+          }
           nuxt.options.runtimeConfig.public.integrations.shopify = true
           nuxt.options.runtimeConfig.public.features.shopify = {
             apiVersion: version,

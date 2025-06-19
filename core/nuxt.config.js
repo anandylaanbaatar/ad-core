@@ -117,6 +117,10 @@ if (siteRuntimeConfig.public.integrations.prismic) {
 
 const modules = defineNuxtConfig(modulesConfig)
 
+const servers = defineNuxtConfig({
+  server: [resolve("server/**")],
+})
+
 /**
  * Plugins
  */
@@ -191,4 +195,4 @@ const build = defineNuxtConfig({
   },
 })
 
-export default defu(middlewares, modules, build, app, plugins)
+export default defu(middlewares, modules, build, app, servers, plugins)

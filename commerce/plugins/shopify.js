@@ -1,28 +1,28 @@
 import moment from "moment-timezone"
 
 export default defineNuxtPlugin((nuxtApp) => {
-  const KEY = useState(
-    "shopifyKey",
-    () => process.env.NUXT_SHOPIFY_STOREFRONT_ACCESS_TOKEN
-  )
-  const ADMIN_KEY = useState(
-    "shopifyAdminKey",
-    () => process.env.NUXT_SHOPIFY_GRAPH_ADMIN_ACCESS_TOKEN
-  )
+  // const KEY = useState(
+  //   "shopifyKey",
+  //   () => process.env.NUXT_SHOPIFY_STOREFRONT_ACCESS_TOKEN
+  // )
+  // const ADMIN_KEY = useState(
+  //   "shopifyAdminKey",
+  //   () => process.env.NUXT_SHOPIFY_GRAPH_ADMIN_ACCESS_TOKEN
+  // )
 
   if (import.meta.client) {
     if (!useRuntimeConfig().public.integrations.shopify) {
       // console.log("[Plugins] ::: [Shopify] ::: Not Initialized!")
       return
     }
-    if (!KEY.value) {
-      console.log("[Plugins] ::: [Shopify] ::: Missing Integration Key!")
-      return
-    }
-    if (!ADMIN_KEY.value) {
-      console.log("[Plugins] ::: [Shopify Admin] ::: Missing Integration Key!")
-      return
-    }
+    // if (!KEY.value) {
+    //   console.log("[Plugins] ::: [Shopify] ::: Missing Integration Key!")
+    //   return
+    // }
+    // if (!ADMIN_KEY.value) {
+    //   console.log("[Plugins] ::: [Shopify Admin] ::: Missing Integration Key!")
+    //   return
+    // }
 
     console.log("[Plugins] ::: [Shopify] ::: Initialized!")
   }

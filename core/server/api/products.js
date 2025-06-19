@@ -1,4 +1,4 @@
-import { client } from "../graphClient.js"
+import { createGraphQLClient } from "@shopify/graphql-client"
 import { defineEventHandler, readBody } from "h3"
 
 const getIds = (id) => {
@@ -237,6 +237,21 @@ const getQuery = (type, options) => {
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
+  const config = useRuntimeConfig(event)
+
+  if (!config.private.shopify) return
+
+  const keys = config.private.shopify
+
+  const client = createGraphQLClient({
+    url: `https://${keys.store_domain}/api/${keys.api_version}/graphql.json`,
+    headers: {
+      "Content-Type": "application/json",
+      "X-Shopify-Storefront-Access-Token": keys.storefront_access_token,
+    },
+    retries: 1,
+  })
+
   let filters = body
 
   if (body) {
