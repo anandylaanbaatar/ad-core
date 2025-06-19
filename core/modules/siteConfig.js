@@ -45,6 +45,8 @@ export default async function siteConfigModule(moduleOptions, nuxt) {
         const integrations = snapshot.val()
         console.log(`✅ Site integrations!`, integrations)
       }
+
+      db.goOffline()
     }
   } else {
     console.log("✅ Site config loaded!", config.defaults.siteUrl)
