@@ -1,91 +1,92 @@
-import { initializeApp, cert, getApps, getApp } from "firebase-admin/app"
-import { getDatabase } from "firebase-admin/database"
-import { getAuth } from "firebase-admin/auth"
+// import { initializeApp, cert, getApps, getApp } from "firebase-admin/app"
+// import { getDatabase } from "firebase-admin/database"
+// import { getAuth } from "firebase-admin/auth"
+
 import path from "node:path"
 let config = await import(path.resolve("config/site.config.json"))
 
-/**
- * Firebase Setup
- */
+// /**
+//  * Firebase Setup
+//  */
 
-let privateKey = process.env.NUXT_FIREBASE_PRIVATE_KEY
-privateKey = privateKey.replace(/\\n/g, "\n").replace(/\\/g, "")
+// let privateKey = process.env.NUXT_FIREBASE_PRIVATE_KEY
+// privateKey = privateKey.replace(/\\n/g, "\n").replace(/\\/g, "")
 
-// Init Firebase
-const app = getApps().length
-  ? getApp()
-  : initializeApp({
-      credential: cert({
-        projectId: process.env.NUXT_FIREBASE_PROJECT_ID,
-        clientEmail: process.env.NUXT_FIREBASE_CLIENT_EMAIL,
-        privateKey: privateKey,
-      }),
-      databaseURL: process.env.NUXT_FIREBASE_DATABASE_URL,
-    })
-const db = getDatabase(app)
-const auth = getAuth(app)
+// // Init Firebase
+// const app = getApps().length
+//   ? getApp()
+//   : initializeApp({
+//       credential: cert({
+//         projectId: process.env.NUXT_FIREBASE_PROJECT_ID,
+//         clientEmail: process.env.NUXT_FIREBASE_CLIENT_EMAIL,
+//         privateKey: privateKey,
+//       }),
+//       databaseURL: process.env.NUXT_FIREBASE_DATABASE_URL,
+//     })
+// const db = getDatabase(app)
+// const auth = getAuth(app)
 
-// Init Use Credential Utility
-const cache = new Map()
+// // Init Use Credential Utility
+// const cache = new Map()
 
-async function useAllCredentials(tenantId, storeId) {
-  const ref = db.ref(`${tenantId}/stores/${storeId}/integrations`)
-  const snapshot = await ref.once("value")
-  if (!snapshot.exists()) return null
-  return snapshot.val()
-}
-async function useCredential(tenantId, storeId, integrationId) {
-  const key = `${tenantId}:${storeId}:${integrationId}`
+// async function useAllCredentials(tenantId, storeId) {
+//   const ref = db.ref(`${tenantId}/stores/${storeId}/integrations`)
+//   const snapshot = await ref.once("value")
+//   if (!snapshot.exists()) return null
+//   return snapshot.val()
+// }
+// async function useCredential(tenantId, storeId, integrationId) {
+//   const key = `${tenantId}:${storeId}:${integrationId}`
 
-  if (cache.has(key)) return cache.get(key)
+//   if (cache.has(key)) return cache.get(key)
 
-  const ref = db.ref(
-    `${tenantId}/stores/${storeId}/integrations/${integrationId}`
-  )
-  const snapshot = await ref.once("value")
-  if (!snapshot.exists()) return null
+//   const ref = db.ref(
+//     `${tenantId}/stores/${storeId}/integrations/${integrationId}`
+//   )
+//   const snapshot = await ref.once("value")
+//   if (!snapshot.exists()) return null
 
-  const creds = snapshot.val()
-  cache.set(key, creds)
+//   const creds = snapshot.val()
+//   cache.set(key, creds)
 
-  return creds
-}
+//   return creds
+// }
 
-/**
- * Setup Remote Config
- */
+// /**
+//  * Setup Remote Config
+//  */
 
-if (config.storeId) {
-  const tenantId = config.features.multitenancy.parentId
-  const storeId = config.storeId
-  const allCredentials = await useAllCredentials(tenantId, storeId)
+// if (config.storeId) {
+//   const tenantId = config.features.multitenancy.parentId
+//   const storeId = config.storeId
+//   const allCredentials = await useAllCredentials(tenantId, storeId)
 
-  if (allCredentials) {
-    // Shopify
-    if (allCredentials.shopify) {
-      const version = "2025-04"
-      const storeDomain = `${allCredentials.shopify.store_domain}.myshopify.com`
+//   if (allCredentials) {
+//     // Shopify
+//     if (allCredentials.shopify) {
+//       const version = "2025-04"
+//       const storeDomain = `${allCredentials.shopify.store_domain}.myshopify.com`
 
-      process.env.NUXT_SHOPIFY_API_VERSION = version
-      process.env.NUXT_SHOPIFY_STORE_DOMAIN = storeDomain
-      process.env.NUXT_SHOPIFY_GRAPH_ADMIN_ACCESS_TOKEN =
-        allCredentials.shopify.graph_admin_access_token
-      process.env.NUXT_SHOPIFY_STOREFRONT_ACCESS_TOKEN =
-        allCredentials.shopify.storefront_access_token
+//       process.env.NUXT_SHOPIFY_API_VERSION = version
+//       process.env.NUXT_SHOPIFY_STORE_DOMAIN = storeDomain
+//       process.env.NUXT_SHOPIFY_GRAPH_ADMIN_ACCESS_TOKEN =
+//         allCredentials.shopify.graph_admin_access_token
+//       process.env.NUXT_SHOPIFY_STOREFRONT_ACCESS_TOKEN =
+//         allCredentials.shopify.storefront_access_token
 
-      config.integrations.shopify = true
-      config.features.shopify = {
-        apiVersion: version,
-        domain: storeDomain,
-      }
-    }
-    // Prismic
-    if (allCredentials.prismic) {
-      config.integrations.prismic = true
-      config.features.prismic = allCredentials.prismic.repo
-    }
-  }
-}
+//       config.integrations.shopify = true
+//       config.features.shopify = {
+//         apiVersion: version,
+//         domain: storeDomain,
+//       }
+//     }
+//     // Prismic
+//     if (allCredentials.prismic) {
+//       config.integrations.prismic = true
+//       config.features.prismic = allCredentials.prismic.repo
+//     }
+//   }
+// }
 
 /**
  * Variables
@@ -382,4 +383,4 @@ siteConfig.appConfig.theme = theme
 siteConfig.app.head = siteHead
 siteConfig.runtimeConfig = siteRuntimeConfig
 
-export { siteConfig, siteRuntimeConfig, db, auth, useCredential }
+export { siteConfig, siteRuntimeConfig } // db, auth, useCredential

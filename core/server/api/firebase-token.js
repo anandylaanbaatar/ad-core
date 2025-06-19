@@ -1,8 +1,8 @@
 import { defineEventHandler, readBody } from "h3"
-import path from "node:path"
+// import path from "node:path"
 
 export default defineEventHandler(async (event) => {
-  const { auth } = await import(path.resolve("v1/core/site.config.js"))
+  // const { auth } = await import(path.resolve("v1/core/site.config.js"))
 
   try {
     const body = await readBody(event)
@@ -24,9 +24,10 @@ export default defineEventHandler(async (event) => {
       return
     }
 
-    const customToken = await auth.createCustomToken(uid)
+    return
 
-    return { userToken: customToken }
+    // const customToken = await auth.createCustomToken(uid)
+    // return { userToken: customToken }
   } catch (err) {
     console.error("[Firebase] ::: Token error ::: ", err.message)
   }

@@ -53,7 +53,11 @@ const app = defineNuxtConfig({
  */
 
 let modulesConfig = {
-  modules: ["@pinia/nuxt", "@primevue/nuxt-module"],
+  modules: [
+    "@pinia/nuxt",
+    "@primevue/nuxt-module",
+    resolve("./modules/siteConfig"),
+  ],
 
   pinia: {
     storesDirs: [resolve("stores/**")],
@@ -131,14 +135,6 @@ const plugins = defineNuxtConfig({
 })
 
 /**
- * Server
- */
-
-const servers = defineNuxtConfig({
-  server: [resolve("server/**")],
-})
-
-/**
  * Build
  */
 
@@ -194,4 +190,4 @@ const build = defineNuxtConfig({
   },
 })
 
-export default defu(middlewares, modules, build, app, plugins, servers)
+export default defu(middlewares, modules, build, app, plugins)
