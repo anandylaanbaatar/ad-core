@@ -71,7 +71,7 @@
           <Loader v-if="loading" type="small"></Loader>
           <Button
             v-else
-            :label="'Check StorePay Amount'"
+            :label="$utils.t('Check StorePay Amount')"
             class="w-full p-3 mt-3"
             @click="checkStorePayUser"
             :disabled="!isValid"

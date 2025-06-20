@@ -161,7 +161,7 @@
         </template>
 
         <span class="ml-2">
-          {{ shippingLine.title }} -
+          {{ $utils.t(shippingLine.title) }} -
           {{ $currency.format(shippingLine.price) }}
 
           <!-- {{ options.distance.formatted }} - ({{

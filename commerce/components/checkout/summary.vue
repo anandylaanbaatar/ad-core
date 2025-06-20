@@ -22,19 +22,20 @@
         :quantity="item.quantity"
         :key="`product_item_${index}`"
         :preview="true"
+        class="p-0"
       ></ProductsCartItem>
     </div>
 
     <div class="row">
       <!--Discount Codes-->
       <div class="c-divider sm"></div>
-      <div class="c-form col-xs-12">
+      <div class="c-form col-xs-12 p-0">
         <div class="c-field">
           <label for="discountCode">{{
             $utils.t("Discount Code or Gift Card")
           }}</label>
         </div>
-        <InputGroup class="c-field c-transparent">
+        <InputGroup class="c-field c-transparent w-full">
           <InputGroupAddon><i class="pi pi-credit-card"></i></InputGroupAddon>
           <InputText
             v-model="options.discountCodes"
@@ -87,21 +88,21 @@
       <!--Summary Total-->
       <div class="c-divider sm"></div>
 
-      <div class="col-xs-6 mb10">
+      <div class="col-xs-6 mb10 pl-0">
         <label class="font-bold font3 text-md">{{
           $utils.t("Sub Total")
         }}</label>
       </div>
-      <div class="col-xs-6">
+      <div class="col-xs-6 pr-0">
         <div class="w-full text-right">
           <h3>{{ $currency.format(totalAmount.charge) }}</h3>
         </div>
       </div>
 
-      <div class="col-xs-6 mb10">
+      <div class="col-xs-6 mb10 pl-0">
         <label class="font-bold font3 text-md">{{ $utils.t("Tax") }}</label>
       </div>
-      <div class="col-xs-6">
+      <div class="col-xs-6 pr-0">
         <div v-if="theme().type === 'commerce'" class="w-full text-right">
           <h3 v-if="useCommerceStore().allowTax">
             {{ $currency.format(cart.cost.totalTaxAmount.amount) }}
@@ -110,12 +111,12 @@
         </div>
       </div>
 
-      <div class="col-xs-6 mb10">
+      <div class="col-xs-6 mb10 pl-0">
         <label class="font-bold font3 text-md">{{
           $utils.t("Discount")
         }}</label>
       </div>
-      <div class="col-xs-6">
+      <div class="col-xs-6 pr-0">
         <div class="w-full text-right">
           <h3 v-if="totalAmount && totalAmount.discount !== 0">
             {{ $currency.format(totalAmount.discount) }}
@@ -124,12 +125,12 @@
         </div>
       </div>
 
-      <div class="col-xs-6 mb10">
+      <div class="col-xs-6 mb10 pl-0">
         <label class="font-bold font3 text-md">{{
           $utils.t("Shipping")
         }}</label>
       </div>
-      <div class="col-xs-6">
+      <div class="col-xs-6 pr-0">
         <div class="w-full text-right">
           <h3 v-if="totalAmount && totalAmount.shipping !== null">
             {{ $currency.format(totalAmount.shipping) }}
@@ -138,10 +139,10 @@
         </div>
       </div>
 
-      <div class="col-xs-6">
+      <div class="col-xs-6 pl-0">
         <h3 class="font-bold font3 text-md">{{ $utils.t("Total") }}</h3>
       </div>
-      <div class="col-xs-6">
+      <div class="col-xs-6 pr-0">
         <div class="w-full text-right">
           <h3>
             <span class="font3 text-sm">{{ currency }}</span>
