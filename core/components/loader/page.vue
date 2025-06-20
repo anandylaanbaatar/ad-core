@@ -22,7 +22,13 @@ export default {
     },
     url() {
       if (this.theme && this.theme.splash) {
-        return `${this.theme.splash}`
+        let splashUrl = this.theme.splash
+
+        if (splashUrl.indexOf("?auto=format,compress") !== -1) {
+          splashUrl = splashUrl.replace("?auto=format,compress", "")
+        }
+
+        return splashUrl
       }
       return
     },
