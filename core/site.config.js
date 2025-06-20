@@ -15,13 +15,18 @@ let prismicConfig = null
 const getSitePrismicConfig = async (repoId) => {
   const endpoint = prismic.getRepositoryEndpoint(repoId)
   const client = prismic.createClient(endpoint)
-  const siteSettings = await client.getSingle("website_settings")
+  let siteSettings = null
+
+  try {
+    siteSettings = await client.getSingle("website_settings")
+  } catch (err) {
+    console.log("Prismic Client error ::: ", err.message)
+  }
 
   if (siteSettings && siteSettings.data) {
     return siteSettings.data
   }
 
-  prismicInit = true
   return null
 }
 if (config.features.prismic) {
