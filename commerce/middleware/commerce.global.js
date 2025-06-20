@@ -180,20 +180,6 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
     ],
   })
 
-  // Inject Scripts to Head
-  if (import.meta.server) {
-    // StorePay
-    if (process.env.NUXT_STOREPAY_TOKEN) {
-      useHead({
-        script: [
-          {
-            src: "https://cdn.jsdelivr.net/gh/davidshimjs/qrcodejs/qrcode.min.js",
-          },
-        ],
-      })
-    }
-  }
-
   // Minor Cleanups & Init Cart
   if (import.meta.client) {
     if (localStorage) {

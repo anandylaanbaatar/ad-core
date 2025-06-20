@@ -41,12 +41,12 @@ export default defineNuxtPlugin((nuxtApp) => {
    * Plugins
    */
 
-  const config = useRuntimeConfig().public.features
+  const config = useRuntimeConfig().public
   const linkTags = []
   const scriptTags = []
 
   // Calendar
-  if (config.calendar) {
+  if (config.features.calendar) {
     linkTags.push({
       rel: "stylesheet",
       href: "https://cdn.jsdelivr.net/npm/@event-calendar/build@4.0.2/dist/event-calendar.min.css",
@@ -55,9 +55,8 @@ export default defineNuxtPlugin((nuxtApp) => {
       src: "https://cdn.jsdelivr.net/npm/@event-calendar/build@4.0.2/dist/event-calendar.min.js",
     })
   }
-
   // Editor
-  if (config.editor) {
+  if (config.features.editor) {
     linkTags.push({
       rel: "stylesheet",
       href: "https://cdn.quilljs.com/1.3.6/quill.snow.css",
@@ -69,6 +68,12 @@ export default defineNuxtPlugin((nuxtApp) => {
     scriptTags.push({
       src: "https://cdn.quilljs.com/1.3.6/quill.min.js",
       defer: true,
+    })
+  }
+  // StorePay
+  if (config.integrations.storepay) {
+    scriptTags.push({
+      src: "https://cdn.jsdelivr.net/gh/davidshimjs/qrcodejs/qrcode.min.js",
     })
   }
 
