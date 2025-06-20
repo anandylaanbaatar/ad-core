@@ -9,10 +9,13 @@
   transition: all 0.4s ease;
 
   .ql-toolbar {
-    border: 0;
+    border: 0 !important;
     padding: 0;
 
     .ql-snow {
+      border: 0;
+    }
+    &.ql-snow {
       border: 0;
     }
     .ql-picker {
