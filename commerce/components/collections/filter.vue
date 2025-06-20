@@ -11,11 +11,11 @@
         :key="`collection_${collection.id}`"
       >
         <h4
-          class="c-link mb-2"
+          class="c-link p-2"
           :class="getClass(collection)"
           @click="$bus.$emit('goTo', `/products/${collection.handle}`)"
         >
-          {{ collection.title }}
+          {{ $utils.t(collection.title) }}
         </h4>
       </li>
     </ul>

@@ -8,8 +8,10 @@
           <div class="text-center">
             <div>
               <h1>404</h1>
-              <p class="my-2">{{ pageId }}: {{ error }}</p>
-              <Button @click="$bus.$emit('goTo', '/')">Home</Button>
+              <p class="my-2">{{ $utils.t(error) }}</p>
+              <Button @click="$bus.$emit('goTo', '/')">{{
+                $utils.t("Home")
+              }}</Button>
             </div>
           </div>
         </UiError>
