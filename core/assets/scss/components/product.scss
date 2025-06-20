@@ -4,6 +4,9 @@
   cursor: pointer;
   background: $white;
   border-radius: 15px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  -webkit-transition: all 0.4s ease;
+  transition: all 0.4s ease;
 
   .c-image {
     cursor: pointer;
@@ -26,6 +29,15 @@
       width: 100%;
       margin: 0;
     }
+
+    div.c-product-slider {
+      .splide__track {
+        border-radius: 10px;
+      }
+      .c-image {
+        border-radius: 10px;
+      }
+    }
   }
 
   .p-glass-button {
@@ -34,6 +46,11 @@
     i {
       color: $black;
     }
+  }
+
+  &:hover {
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    background: rgba(255, 255, 255, 1.15);
   }
 
   &.list {
@@ -74,8 +91,6 @@
   .c-product {
     background: rgba(255, 255, 255, 0.03);
     border: 1px solid rgba(255, 255, 255, 0.03);
-    -webkit-transition: all 0.4s ease;
-    transition: all 0.4s ease;
 
     .c-product-content {
       p {
@@ -93,6 +108,17 @@
       border: 1px solid rgba(255, 255, 255, 0.08);
       background: rgba(255, 255, 255, 0.06);
     }
+  }
+}
+.c-product-images {
+  button.p-button-icon-only.imagePreviewBtn {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 10px;
+    color: $white;
+    transition: all 0.4s ease;
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    backdrop-filter: saturate(180%) blur(20px);
   }
 }
 
@@ -256,6 +282,11 @@ div.p-dataview {
         padding-left: 0;
         padding-right: 0;
         margin-top: 0;
+        margin-bottom: 10px;
+
+        &:last-child {
+          margin-bottom: 0;
+        }
       }
     }
   }
@@ -338,6 +369,7 @@ div.p-dataview {
 
         &:last-child {
           margin-right: 0;
+          margin-left: 5px;
         }
       }
       button.iconBtn {
@@ -377,6 +409,8 @@ div.p-dataview {
 }
 .product.cartItem {
   min-height: 90px;
+  position: relative;
+  overflow: hidden;
 
   .imageArea {
     left: 10px;
@@ -400,7 +434,7 @@ div.p-dataview {
     min-height: 70px;
     display: flex;
     align-items: center;
-    padding-left: 110px;
+    padding-left: 100px;
 
     .title,
     .price {

@@ -32,6 +32,7 @@
 
     <!--Global Items-->
     <template v-if="globalItemsInit">
+      <ModalImages></ModalImages>
       <SidebarGlobal></SidebarGlobal>
       <ScrollTop></ScrollTop>
       <Toast position="bottom-right" group="global"></Toast>

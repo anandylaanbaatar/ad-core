@@ -25,24 +25,26 @@
               <Button
                 icon="pi pi-arrow-left"
                 @click="$bus.$emit('goTo', `/products/${category}/`)"
-                class="smallBtn mr-3"
+                class="sm mr-3"
               ></Button>
 
               <ul class="c-breadcrumb">
-                <li @click="$bus.$emit('goTo', '/')">{{ $utils.t("Home") }}</li>
-                <li class="c-breadcrumb-arrow">
+                <li @click="$bus.$emit('goTo', '/')" class="text-sm">
+                  {{ $utils.t("Home") }}
+                </li>
+                <li class="c-breadcrumb-arrow text-sm">
                   <i class="pi pi-chevron-right"></i>
                 </li>
                 <li
                   @click="$bus.$emit('goTo', `/products/${category}/`)"
-                  class="capitalize"
+                  class="capitalize text-sm"
                 >
                   {{ $utils.t(category) }}
                 </li>
-                <li class="c-breadcrumb-arrow">
+                <li class="c-breadcrumb-arrow text-sm">
                   <i class="pi pi-chevron-right"></i>
                 </li>
-                <li>{{ product.title }}</li>
+                <li class="text-sm">{{ product.title }}</li>
               </ul>
             </template>
 
@@ -50,13 +52,13 @@
               <Button
                 v-if="!isSavedItem"
                 icon="pi pi-heart"
-                class="smallBtn"
+                class="sm"
                 @click.stop="useSaveProduct(product)"
               ></Button>
               <Button
                 v-else
                 icon="pi pi-heart-fill"
-                class="smallBtn"
+                class="sm"
                 @click.stop="useRemoveProduct(product)"
               ></Button>
             </template>
@@ -69,12 +71,23 @@
               v-if="product.images.length > 1"
               class="col-xs-12 col-md-4 mb-4"
             >
-              <div class="c-product-images">
+              <div class="c-product-images relative">
                 <SlidersProduct
                   class="c-product-detailed-slider"
                   :item="product"
                   type="productDetailedSlider"
                 ></SlidersProduct>
+
+                <div class="c-product-images-overlay">
+                  <div class="c-block-top-right p-2">
+                    <Button
+                      v-tooltip.left="`Image Preview`"
+                      icon="pi pi-external-link"
+                      class="sm imagePreviewBtn"
+                      @click="$bus.$emit('imagePreviewGlobal', product.images)"
+                    ></Button>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -101,7 +114,10 @@
             </div>
 
             <!--Featured Image-->
-            <div v-if="featuredImage" class="col-xs-12 col-md-4 mb-4">
+            <div
+              v-if="featuredImage"
+              class="col-xs-12 col-md-4 mb-4 desktopOnly"
+            >
               <div class="c-product-images">
                 <div
                   class="c-block c-image size-2xl"
