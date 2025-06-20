@@ -665,7 +665,7 @@ export default defineNuxtPlugin((nuxtApp) => {
     if (cartItemsData) {
       let returnData = cartItemsData.cart
 
-      if (returnData.lines) {
+      if (returnData && returnData.lines) {
         returnData.items = returnData.lines.edges.map((i) => mapProduct(i.node))
         delete returnData.lines
       }
