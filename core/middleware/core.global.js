@@ -4,26 +4,6 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
   let siteName = appConfig.name
   let siteDesc = appConfig.description
 
-  // Site Settings
-  if (
-    useRuntimeConfig().public.features.prismic &&
-    appConfig.type !== "commerce"
-  ) {
-    const { client } = usePrismic()
-    const siteSettings = await client.getSingle("website_settings")
-
-    if (siteSettings && siteSettings.data) {
-      const siteConfig = siteSettings.data
-
-      if (siteConfig.name) {
-        siteName = siteConfig.name
-      }
-      if (siteConfig.description) {
-        siteDesc = siteConfig.description
-      }
-    }
-  }
-
   let meta = {
     url: siteUrl,
     title: `${siteName} | ${siteDesc}`,
@@ -127,44 +107,6 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
           rel: "canonical",
           href: meta.url,
         },
-      ],
-    })
-  }
-
-  // Inject Scripts to Head
-  if (import.meta.server) {
-    if (process.env.NUXT_GOOGLE_MAPS_TOKEN) {
-      useHead({
-        script: [
-          {
-            src: `//maps.googleapis.com/maps/api/js?key=${process.env.NUXT_GOOGLE_MAPS_TOKEN}&libraries=places&marker&v=weekly&loading=async`,
-            async: true,
-            defer: true,
-          },
-        ],
-      })
-    }
-
-    useHead({
-      link: [
-        {
-          rel: "stylesheet",
-          href: "https://cdn.jsdelivr.net/npm/@event-calendar/build@4.0.2/dist/event-calendar.min.css",
-        },
-        {
-          rel: "stylesheet",
-          href: "https://cdn.quilljs.com/1.3.6/quill.snow.css",
-        },
-        {
-          rel: "stylesheet",
-          href: "https://cdn.quilljs.com/1.3.6/quill.bubble.css",
-        },
-      ],
-      script: [
-        {
-          src: "https://cdn.jsdelivr.net/npm/@event-calendar/build@4.0.2/dist/event-calendar.min.js",
-        },
-        { src: "https://cdn.quilljs.com/1.3.6/quill.min.js", defer: true },
       ],
     })
   }

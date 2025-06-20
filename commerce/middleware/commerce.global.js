@@ -1,29 +1,9 @@
 export default defineNuxtRouteMiddleware(async (to, from) => {
-  console.log("[Middleware] ::: [Commerce] ::: Initialized!")
-
   const nuxtApp = useNuxtApp()
   const appConfig = useAppConfig().theme
   let siteUrl = appConfig.siteUrl
   let siteName = appConfig.name
   let siteDesc = appConfig.description
-
-  // Site Settings
-  if (useRuntimeConfig().public.features.prismic) {
-    const { client } = usePrismic()
-    const siteSettings = await client.getSingle("website_settings")
-
-    if (siteSettings && siteSettings.data) {
-      const siteConfig = siteSettings.data
-
-      if (siteConfig.name) {
-        siteName = siteConfig.name
-      }
-      if (siteConfig.description) {
-        siteDesc = siteConfig.description
-      }
-    }
-  }
-
   let meta = {
     url: siteUrl,
     title: `${siteName} | ${siteDesc}`,
@@ -227,5 +207,7 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
       commerceStore.set("initCart", true)
       await useGetCartItems()
     }
+
+    console.log("[Middleware] ::: [Commerce] ::: Initialized!")
   }
 })

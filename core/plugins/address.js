@@ -7,6 +7,23 @@ export default defineNuxtPlugin((nuxtApp) => {
     () => process.env.NUXT_GOOGLE_MAPS_TOKEN
   )
 
+  // Register Scripts
+  if (import.meta.server) {
+    if (process.env.NUXT_GOOGLE_MAPS_TOKEN) {
+      if (useRuntimeConfig().public.features.googleMaps) {
+        useHead({
+          script: [
+            {
+              src: `//maps.googleapis.com/maps/api/js?key=${process.env.NUXT_GOOGLE_MAPS_TOKEN}&libraries=places&marker&v=weekly&loading=async`,
+              async: true,
+              defer: true,
+            },
+          ],
+        })
+      }
+    }
+  }
+
   if (import.meta.client) {
     if (!useRuntimeConfig().public.features.googleMaps) {
       // console.log("[Plugins] ::: [Address] ::: Not Initialized!")

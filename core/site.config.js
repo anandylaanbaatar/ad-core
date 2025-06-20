@@ -63,8 +63,8 @@ if (config.features.prismic) {
     if (prismicConfig.site_slogan) {
       config.defaults.slogan = prismicConfig.site_slogan
     }
-    if (prismicConfig.description) {
-      config.defaults.description = prismicConfig.description
+    if (prismicConfig.site_description) {
+      config.defaults.description = prismicConfig.site_description
     }
 
     // Theme
