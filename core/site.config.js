@@ -1,92 +1,119 @@
-// import { initializeApp, cert, getApps, getApp } from "firebase-admin/app"
-// import { getDatabase } from "firebase-admin/database"
-// import { getAuth } from "firebase-admin/auth"
-
 import path from "node:path"
+import * as prismic from "@prismicio/client"
+
+/**
+ * Base Config
+ */
+
 let config = await import(path.resolve("config/site.config.json"))
+let prismicConfig = null
 
-// /**
-//  * Firebase Setup
-//  */
+/**
+ * Prismic Config
+ */
 
-// let privateKey = process.env.NUXT_FIREBASE_PRIVATE_KEY
-// privateKey = privateKey.replace(/\\n/g, "\n").replace(/\\/g, "")
+const getSitePrismicConfig = async (repoId) => {
+  const endpoint = prismic.getRepositoryEndpoint(repoId)
+  const client = prismic.createClient(endpoint)
+  const siteSettings = await client.getSingle("website_settings")
 
-// // Init Firebase
-// const app = getApps().length
-//   ? getApp()
-//   : initializeApp({
-//       credential: cert({
-//         projectId: process.env.NUXT_FIREBASE_PROJECT_ID,
-//         clientEmail: process.env.NUXT_FIREBASE_CLIENT_EMAIL,
-//         privateKey: privateKey,
-//       }),
-//       databaseURL: process.env.NUXT_FIREBASE_DATABASE_URL,
-//     })
-// const db = getDatabase(app)
-// const auth = getAuth(app)
+  if (siteSettings && siteSettings.data) {
+    return siteSettings.data
+  }
 
-// // Init Use Credential Utility
-// const cache = new Map()
+  prismicInit = true
+  return null
+}
+if (config.features.prismic) {
+  prismicConfig = await getSitePrismicConfig(config.features.prismic)
 
-// async function useAllCredentials(tenantId, storeId) {
-//   const ref = db.ref(`${tenantId}/stores/${storeId}/integrations`)
-//   const snapshot = await ref.once("value")
-//   if (!snapshot.exists()) return null
-//   return snapshot.val()
-// }
-// async function useCredential(tenantId, storeId, integrationId) {
-//   const key = `${tenantId}:${storeId}:${integrationId}`
+  if (prismicConfig) {
+    // Required Fields
+    if (prismicConfig.site_id) {
+      config.theme.storeId = prismicConfig.site_id
+    }
+    if (prismicConfig.site_type) {
+      config.theme.type = prismicConfig.site_type
+    }
+    if (prismicConfig.site_name) {
+      config.defaults.name = prismicConfig.site_name
+    }
+    if (prismicConfig.site_url) {
+      config.defaults.siteUrl = prismicConfig.site_url
+    }
 
-//   if (cache.has(key)) return cache.get(key)
+    // Location Specific Required Fields
+    if (prismicConfig.site_language) {
+      config.theme.language = prismicConfig.site_language
+    }
+    if (prismicConfig.site_country) {
+      config.theme.country = prismicConfig.site_country
+    }
+    if (prismicConfig.site_currency) {
+      config.theme.currency = prismicConfig.site_currency
+    }
+    if (prismicConfig.site_timezone) {
+      config.theme.timezone = prismicConfig.site_timezone
+    }
 
-//   const ref = db.ref(
-//     `${tenantId}/stores/${storeId}/integrations/${integrationId}`
-//   )
-//   const snapshot = await ref.once("value")
-//   if (!snapshot.exists()) return null
+    // Optional Fields
+    if (prismicConfig.site_name_short) {
+      config.defaults.name_short = prismicConfig.site_name_short
+    }
+    if (prismicConfig.site_slogan) {
+      config.defaults.slogan = prismicConfig.site_slogan
+    }
+    if (prismicConfig.description) {
+      config.defaults.description = prismicConfig.description
+    }
 
-//   const creds = snapshot.val()
-//   cache.set(key, creds)
+    // Theme
+    if (prismicConfig.site_logo) {
+      if (prismicConfig.site_logo.url) {
+        config.logo.desktop = prismicConfig.site_logo.url
+      }
+    }
+    if (prismicConfig.site_logo_dark) {
+      if (prismicConfig.site_logo_dark.url) {
+        config.logo.desktop_dark = prismicConfig.site_logo_dark.url
+      }
+    }
+    if (prismicConfig.site_mobile_logo) {
+      if (prismicConfig.site_mobile_logo.url) {
+        config.logo.mobile = prismicConfig.site_mobile_logo.url
+      }
+    }
+    if (prismicConfig.site_mobile_logo_dark) {
+      if (prismicConfig.site_mobile_logo_dark.url) {
+        config.logo.mobile_dark = prismicConfig.site_mobile_logo_dark.url
+      }
+    }
+    if (prismicConfig.site_splash) {
+      if (prismicConfig.site_splash.url) {
+        config.theme.splash = prismicConfig.site_splash.url
+      }
+    }
+    if (prismicConfig.site_light_dark_mode) {
+      if (prismicConfig.site_light_dark_mode === "both") {
+        config.theme.darkLightMode = null
+      } else if (prismicConfig.site_light_dark_mode === "light") {
+        config.theme.darkLightMode = "light"
+      } else if (prismicConfig.site_light_dark_mode === "dark") {
+        config.theme.darkLightMode = "dark"
+      }
+    }
 
-//   return creds
-// }
+    // Contact
+    if (prismicConfig.contact_email) {
+      config.contact.email = prismicConfig.contact_email
+    }
+    if (prismicConfig.contact_phone) {
+      config.contact.phone = prismicConfig.contact_phone
+    }
+  }
 
-// /**
-//  * Setup Remote Config
-//  */
-
-// if (config.storeId) {
-//   const tenantId = config.features.multitenancy.parentId
-//   const storeId = config.storeId
-//   const allCredentials = await useAllCredentials(tenantId, storeId)
-
-//   if (allCredentials) {
-//     // Shopify
-//     if (allCredentials.shopify) {
-//       const version = "2025-04"
-//       const storeDomain = `${allCredentials.shopify.store_domain}.myshopify.com`
-
-//       process.env.NUXT_SHOPIFY_API_VERSION = version
-//       process.env.NUXT_SHOPIFY_STORE_DOMAIN = storeDomain
-//       process.env.NUXT_SHOPIFY_GRAPH_ADMIN_ACCESS_TOKEN =
-//         allCredentials.shopify.graph_admin_access_token
-//       process.env.NUXT_SHOPIFY_STOREFRONT_ACCESS_TOKEN =
-//         allCredentials.shopify.storefront_access_token
-
-//       config.integrations.shopify = true
-//       config.features.shopify = {
-//         apiVersion: version,
-//         domain: storeDomain,
-//       }
-//     }
-//     // Prismic
-//     if (allCredentials.prismic) {
-//       config.integrations.prismic = true
-//       config.features.prismic = allCredentials.prismic.repo
-//     }
-//   }
-// }
+  console.log("[Site Config] ::: Using Prismic Settings!")
+}
 
 /**
  * Variables
@@ -155,23 +182,17 @@ let siteRuntimeConfig = {
 
 // Firebase
 if (config.integrations.firebase) {
-  // let serviceAccount = null
-
-  // // Setup Firebase Service Account
-  // if (config.config.firebaseServiceAccount) {
-  //   serviceAccount = path.resolve("config/serviceAccount.json")
-  //   process.env.GOOGLE_APPLICATION_CREDENTIALS = serviceAccount
-  // }
-
   // Setup Firebase App Config
   if (config.config.firebaseConfig) {
     siteRuntimeConfig.public.firebase = config.config.firebaseConfig
 
+    // Firebase Push Notifications
     if (config.config.firebaseWebPushKey) {
       siteRuntimeConfig.public.features.firebaseWebPushKey =
         config.config.firebaseWebPushKey
     }
 
+    // Vuefire Module
     siteConfig.vuefire = {
       config: config.config.firebaseConfig,
       auth: {
@@ -182,41 +203,14 @@ if (config.integrations.firebase) {
         sessionCookie: false,
       },
     }
-    // if (serviceAccount) {
-    //   siteConfig.vuefire.admin = {
-    //     serviceAccount: serviceAccount,
-    //   }
-    // }
   }
-
-  // // Setup Site Settings from Firebase remotely
-  // if (config.storeId) {
-  //   if (config.config.firebaseConfig && config.features.multitenancy.parentId) {
-  //     // Get Service Account Data
-  //     const serviceAccountPath = path.resolve("config/serviceAccount.json")
-  //     const rawConfig = await readFile(serviceAccountPath, "utf-8")
-  //     const serviceAccountData = JSON.parse(rawConfig)
-
-  //     // Init Firebase Admin
-  //     if (!getApps().length) {
-  //       initializeApp({
-  //         credential: cert(serviceAccountData),
-  //         databaseURL: config.config.firebaseConfig.databaseURL,
-  //       })
-  //     }
-  //     const db = getDatabase()
-  //     const parentId = config.features.multitenancy.parentId
-  //     const storeId = config.storeId
-  //     const snapshot = await db
-  //       .ref(`${parentId}/stores/${storeId}`)
-  //       .once("value")
-  //     const settings = snapshot.val()
-
-  //     if (settings) {
-  //       siteRuntimeConfig.public.siteSettings = settings
-  //     }
-  //   }
-  // }
+}
+// Prismic
+if (config.features.prismic) {
+  siteConfig.prismic = {
+    endpoint: config.features.prismic,
+    preview: false,
+  }
 }
 
 /**
@@ -383,4 +377,4 @@ siteConfig.appConfig.theme = theme
 siteConfig.app.head = siteHead
 siteConfig.runtimeConfig = siteRuntimeConfig
 
-export { siteConfig, siteRuntimeConfig } // db, auth, useCredential
+export { siteConfig, siteRuntimeConfig }

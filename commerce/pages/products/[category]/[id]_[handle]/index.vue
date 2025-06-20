@@ -20,7 +20,7 @@
       <template v-else>
         <div class="container py-4">
           <!--Toolbar-->
-          <Toolbar class="mb-3">
+          <Toolbar class="mb-3 px-3">
             <template #start>
               <Button
                 icon="pi pi-arrow-left"

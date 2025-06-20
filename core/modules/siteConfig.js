@@ -1,14 +1,12 @@
-import path from "node:path"
-
 export default async function siteConfigModule(moduleOptions, nuxt) {
   const { initializeApp, cert, getApps, getApp } = await import(
     "firebase-admin/app"
   )
   const { getDatabase } = await import("firebase-admin/database")
-  const siteConfigData = await import(path.resolve("config/site.config.json"), {
-    with: { type: "json" },
-  })
-  let config = siteConfigData.default
+
+  let appConfig = nuxt.options.appConfig
+
+  // console.log("[Module Config] ::: ", appConfig)
 
   const credentials = {
     projectId: process.env.NUXT_FIREBASE_PROJECT_ID,
@@ -27,9 +25,10 @@ export default async function siteConfigModule(moduleOptions, nuxt) {
   const db = getDatabase(app)
 
   // Commerce
-  if (config.theme.type === "commerce" && config.storeId) {
-    const tenantId = config.features.multitenancy.parentId
-    const storeId = config.storeId
+  if (appConfig.theme.type === "commerce" && appConfig.theme.storeId) {
+    const tenantId =
+      nuxt.options.runtimeConfig.public.features.multitenancy.parentId
+    const storeId = appConfig.theme.storeId
     const configPath = `${tenantId}/stores/${storeId}/integrations`
     const snapshot = await db.ref(configPath).once("value")
 
@@ -45,13 +44,6 @@ export default async function siteConfigModule(moduleOptions, nuxt) {
         if (integrations.shopify) {
           const version = "2025-04"
           const storeDomain = `${integrations.shopify.store_domain}.myshopify.com`
-
-          process.env.NUXT_SHOPIFY_API_VERSION = version
-          process.env.NUXT_SHOPIFY_STORE_DOMAIN = storeDomain
-          process.env.NUXT_SHOPIFY_GRAPH_ADMIN_ACCESS_TOKEN =
-            integrations.shopify.graph_admin_access_token
-          process.env.NUXT_SHOPIFY_STOREFRONT_ACCESS_TOKEN =
-            integrations.shopify.storefront_access_token
 
           nuxt.options.runtimeConfig.private.shopify = {
             api_version: version,
@@ -78,13 +70,12 @@ export default async function siteConfigModule(moduleOptions, nuxt) {
       }
     }
 
-    console.log(
-      "✅ [Commerce] Config Set!",
-      process.env.NUXT_SHOPIFY_STORE_DOMAIN,
-      config.defaults.siteUrl
-    )
+    // console.log(
+    //   "✅ [Commerce] Config Set!",
+    //   process.env.NUXT_SHOPIFY_STORE_DOMAIN
+    // )
   } else {
-    console.log("✅ [Site] Config Set!", config.defaults.siteUrl)
+    // console.log("✅ [Site] Config Set!", appConfig.defaults.siteUrl)
   }
 
   // Turn off db and cleanup app to avoid long running process.

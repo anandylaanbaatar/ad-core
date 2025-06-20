@@ -1,17 +1,8 @@
-import path from "node:path"
 import { defu } from "defu"
 import { createResolver } from "@nuxt/kit"
 import { defineNuxtConfig } from "nuxt/config"
 import Aura from "@primevue/themes/aura"
 const { resolve } = createResolver(import.meta.url)
-
-/**
- * Site Config
- */
-
-const { siteRuntimeConfig, siteConfig } = await import(
-  path.resolve("./v1/core/site.config.js")
-)
 
 console.log("[Layer] :: Adding AD Core - v2.1.1")
 
@@ -56,13 +47,16 @@ let modulesConfig = {
   modules: [
     "@pinia/nuxt",
     "@primevue/nuxt-module",
+    "@nuxtjs/i18n",
+    "@nuxtjs/robots",
+    "nuxt-vuefire",
+    "@nuxtjs/prismic",
     resolve("./modules/siteConfig"),
   ],
 
   pinia: {
     storesDirs: [resolve("stores/**")],
   },
-
   primevue: {
     options: {
       theme: {
@@ -79,43 +73,23 @@ let modulesConfig = {
       ripple: true,
     },
   },
-}
-
-// i18n
-if (siteRuntimeConfig.public.features.i18n) {
-  modulesConfig.modules.push("@nuxtjs/i18n")
-  modulesConfig.i18n = {
+  i18n: {
     vueI18n: resolve("../../config/i18n.config.js"),
     bundle: {
       optimizeTranslationDirective: false,
     },
-  }
-}
-
-// Robots
-if (siteRuntimeConfig.public.features.robots) {
-  modulesConfig.modules.push("@nuxtjs/robots")
-  modulesConfig.robots = {
+  },
+  robots: {
     UserAgent: "*",
     Disallow: "",
-  }
-}
-
-// Firebase
-if (siteRuntimeConfig.public.integrations.firebase) {
-  modulesConfig.modules.push("nuxt-vuefire")
-}
-
-// Prismic
-if (siteRuntimeConfig.public.integrations.prismic) {
-  modulesConfig.modules.push("@nuxtjs/prismic")
-  modulesConfig.prismic = {
-    endpoint: siteRuntimeConfig.public.features.prismic,
-    preview: false,
-  }
+  },
 }
 
 const modules = defineNuxtConfig(modulesConfig)
+
+/**
+ * Servers
+ */
 
 const servers = defineNuxtConfig({
   server: [resolve("server/**")],
@@ -178,14 +152,16 @@ const build = defineNuxtConfig({
   vue: {
     compilerOptions: {
       // Ignore media-controller player tag
+
+      // (siteConfig.appConfig.theme.type !== "commerce" &&
+      //   tag.startsWith("CommerceSidebar"))
+
       isCustomElement: (tag) => {
         if (
           tag.startsWith("media-") ||
           tag.startsWith("mux-") ||
           tag.startsWith("youtube-") ||
-          tag.startsWith("vimeo-") ||
-          (siteConfig.appConfig.theme.type !== "commerce" &&
-            tag.startsWith("CommerceSidebar"))
+          tag.startsWith("vimeo-")
         ) {
           return tag
         }
