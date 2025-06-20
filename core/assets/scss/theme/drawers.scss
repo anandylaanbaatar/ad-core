@@ -43,8 +43,8 @@ div.p-drawer {
   }
 
   .p-drawer-close {
-    width: 40px;
-    height: 40px;
+    width: 30px;
+    height: 30px;
     top: 20px;
     right: 20px;
     position: absolute;
@@ -57,6 +57,12 @@ div.p-drawer {
     -webkit-transition: all 0.4s ease;
     transition: all 0.4s ease;
 
+    &-button {
+      width: 30px;
+      height: 30px;
+      min-height: 30px;
+      border-radius: 10px;
+    }
     .p-icon {
       width: 15px;
       height: 15px;
@@ -237,6 +243,12 @@ div.p-drawer.cartSidebar {
         height: 100%;
         width: 100%;
         margin-bottom: 240px;
+
+        div.col-xs-12 {
+          margin-top: 0;
+          padding-left: 0;
+          padding-right: 0;
+        }
       }
     }
     .bottom {

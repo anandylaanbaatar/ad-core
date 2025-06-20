@@ -246,6 +246,19 @@ div.p-dataview {
 
 .productsGrid {
   position: relative;
+
+  &.row {
+    margin-right: 0;
+    margin-left: 0;
+
+    .productsGridScroll {
+      .col-xs-12 {
+        padding-left: 0;
+        padding-right: 0;
+        margin-top: 0;
+      }
+    }
+  }
 }
 
 .product {
@@ -375,6 +388,12 @@ div.p-dataview {
       height: 90px;
       min-height: 90px;
       width: 90px;
+      border-radius: 8px;
+
+      .p-badge {
+        background-color: $white;
+        color: $black;
+      }
     }
   }
   .content {
@@ -405,6 +424,7 @@ div.p-dataview {
         width: 70px;
         height: 70px;
         min-height: 70px;
+        border-radius: 8px;
       }
     }
     .content {
