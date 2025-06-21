@@ -34,13 +34,13 @@
               <Button
                 v-if="showFilters"
                 icon="pi pi-times"
-                class="mr-3"
+                class="mr-3 sm"
                 @click="toggleFilters(false)"
               ></Button>
               <Button
                 v-else
                 icon="pi pi-filter"
-                class="mr-3"
+                class="mr-3 sm"
                 @click="toggleFilters(true)"
               ></Button>
 
@@ -49,6 +49,7 @@
                 :options="sortOptions"
                 optionLabel="name"
                 placeholder="Sort By"
+                class="sm"
                 @change="changeSort"
               ></Select>
 

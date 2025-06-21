@@ -112,50 +112,27 @@ export default {
         }
       }
 
-      // Fetch Products
-      await $fetch(`/api/products`, {
-        method: "post",
-        body: options,
-      })
-        .then((data) => {
-          this.pageInfo = data.pageInfo
+      const products = await this.$shopify.productsV2(options)
 
-          if (this.products === null) {
-            if (this.exclude) {
-              this.products = data.items.filter(
-                (item) => item.id !== this.exclude
-              )
-            } else {
-              this.products = data.items
-            }
-          } else {
-            this.products = this.products.concat(data.items)
-          }
+      this.pageInfo = products.meta
 
-          if (isViewMore) {
-            this.moreLoading = false
-          } else {
-            this.loading = false
-          }
-        })
-        .catch((err) => {
-          console.log("Products ::: Error: ", err)
-
-          if (isViewMore) {
-            this.moreLoading = false
-          } else {
-            this.loading = false
-          }
-        })
+      if (this.products === null) {
+        if (this.exclude) {
+          this.products = products.items.filter(
+            (item) => item.id !== this.exclude
+          )
+        } else {
+          this.products = products.items
+        }
+      } else {
+        this.products = this.products.concat(products.items)
+      }
+      if (isViewMore) {
+        this.moreLoading = false
+      } else {
+        this.loading = false
+      }
     },
   },
 }
 </script>
-
-<style lang="scss">
-.productItem {
-  width: 332px;
-  min-width: 332px;
-  height: 418px;
-}
-</style>

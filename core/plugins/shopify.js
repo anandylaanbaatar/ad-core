@@ -161,6 +161,19 @@ export default defineNuxtPlugin((nuxtApp) => {
     })
 
     if (productsData) {
+      // Return products with collection
+      if (productsData.collection) {
+        const allProducts = productsData.collection.products
+        let allCollectionData = productsData.collection
+        delete allCollectionData.products
+
+        return {
+          collection: mapCollection(allCollectionData),
+          items: allProducts.edges.map((i) => mapProduct(i.node)),
+          meta: allProducts.pageInfo,
+        }
+        // Return all products
+      }
       if (productsData.products) {
         return {
           items: productsData.products.edges.map((i) => mapProduct(i.node)),

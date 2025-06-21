@@ -65,7 +65,6 @@ export default {
 
   mounted() {
     this.$bus.$on("imagePreviewGlobal", (items) => {
-      console.log("Items type ::: ", typeof items, items)
       this.setHeight()
 
       if (typeof items === "object") {

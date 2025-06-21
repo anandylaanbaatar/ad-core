@@ -121,6 +121,11 @@
     backdrop-filter: saturate(180%) blur(20px);
   }
 }
+.productItem {
+  width: 332px;
+  min-width: 332px;
+  height: 418px;
+}
 
 .c-sizes {
   width: auto;

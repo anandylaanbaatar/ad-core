@@ -18,7 +18,7 @@
 
         <Button
           :label="$utils.t('Shop All Products')"
-          severity="primary"
+          severity="secondary"
           @click="$bus.$emit('goTo', '/products/all')"
         ></Button>
       </div>
