@@ -22,7 +22,7 @@ export const usePaymentStore = defineStore("payment", {
         options: {},
       },
       {
-        id: "card",
+        id: "stripe",
         title: "Credit Card, Debit Card, Klarna",
         logo: "/images/theme/credit_card_icons.png",
         active: false,

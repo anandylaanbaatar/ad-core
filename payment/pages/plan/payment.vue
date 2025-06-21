@@ -204,7 +204,7 @@ export default {
 
       console.log("[Stripe] ::: Form Submit ::", result)
 
-      if (result && result.selectedPaymentMethod === "card") {
+      if (result && result.selectedPaymentMethod === "stripe") {
         const elements = this.elements
 
         const { paymentIntent, error } = await this.stripe.confirmPayment({

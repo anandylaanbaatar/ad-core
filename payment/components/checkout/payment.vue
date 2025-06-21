@@ -89,9 +89,9 @@
       :discountCodes="discountCodes"
     ></CheckoutStorepay>
 
-    <!--Card-->
-    <CheckoutCard
-      v-else-if="options.payment === 'card'"
+    <!--Stripe-->
+    <CheckoutStripe
+      v-else-if="options.payment === 'stripe'"
       :cart="cart"
       :totalAmount="totalAmount"
       :account="account"
@@ -99,7 +99,7 @@
       :shippingLine="shippingLine"
       :shippingAddress="shippingAddress"
       :discountCodes="discountCodes"
-    ></CheckoutCard>
+    ></CheckoutStripe>
   </section>
 </template>
 

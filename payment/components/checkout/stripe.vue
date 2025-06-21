@@ -108,11 +108,11 @@ export default {
         shippingAddress: this.shippingAddress,
         presentmentCurrencyCode: this.currency,
         discountCodes: this.discountCodes,
-        note: `Card`,
+        note: `Stripe`,
       }
     },
     paymentType() {
-      return useAppConfig().theme.payment.payments.find((i) => i.id === "card")
+      return usePaymentStore().paymentOptions.find((i) => i.id === "stripe")
     },
     isDarkMode() {
       return useCoreStore().darkMode
@@ -300,7 +300,7 @@ export default {
       // if (result && result.error) {
       //   this.btnLoading = false
       // }
-      if (result && result.selectedPaymentMethod === "card") {
+      if (result && result.selectedPaymentMethod === "stripe") {
         const elements = this.elements
 
         // Payment Intent
