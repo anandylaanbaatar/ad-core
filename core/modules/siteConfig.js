@@ -34,6 +34,7 @@ export default async function siteConfigModule(moduleOptions, nuxt) {
     // Check if site setup
     if (snapshot.exists()) {
       const storeData = snapshot.val()
+
       if (storeData) {
         // Set Default Private to hold integrations
         if (!nuxt.options.runtimeConfig.private) {
@@ -43,8 +44,10 @@ export default async function siteConfigModule(moduleOptions, nuxt) {
         // Store Setup
         if (storeData.tenantId) {
           // TenentId
-          nuxt.options.runtimeConfig.public.features.multitenancy =
-            storeData.tenantId
+          nuxt.options.runtimeConfig.public.features.multitenancy = {
+            parentId: parentId,
+            tenantId: storeData.tenantId,
+          }
 
           // FileSystem
           nuxt.options.runtimeConfig.public.features.fileSystem = {

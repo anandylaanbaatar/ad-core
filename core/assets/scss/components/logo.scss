@@ -13,22 +13,21 @@
     display: none;
     height: 40px;
   }
+}
+.c-payment-logo {
+  width: auto;
+  height: 30px !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px;
+  background: $white;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.2);
 
-  &.c-payment-logo {
-    width: auto;
-    height: 30px !important;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 5px;
-    background: $white;
-    border-radius: 8px;
-    border: 1px solid rgba(0, 0, 0, 0.2);
-
-    img {
-      border-radius: 6px;
-      height: 25px !important;
-    }
+  img {
+    border-radius: 6px;
+    height: 25px !important;
   }
 }
 

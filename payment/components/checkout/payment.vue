@@ -43,7 +43,7 @@
               <div class="col-xs-6">{{ payment.title }}</div>
               <div class="col-xs-6 right">
                 <div class="text-right">
-                  <div v-if="payment.logo" class="c-logo c-payment-logo">
+                  <div v-if="payment.logo" class="c-payment-logo">
                     <img :src="payment.logo" :alt="payment.title" />
                   </div>
 

@@ -70,7 +70,10 @@ export const usePaymentStore = defineStore("payment", {
       if (features.multitenancy) {
         if (features.multitenancy.tenantId) {
           isMultitenant = true
-          tenantId = features.multitenancy.tenantId
+          tenantId = features.multitenancy
+        } else if (typeof features.multitenancy === "string") {
+          isMultitenant = true
+          tenantId = features.multitenancy
         }
       }
 
