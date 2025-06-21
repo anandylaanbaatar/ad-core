@@ -15,6 +15,19 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
 
   // Set Collections
   const commerceStore = useCommerceStore()
+
+  // Server Init
+  if (import.meta.server && !commerceStore.serverInit) {
+    await commerceStore.setCollections()
+    commerceStore.set("serverInit", true)
+  }
+  // Client Init
+  if (import.meta.client && !commerceStore.clientInit) {
+    await commerceStore.setLocations()
+    commerceStore.setSavedItems()
+    commerceStore.set("clientInit", true)
+  }
+
   const collections = commerceStore.collections
 
   /**

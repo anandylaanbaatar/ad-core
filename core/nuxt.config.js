@@ -105,11 +105,11 @@ const plugins = defineNuxtConfig({
     resolve("./plugins/address.js"),
     resolve("./plugins/currency.js"),
     resolve("./plugins/algolia.js"),
+    resolve("./plugins/shopify.js"),
     resolve("./plugins/firebase.client.js"),
     resolve("./plugins/forms.js"),
     resolve("./plugins/general.client.js"),
     resolve("./plugins/notifications.js"),
-    resolve("./plugins/shopify.js"),
     resolve("./plugins/core.client.js"),
   ],
 })

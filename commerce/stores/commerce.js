@@ -5,6 +5,9 @@ export const useCommerceStore = defineStore("commerce", {
   id: "commerce-store",
 
   state: () => ({
+    serverInit: false,
+    clientInit: false,
+
     // User
     shopifyUser: null,
 
@@ -144,6 +147,7 @@ export const useCommerceStore = defineStore("commerce", {
       }
 
       const nuxtApp = useNuxtApp()
+
       const allCollections = await nuxtApp.$shopify.collections({
         limit: 150,
       })
