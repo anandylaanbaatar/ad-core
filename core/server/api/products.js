@@ -238,10 +238,14 @@ const getQuery = (type, options) => {
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
   const config = useRuntimeConfig(event)
+  let keys = config.private.shopify
 
-  if (!config.private.shopify) return
+  // Override Keys
+  if (body.customKeys) {
+    keys = body.customKeys
+  }
 
-  const keys = config.private.shopify
+  if (!keys) return
 
   const client = createGraphQLClient({
     url: `https://${keys.store_domain}/api/${keys.api_version}/graphql.json`,
@@ -265,7 +269,7 @@ export default defineEventHandler(async (event) => {
       filters.category = "all"
     }
     if (typeof body.sort === "undefined") {
-      filters.category = "CREATED_AT"
+      filters.sort = "CREATED_AT"
     }
   }
 

@@ -109,6 +109,7 @@ const plugins = defineNuxtConfig({
     resolve("./plugins/forms.js"),
     resolve("./plugins/general.client.js"),
     resolve("./plugins/notifications.js"),
+    resolve("./plugins/shopify.js"),
     resolve("./plugins/core.client.js"),
   ],
 })

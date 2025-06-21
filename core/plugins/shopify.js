@@ -1,28 +1,11 @@
 import moment from "moment-timezone"
 
 export default defineNuxtPlugin((nuxtApp) => {
-  // const KEY = useState(
-  //   "shopifyKey",
-  //   () => process.env.NUXT_SHOPIFY_STOREFRONT_ACCESS_TOKEN
-  // )
-  // const ADMIN_KEY = useState(
-  //   "shopifyAdminKey",
-  //   () => process.env.NUXT_SHOPIFY_GRAPH_ADMIN_ACCESS_TOKEN
-  // )
-
   if (import.meta.client) {
     if (!useRuntimeConfig().public.integrations.shopify) {
       // console.log("[Plugins] ::: [Shopify] ::: Not Initialized!")
       return
     }
-    // if (!KEY.value) {
-    //   console.log("[Plugins] ::: [Shopify] ::: Missing Integration Key!")
-    //   return
-    // }
-    // if (!ADMIN_KEY.value) {
-    //   console.log("[Plugins] ::: [Shopify Admin] ::: Missing Integration Key!")
-    //   return
-    // }
 
     console.log("[Plugins] ::: [Shopify] ::: Initialized!")
   }
@@ -53,6 +36,47 @@ export default defineNuxtPlugin((nuxtApp) => {
       id: ids[ids.length - 1],
     }
   }
+
+  const mapImage = (image) => {
+    let item = image
+    let itemIds = getIds(item.id)
+
+    item.id = itemIds.id
+    item.uid = itemIds.uid
+
+    return item
+  }
+  const mapCollection = (collection) => {
+    let item = collection
+    let itemIds = getIds(item.id)
+
+    item.id = itemIds.id
+    item.uid = itemIds.uid
+
+    return item
+  }
+  const mapVariant = (variant) => {
+    let item = variant
+    let itemIds = getIds(item.id)
+
+    item.id = itemIds.id
+    item.uid = itemIds.uid
+
+    // Store Availability
+    if (item.storeAvailability) {
+      item.storeAvailability = item.storeAvailability.edges.map((i) => {
+        let itemStore = i.node
+        let itemStoreIds = getIds(itemStore.location.id)
+
+        itemStore.location.id = itemStoreIds.id
+        itemStore.location.uid = itemStoreIds.uid
+
+        return itemStore
+      })
+    }
+
+    return item
+  }
   const mapProduct = (product) => {
     let item = product
 
@@ -64,67 +88,50 @@ export default defineNuxtPlugin((nuxtApp) => {
     }
 
     // Collections && Categories
-    if (item.collections && item.collections.edges) {
-      if (item.collections.edges.length > 0) {
-        let categoryIds = getIds(item.collections.edges[0].node.id)
-
-        item.category = item.collections.edges[0].node
-        item.category.id = categoryIds.id
-        item.category.uid = categoryIds.uid
-
-        // delete item.collections
-      }
+    if (item.collections) {
+      item.collections = product.collections.edges.map((i) =>
+        mapCollection(i.node)
+      )
+      item.category = item.collections[0]
     }
 
     // Images
     if (item.featuredImage && item.featuredImage.url) {
       let featuredImageIds = getIds(item.featuredImage.id)
+
       item.featuredImage.id = featuredImageIds.id
       item.featuredImage.uid = featuredImageIds.uid
+
       item.image = item.featuredImage.url
     }
     if (item.images) {
-      item.images = product.images.edges.map((j) => {
-        let itemImage = j.node
-        let imageIds = getIds(j.node.id)
-        itemImage.id = imageIds.id
-        itemImage.uid = imageIds.uid
-        return itemImage
-      })
+      item.images = product.images.edges.map((i) => mapImage(i.node))
     }
 
     // Variants
     if (item.variants) {
-      item.variants = product.variants.edges.map((k) => {
-        let itemVariant = k.node
-        let itemVariantIds = getIds(k.node.id)
-
-        itemVariant.id = itemVariantIds.id
-        itemVariant.uid = itemVariantIds.uid
-
-        // Store Availability
-        let storeAvailability = itemVariant.storeAvailability.edges.map((j) => {
-          let itemStore = j.node
-          let itemStoreIds = getIds(j.node.location.id)
-
-          itemStore.location.id = itemStoreIds.id
-          itemStore.location.uid = itemStoreIds.uid
-
-          return itemStore
-        })
-        itemVariant.storeAvailability = storeAvailability
-
-        return itemVariant
-      })
+      item.variants = product.variants.edges.map((i) => mapVariant(i.node))
 
       // Price
-      item.price = item.variants[0].price.amount
+      if (item.variants.length > 0) {
+        item.price = item.variants[0].price.amount
+        item.currency = item.variants[0].price.currencyCode
+      }
     }
 
     return item
   }
-  const mapCollection = (collection) => {
-    let item = collection.node
+  const mapLocation = (location) => {
+    let item = location
+    let itemIds = getIds(item.id)
+
+    item.id = itemIds.id
+    item.uid = itemIds.uid
+
+    return item
+  }
+  const mapOrder = (order) => {
+    let item = order
     let itemIds = getIds(item.id)
 
     item.id = itemIds.id
@@ -146,6 +153,24 @@ export default defineNuxtPlugin((nuxtApp) => {
       type: "products",
     })
   }
+  const productsV2 = async (params) => {
+    const productsData = await fetchData({
+      graphql: true,
+      params: params,
+      type: "products",
+    })
+
+    if (productsData) {
+      if (productsData.products) {
+        return {
+          items: productsData.products.edges.map((i) => mapProduct(i.node)),
+          meta: productsData.products.pageInfo,
+        }
+      }
+    }
+
+    return productsData
+  }
   const product = async (params) => {
     const productData = await fetchData({
       graphql: true,
@@ -153,10 +178,26 @@ export default defineNuxtPlugin((nuxtApp) => {
       type: "product",
     })
 
-    // console.log("[Product] ::: Product Data ::", productData)
-
     if (productData && productData.product) {
       return mapProduct(productData.product)
+    }
+
+    return null
+  }
+  const productsCount = async (params) => {
+    const allProductsCount = await fetchData({
+      graphqlAdmin: true,
+      params: params,
+      type: "productsCount",
+    })
+
+    if (allProductsCount) {
+      if (
+        allProductsCount.productsCount &&
+        allProductsCount.productsCount.count
+      ) {
+        return allProductsCount.productsCount.count
+      }
     }
 
     return null
@@ -182,57 +223,54 @@ export default defineNuxtPlugin((nuxtApp) => {
       dataInput: dataInput,
     })
   }
-  const productsCount = async (params) => {
-    const allProductsCount = await fetchData({
-      graphqlAdmin: true,
+
+  /**
+   * Collections
+   */
+
+  const collections = async (params) => {
+    const allCollections = await fetchData({
+      graphql: true,
       params: params,
-      type: "productsCount",
+      type: "collections",
     })
 
-    if (allProductsCount) {
-      if (
-        allProductsCount.productsCount &&
-        allProductsCount.productsCount.count
-      ) {
-        return allProductsCount.productsCount.count
+    if (allCollections) {
+      if (allCollections.collections) {
+        return allCollections.collections.edges.map((i) =>
+          mapCollection(i.node)
+        )
       }
     }
 
     return null
   }
+  const collection = async (params) => {
+    const collection = await fetchData({
+      graphql: true,
+      params: params,
+      type: "collection",
+    })
 
-  /**
-   * Orders
-   */
+    return collection
+  }
+  const collectionsCount = async (params) => {
+    const allCollectionsCount = await fetchData({
+      graphqlAdmin: true,
+      params: params,
+      type: "collectionsCount",
+    })
 
-  // REST - deprecated
-  const orders = async (params) => {
-    return await fetchData({
-      method: "get",
-      params: params,
-      type: "orders",
-    })
-  }
-  const order = async (params) => {
-    return await fetchData({
-      graphqlAdmin: true,
-      params: params,
-      type: "order",
-    })
-  }
-  const createDraftOrder = async (dataInput) => {
-    return await fetchData({
-      graphqlAdmin: true,
-      type: "createDraftOrder",
-      dataInput: dataInput,
-    })
-  }
-  const completeDraftOrder = async (params) => {
-    return await fetchData({
-      graphqlAdmin: true,
-      type: "completeDraftOrder",
-      params: params,
-    })
+    if (allCollectionsCount) {
+      if (
+        allCollectionsCount.collectionsCount &&
+        allCollectionsCount.collectionsCount.count
+      ) {
+        return allCollectionsCount.collectionsCount.count
+      }
+    }
+
+    return null
   }
 
   /**
@@ -448,14 +486,6 @@ export default defineNuxtPlugin((nuxtApp) => {
   }
 
   const customer = async (params) => {
-    // Option 1
-    // return await fetchData({
-    //   method: "get",
-    //   params: params,
-    //   type: "customer",
-    // })
-
-    // Option 2
     const res = await fetchData({
       graphql: true,
       params: params,
@@ -601,52 +631,100 @@ export default defineNuxtPlugin((nuxtApp) => {
       type: "locations",
     })
   }
-
-  /**
-   * Collections
-   */
-
-  const collections = async (params) => {
-    const allCollections = await fetchData({
-      graphql: true,
-      params: params,
-      type: "collections",
-    })
-
-    if (allCollections) {
-      if (allCollections.collections) {
-        return allCollections.collections.edges.map((i) => mapCollection(i))
-      }
-    }
-
-    return null
-  }
-  const collection = async (params) => {
-    const collection = await fetchData({
-      graphql: true,
-      params: params,
-      type: "collection",
-    })
-
-    return collection
-  }
-  const collectionsCount = async (params) => {
-    const allCollectionsCount = await fetchData({
+  const locationsV2 = async (params) => {
+    const locationsData = await fetchData({
       graphqlAdmin: true,
       params: params,
-      type: "collectionsCount",
+      type: "locations",
     })
 
-    if (allCollectionsCount) {
-      if (
-        allCollectionsCount.collectionsCount &&
-        allCollectionsCount.collectionsCount.count
-      ) {
-        return allCollectionsCount.collectionsCount.count
+    if (locationsData) {
+      if (locationsData.locations) {
+        return locationsData.locations.edges.map((i) => mapLocation(i.node))
       }
     }
 
-    return null
+    return locationsData
+  }
+  const location = async (params) => {
+    const locationData = await fetchData({
+      graphqlAdmin: true,
+      params: params,
+      type: "location",
+    })
+
+    if (locationData && locationData.location) {
+      return mapLocation(locationData.location)
+    }
+
+    return locationData
+  }
+
+  /**
+   * Orders
+   */
+
+  // REST - deprecated
+  const orders = async (params) => {
+    return await fetchData({
+      method: "get",
+      params: params,
+      type: "orders",
+    })
+  }
+  const ordersV2 = async (params) => {
+    const ordersData = await fetchData({
+      graphqlAdmin: true,
+      params: params,
+      type: "orders",
+    })
+
+    if (ordersData) {
+      if (ordersData.orders) {
+        return {
+          items: ordersData.orders.edges.map((i) => mapOrder(i.node)),
+          meta: ordersData.orders.pageInfo,
+        }
+      }
+    }
+
+    return ordersData
+  }
+  const order = async (params) => {
+    return await fetchData({
+      graphqlAdmin: true,
+      params: params,
+      type: "order",
+    })
+  }
+  const ordersCount = async (params) => {
+    const allOrdersCount = await fetchData({
+      graphqlAdmin: true,
+      params: params,
+      type: "ordersCount",
+    })
+
+    if (allOrdersCount) {
+      if (allOrdersCount.ordersCount) {
+        return allOrdersCount.ordersCount.count
+      }
+    }
+
+    return
+  }
+  const createDraftOrder = async (dataInput) => {
+    return await fetchData({
+      graphqlAdmin: true,
+      type: "createDraftOrder",
+      dataInput: dataInput,
+    })
+  }
+  const completeDraftOrder = async (params) => {
+    return await fetchData({
+      graphqlAdmin: true,
+      type: "completeDraftOrder",
+      params: params,
+    })
   }
 
   /**
@@ -725,6 +803,7 @@ export default defineNuxtPlugin((nuxtApp) => {
       shopify: {
         // Products
         products,
+        productsV2,
         product,
         createProduct,
         createProductVariant,
@@ -733,7 +812,9 @@ export default defineNuxtPlugin((nuxtApp) => {
 
         // Orders
         orders,
+        ordersV2,
         order,
+        ordersCount,
         createDraftOrder,
         completeDraftOrder,
 
@@ -755,6 +836,8 @@ export default defineNuxtPlugin((nuxtApp) => {
 
         // Locations
         locations,
+        locationsV2,
+        location,
 
         // Collections
         collections,

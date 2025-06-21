@@ -6,6 +6,186 @@ import { defineEventHandler, readBody } from "h3"
 // https://github.com/Shopify/shopify-app-js/tree/565d1142edbfabba8ad516214f597778f7cfb521/packages/api-clients/admin-api-client#rest-client
 // https://shopify.dev/docs/api/storefront/2024-07/queries/collection
 
+const getProductsQuery = (type, options) => {
+  let query = ``
+
+  let productNode = `
+    id
+    images(first: 50) {
+      edges {
+        node {
+          id
+          url
+          width
+          height
+          altText
+        }
+      }
+    }
+    featuredImage {
+      id
+      url
+      width
+      height
+      altText
+    }
+    productType
+    description
+    createdAt
+    handle
+    tags
+    title
+    totalInventory
+    updatedAt
+    vendor
+    publishedAt
+    variants (first: 50) {
+      edges {
+        node {
+          id
+          price {
+            amount
+            currencyCode
+          }
+          compareAtPrice {
+            amount
+            currencyCode
+          }
+          image {
+            id
+            altText
+            height
+            url
+            width
+          }
+          sku
+          title
+        }
+      }
+    }
+    collections(first: 50) {
+      edges {
+        node {
+          id
+          handle
+          title
+        }
+        cursor
+      }
+      totalCount
+    }
+  `
+  let productEdges = `
+    edges {
+      cursor
+      node {
+        ${productNode}
+      }
+    }
+  `
+  let pageInfo = `
+    pageInfo {
+      endCursor
+      hasNextPage
+      hasPreviousPage
+      startCursor
+    }
+  `
+
+  /**
+   * Sort & Filters
+   */
+
+  // https://shopify.dev/docs/api/usage/search-syntax
+  let queryFilter = ""
+  if (typeof options.limit === "undefined") {
+    options.limit = 5
+  }
+  if (typeof options.category === "undefined") {
+    options.category = "all"
+  }
+  if (typeof options.sort === "undefined") {
+    options.sort = "CREATED_AT"
+  }
+
+  if (options.query) {
+    queryFilter = `, query: "${options.query}"`
+  }
+  if (options.ids) {
+    let queryList = ""
+
+    for (let i = 0; i < options.ids.length; i++) {
+      if (queryList !== "") queryList += ` OR `
+      queryList += `(id:${options.ids[i]})`
+    }
+
+    queryFilter = `, query: "${queryList}"`
+  }
+
+  let pagination = ``
+  if (options.cursor) {
+    pagination = `, after: "${options.cursor}"`
+  }
+
+  let reverseKey = `, reverse: true`
+  let sortKey = `, sortKey: ${options.sort}`
+
+  if (options.category !== "all") {
+    if (options.sort === "CREATED_AT") {
+      sortKey = `, sortKey: CREATED`
+    }
+  }
+  if (options.sort === "PRICE_HIGH_TO_LOW") {
+    sortKey = `, sortKey: PRICE`
+  } else if (options.sort === "PRICE_LOW_TO_HIGH") {
+    sortKey = `, sortKey: PRICE`
+    reverseKey = `, reverse: false`
+  }
+
+  // Products Query
+  let productsNode = `
+    products(first: ${options.limit}${queryFilter}${sortKey}${reverseKey}${pagination}) {
+      ${productEdges}
+      ${pageInfo}
+    }
+  `
+
+  // All Products
+  if (type === "products") {
+    // Products by Collection
+    if (options.category !== "all") {
+      query = `{
+        collection(handle: "${options.category}") {
+          id
+          handle
+          title
+          description
+          image {
+            id
+            url
+          }
+          ${productsNode}
+        }
+      }`
+      // All Products
+    } else {
+      query = `{
+        ${productsNode}    
+      }`
+      return query
+    }
+    // Single Product
+  } else if (type === "product") {
+    query = `{
+      product(id: "gid://shopify/Product/${options.productId}") {
+        ${productNode}
+      }
+    }`
+    return query
+  }
+
+  return query
+}
 const getQuery = (type, body) => {
   let query = ``
 
@@ -367,7 +547,109 @@ const getQuery = (type, body) => {
   }
 
   // Orders
-  if (type === "draftOrders") {
+  if (type === "orders") {
+    query = `
+      query {
+        orders(first: 50) {
+          edges {
+            cursor
+            node {
+              billingAddressMatchesShippingAddress
+              canMarkAsPaid
+              canNotifyCustomer
+              cancelReason
+              cancelledAt
+              capturable
+              cartDiscountAmount
+              clientIp
+              closed
+              closedAt
+              confirmationNumber
+              confirmed
+              createdAt
+              currencyCode
+              currentSubtotalLineItemsQuantity
+              currentTotalWeight
+              customerAcceptsMarketing
+              customerLocale
+              discountCode
+              discountCodes
+              displayFinancialStatus
+              displayFulfillmentStatus
+              edited
+              email
+              estimatedTaxes
+              fulfillable
+              fullyPaid
+              hasTimelineComment
+              id
+              landingPageDisplayText
+              landingPageUrl
+              legacyResourceId
+              merchantEditable
+              merchantEditableErrors
+              name
+              netPayment
+              note
+              paymentGatewayNames
+              phone
+              poNumber
+              presentmentCurrencyCode
+              processedAt
+              purchasingEntity
+              referralCode
+              referrerDisplayText
+              referrerUrl
+              refundable
+              registeredSourceUrl
+              requiresShipping
+              restockable
+              returnStatus
+              riskLevel
+              sourceIdentifier
+              subtotalLineItemsQuantity
+              subtotalPrice
+              tags
+              taxExempt
+              taxesIncluded
+              test
+              totalCapturable
+              totalDiscounts
+              totalPrice
+              totalReceived
+              totalRefunded
+              totalShippingPrice
+              totalTax
+              totalWeight
+              unpaid
+              updatedAt
+              lineItems(first: 100) {
+                nodes {
+                  id
+                  image {
+                      url
+                      id
+                  }
+                  name
+                  quantity
+                  title
+                  variantTitle
+                  originalTotal
+                  originalUnitPrice
+                }
+              }
+            }
+          }
+          pageInfo {
+            hasNextPage
+            hasPreviousPage
+            startCursor
+            endCursor
+          }
+        }
+      }
+    `
+  } else if (type === "draftOrders") {
     query = `
       query DraftOrders {
         draftOrders(first: 100) {
@@ -507,7 +789,15 @@ const getQuery = (type, body) => {
               originalTotal
               originalUnitPrice
             }
+          }
         }
+      }
+    `
+  } else if (type === "ordersCount") {
+    query = `
+      query OrdersCount {
+        ordersCount(limit: 10000) {
+          count
         }
       }
     `
@@ -939,7 +1229,9 @@ const getQuery = (type, body) => {
   }
 
   // Product
-  if (type === "product") {
+  if (type === "products") {
+    query = getProductsQuery(type, body)
+  } else if (type === "product") {
     let productNode = `
       id
       images(first: 50) {
@@ -1162,23 +1454,103 @@ const getQuery = (type, body) => {
     `
   }
 
+  // Locations
+  if (type === "locations") {
+    const limit = body && body.limit ? body.limit : 50
+
+    query = `
+      query {
+        locations(first: ${limit}) {
+          edges {
+            node {
+              id
+              name
+              isActive
+              address {
+                address1
+                address2
+                city
+                country
+                countryCode
+                formatted
+                latitude
+                longitude
+                phone
+                province
+                provinceCode
+                zip
+              }
+              hasActiveInventory
+              hasUnfulfilledOrders
+              shipsInventory
+              deletable
+              createdAt
+              updatedAt
+            }
+          }
+        }
+      }
+    `
+  } else if (type === "location") {
+    query = `
+      query {
+        location(id: "gid://shopify/Location/${body.locationId}") {
+          id
+          name
+          isActive
+          address {
+            address1
+            address2
+            city
+            country
+            countryCode
+            formatted
+            latitude
+            longitude
+            phone
+            province
+            provinceCode
+            zip
+          }
+          hasActiveInventory
+          hasUnfulfilledOrders
+          shipsInventory
+          deletable
+          createdAt
+          updatedAt
+        }
+      }
+    `
+  }
+
   return query
 }
 
 export default defineEventHandler(async (event) => {
-  const body = await readBody(event)
+  const bodyData = await readBody(event)
   const config = useRuntimeConfig(event)
+  let keys = config.private.shopify
+  let body = bodyData
 
-  if (!config.private.shopify) return
+  // Override Keys
+  if (body.customKeys) {
+    keys = body.customKeys
+    delete body.customKeys
+  }
+  if (body.params) {
+    if (body.params.customKeys) {
+      keys = body.params.customKeys
+      delete body.params.customKeys
+    }
+  }
+  if (!keys) return
 
-  const keys = config.private.shopify
-
-  const gqlClient = createAdminApiClient({
+  const adminClient = createAdminApiClient({
     storeDomain: keys.store_domain,
     apiVersion: keys.api_version,
     accessToken: keys.graph_admin_access_token,
   })
-  const client = createGraphQLClient({
+  const storeClient = createGraphQLClient({
     url: `https://${keys.store_domain}/api/${keys.api_version}/graphql.json`,
     headers: {
       "Content-Type": "application/json",
@@ -1196,21 +1568,23 @@ export default defineEventHandler(async (event) => {
   if (body.graphqlAdmin) {
     let params = body.params
     let query = getQuery(body.type, params)
-    let dataInput = {}
+    let input = {}
 
-    if (body.dataInput) {
+    if (body.rawInput) {
+      input = body.rawInput
+    } else if (body.dataInput) {
       if (body.type === "createProductVariant") {
-        dataInput = body.dataInput
+        input = body.dataInput
       } else {
-        dataInput = {
+        input = {
           input: body.dataInput,
         }
       }
     }
 
     try {
-      const { data, errors } = await gqlClient.request(query, {
-        variables: dataInput,
+      const { data, errors } = await adminClient.request(query, {
+        variables: input,
       })
 
       if (errors) {
@@ -1225,19 +1599,19 @@ export default defineEventHandler(async (event) => {
   } else if (body.graphql) {
     let params = body.params
     let query = getQuery(body.type, params)
-    let dataInput = {}
+    let input = {}
 
     if (body.rawInput) {
-      dataInput = body.rawInput
+      input = body.rawInput
     } else if (body.dataInput) {
-      dataInput = {
+      input = {
         input: body.dataInput,
       }
     }
 
     try {
-      const { data, errors } = await client.request(query, {
-        variables: dataInput,
+      const { data, errors } = await storeClient.request(query, {
+        variables: input,
       })
 
       if (errors) {
