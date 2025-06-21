@@ -232,9 +232,8 @@ if (config.features.payments) {
   // QPay
   if (config.features.payments.qpay) {
     const token = process.env.NUXT_QPAY_TOKEN
-    if (token) {
-      console.log("QPay TOKEN ::: ", token)
 
+    if (token) {
       siteRuntimeConfig.private.qpay = {
         token: token,
         invoiceCode: config.features.payments.qpay.invoiceCode,
@@ -245,14 +244,11 @@ if (config.features.payments) {
       }
     }
   }
-
   // StorePay
   if (config.features.payments.storepay) {
     const token = process.env.NUXT_STOREPAY_TOKEN
-    if (token) {
-      console.log("Storepay TOKEN ::: ", token)
 
-      siteRuntimeConfig.private = {}
+    if (token) {
       siteRuntimeConfig.private.storepay = {
         token: token,
         storeId: config.features.payments.storepay.storeId,
@@ -262,6 +258,28 @@ if (config.features.payments) {
       siteRuntimeConfig.public.integrations.storepay = true
       payments.storepay = {
         storeId: config.features.payments.storepay.storeId,
+      }
+    }
+  }
+  // Stripe
+  if (config.features.payments.stripe) {
+    const key = process.env.NUXT_STRIPE_KEY
+    const secret = process.env.NUXT_STRIPE_SECRET
+    const test_key = process.env.NUXT_STRIPE_TEST_KEY
+    const test_secret = process.env.NUXT_STRIPE_TEST_SECRET
+    const isTestMode = process.env.NODE_ENV === "production" ? false : true
+
+    if (key && secret && test_key && test_secret) {
+      siteRuntimeConfig.private.stripe = {
+        key: key,
+        secret: secret,
+        test_key: test_key,
+        test_secret: test_secret,
+        isTestMode: isTestMode,
+      }
+      siteRuntimeConfig.public.integrations.stripe = true
+      payments.stripe = {
+        active: true,
       }
     }
   }

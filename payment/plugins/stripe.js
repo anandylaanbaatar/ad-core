@@ -7,16 +7,30 @@ import Stripe from "stripe"
 import { loadStripe } from "@stripe/stripe-js"
 
 export default defineNuxtPlugin(async () => {
-  const SECRET_ = useState("secret", () =>
-    process.env.NODE_ENV === "production"
-      ? process.env.NUXT_STRIPE_SECRET
-      : process.env.NUXT_STRIPE_TEST_SECRET
-  )
-  const KEY_ = useState("key", () =>
-    process.env.NODE_ENV === "production"
-      ? process.env.NUXT_STRIPE_KEY
-      : process.env.NUXT_STRIPE_TEST_KEY
-  )
+  const getKeys = () => {
+    let keys = {}
+
+    if (process.env.NODE_ENV === "production") {
+      if (useRuntimeConfig().private.stripe) {
+        keys.key = useRuntimeConfig().private.stripe.key
+        keys.secret = useRuntimeConfig().private.stripe.secret
+      } else if (process.env.NUXT_STRIPE_KEY) {
+        keys.key = process.env.NUXT_STRIPE_KEY
+        keys.secret = process.env.NUXT_STRIPE_SECRET
+      }
+    } else {
+      if (useRuntimeConfig().private.stripe) {
+        keys.key = useRuntimeConfig().private.stripe.test_key
+        keys.secret = useRuntimeConfig().private.stripe.test_secret
+      } else if (process.env.NUXT_STRIPE_KEY) {
+        keys.key = process.env.NUXT_STRIPE_TEST_KEY
+        keys.secret = process.env.NUXT_STRIPE_TEST_SECRET
+      }
+    }
+
+    return keys
+  }
+  const KEYS_ = useState("keys", () => getKeys())
   const mode =
     process.env.NODE_ENV === "production" ? "Production Mode" : "Test Mode"
 
@@ -26,13 +40,23 @@ export default defineNuxtPlugin(async () => {
       // console.log(`[Plugins] ::: [Stripe] ::: Not Initialized! ::: ${mode}`)
       return
     }
-    if (!SECRET_.value) {
-      console.log(`[Plugins] ::: [Stripe] ::: Missing SECRET! ::: ${mode}`)
+    if (!useRuntimeConfig().public.features.payments) {
+      console.log("[Plugins] ::: [Stripe] ::: Payments Not Setup Yet!")
       return
     }
-    if (!KEY_.value) {
-      console.log(`[Plugins] ::: [Stripe] ::: Missing KEY! ::: ${mode}`)
+    if (!useRuntimeConfig().public.features.payments.stripe) {
+      console.log("[Plugins] ::: [Stripe] ::: Missing Stripe Config!")
       return
+    }
+    if (!KEYS_.value) {
+      console.log("[Plugins] ::: [Stripe] ::: Missing Stripe Key & Secret!")
+      return
+    }
+    if (KEYS_.value) {
+      if (!KEYS_.value.key || !KEYS_.value.secret) {
+        console.log("[Plugins] ::: [Stripe] ::: Missing Stripe Key & Secret!")
+        return
+      }
     }
 
     console.log(`[Plugins] ::: [Stripe] ::: Initialized! ::: ${mode}`)
@@ -41,8 +65,8 @@ export default defineNuxtPlugin(async () => {
   }
 
   // Initialize Stripe
-  const SECRET = SECRET_.value
-  const KEY = KEY_.value
+  const KEY = KEYS_.value.key
+  const SECRET = KEYS_.value.secret
   const stripe = Stripe(SECRET)
 
   // Set Test Mode in Payment Store

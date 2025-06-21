@@ -60,16 +60,17 @@ export const usePaymentStore = defineStore("payment", {
     async setStripeCustomerId(userData) {
       let customerId = null
 
+      const features = useRuntimeConfig().public.features
       const nuxtApp = useNuxtApp()
       let isMultitenant = false
       let tenantId = null
       let isTestMode = this.stripeTestMode
 
       // Check for Multitenancy
-      if (features().multitenancy) {
-        if (features().multitenancy.tenantId) {
+      if (features.multitenancy) {
+        if (features.multitenancy.tenantId) {
           isMultitenant = true
-          tenantId = features().multitenancy.tenantId
+          tenantId = features.multitenancy.tenantId
         }
       }
 

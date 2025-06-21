@@ -120,6 +120,22 @@ export default async function siteConfigModule(moduleOptions, nuxt) {
               storeId: integrations.storepay.storeId,
             }
           }
+          // Stripe
+          if (integrations.stripe) {
+            const isTestMode =
+              process.env.NODE_ENV === "production" ? false : true
+            nuxt.options.runtimeConfig.private.stripe = {
+              key: integrations.stripe.key,
+              secret: integrations.stripe.secret,
+              test_key: integrations.stripe.test_key,
+              test_secret: integrations.stripe.test_secret,
+              isTestMode: isTestMode,
+            }
+            nuxt.options.runtimeConfig.public.integrations.stripe = true
+            payments.stripe = {
+              active: true,
+            }
+          }
 
           if (Object.keys(payments).length > 0) {
             nuxt.options.runtimeConfig.public.features.payments = payments
