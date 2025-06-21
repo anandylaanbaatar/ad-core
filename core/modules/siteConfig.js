@@ -59,6 +59,12 @@ export default async function siteConfigModule(moduleOptions, nuxt) {
         // Integrations Setup
         const integrations = storeData.integrations
         if (integrations) {
+          // Prismic
+          if (integrations.prismic) {
+            nuxt.options.runtimeConfig.public.integrations.prismic = true
+            nuxt.options.runtimeConfig.public.features.prismic =
+              integrations.prismic.repo
+          }
           // Shopify
           if (integrations.shopify) {
             const version = "2025-04"
@@ -81,15 +87,46 @@ export default async function siteConfigModule(moduleOptions, nuxt) {
               shopify: true,
             }
           }
-          // Prismic
-          if (integrations.prismic) {
-            nuxt.options.runtimeConfig.public.integrations.prismic = true
-            nuxt.options.runtimeConfig.public.features.prismic =
-              integrations.prismic.repo
+
+          /**
+           * Payments
+           */
+
+          let payments = {}
+
+          // QPay
+          if (integrations.qpay) {
+            nuxt.options.runtimeConfig.private.qpay = {
+              token: integrations.qpay.token,
+              invoiceCode: integrations.qpay.invoiceCode,
+            }
+            nuxt.options.runtimeConfig.public.integrations.qpay = true
+
+            payments.qpay = {
+              invoiceCode: integrations.qpay.invoiceCode,
+            }
+          }
+          // StorePay
+          if (integrations.storepay) {
+            nuxt.options.runtimeConfig.private.storepay = {
+              token: integrations.storepay.token,
+              storeId: integrations.storepay.storeId,
+              storeUsername: integrations.storepay.storeUsername,
+              storePassword: integrations.storepay.storePassword,
+            }
+            nuxt.options.runtimeConfig.public.integrations.storepay = true
+
+            payments.storepay = {
+              storeId: integrations.storepay.storeId,
+            }
+          }
+
+          if (Object.keys(payments).length > 0) {
+            nuxt.options.runtimeConfig.public.features.payments = payments
           }
         }
 
-        console.log(`✅ [Commerce] Integrations Set!`)
+        console.log(`✅ [Site Config] Integrations Set!`)
       }
     }
   }

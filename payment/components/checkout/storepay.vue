@@ -85,7 +85,7 @@
               icon="pi pi-arrow-left"
               rounded
               severity="secondary"
-              class="c-block-top-left mt-3 ml-3 sm"
+              class="sm absolute top-0 left-0 m-3"
               @click="reset"
               v-tooltip.right="$utils.t('Cancel')"
             ></Button>
@@ -216,9 +216,7 @@ export default {
 
   computed: {
     paymentType() {
-      return useAppConfig().theme.payment.payments.find(
-        (i) => i.id === "storepay"
-      )
+      return usePaymentStore().paymentOptions.find((i) => i.id === "storepay")
     },
     allCountries() {
       return this.$forms.phoneCountries()
@@ -346,14 +344,13 @@ export default {
 
       let storepayInvoice = {
         token: this.storepay.accessToken,
+        storeId: this.paymentType.options.storeId,
         phone: this.form.phone,
         amount: this.totalAmount.total,
-        description: `AD Original Studio`,
+        description: theme().name,
       }
 
       const res = await this.$storepay.getInvoice(storepayInvoice)
-
-      console.log("[StorePay] ::: Create Invoice :: ", res)
 
       if (res && res.status === "Success" && res.value) {
         this.storepay.invoiceId = res.value
@@ -372,8 +369,8 @@ export default {
       this.loading = true
 
       let qrCodeData = {
-        storeCode: "21364",
-        description: "AD Original Studio",
+        storeCode: this.paymentType.options.storeId,
+        description: theme().name,
         amount: this.totalAmount.total,
       }
 

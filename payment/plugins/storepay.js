@@ -1,17 +1,15 @@
 export default defineNuxtPlugin(() => {
-  const KEY = useState("storepayKey", () => process.env.NUXT_STOREPAY_TOKEN)
-
   if (import.meta.client) {
     if (!useRuntimeConfig().public.integrations.storepay) {
       // console.log("[Plugins] ::: [Storepay] ::: Not Initialized!")
       return
     }
-    if (!useRuntimeConfig().public.storepay) {
-      console.log("[Plugins] ::: [Storepay] ::: Missing StorePay Config!")
+    if (!useRuntimeConfig().public.features.payments) {
+      console.log("[Plugins] ::: [Storepay] ::: Payments Not Setup Yet!")
       return
     }
-    if (!KEY.value) {
-      console.log("[Plugins] ::: [Storepay] ::: Missing Integration Key!")
+    if (!useRuntimeConfig().public.features.payments.storepay) {
+      console.log("[Plugins] ::: [Storepay] ::: Missing StorePay Config!")
       return
     }
 
@@ -20,29 +18,17 @@ export default defineNuxtPlugin(() => {
     return
   }
 
-  const config = useRuntimeConfig()
-  const key = KEY.value
-  const base = "https://service.storepay.mn:8778"
-  const baseUrl = `${base}/lend-merchant`
-  const storeId = config.public.storepay.storeId
-  const username = config.public.storepay.username
-  const password = config.public.storepay.password
-
   // Token
   const getToken = async () => {
-    let url = `${base}/merchat-uaa/oauth/token?grant_type=password&username=${username}&password=${password}`
-    let options = {
+    const res = await $fetch("/api/storepay", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Basic ${key}`,
+      body: {
+        type: "getToken",
       },
-    }
+    })
 
-    const res = await $fetch(url, options)
     return res
   }
-  const isTokenExpired = (tokendata) => {}
 
   // Invoice
   const getInvoice = async (body) => {
@@ -52,15 +38,13 @@ export default defineNuxtPlugin(() => {
         type: "createInvoice",
         token: body.token,
         data: {
-          storeId: storeId,
+          storeId: parseInt(body.storeId),
           mobileNumber: body.phone,
           description: body.description,
           amount: body.amount,
         },
       },
     })
-
-    // console.log("[StorePay] ::: Plugin ::: ", res)
 
     return res
   }
@@ -80,11 +64,6 @@ export default defineNuxtPlugin(() => {
 
     return res
   }
-  const createQR = async (body) => {
-    let url = `${baseUrl}/`
-  }
-
-  // Payment
   const checkPayment = async (body) => {
     const res = await $fetch("/api/storepay", {
       method: "POST",

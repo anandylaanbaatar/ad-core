@@ -1,7 +1,9 @@
 export default defineNuxtPlugin(async () => {
-  const store = usePaymentStore()
-
   if (import.meta.client) {
+    const store = usePaymentStore()
+
+    store.setPaymentOptions()
+
     console.log("[Plugins] ::: [Payment] ::: Initialized!")
   }
 })

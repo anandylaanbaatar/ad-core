@@ -1,15 +1,17 @@
 import moment from "moment"
 
 export default defineNuxtPlugin(() => {
-  const KEY = useState("qpayKey", () => process.env.NUXT_QPAY_TOKEN)
-
   if (import.meta.client) {
     if (!useRuntimeConfig().public.integrations.qpay) {
       // console.log("[Plugins] ::: [QPay] ::: Not Initialized!")
       return
     }
-    if (!KEY.value) {
-      console.log("[Plugins] ::: [QPay] ::: Missing Key!")
+    if (!useRuntimeConfig().public.features.payments) {
+      console.log("[Plugins] ::: [Qpay] ::: Payments Not Setup Yet!")
+      return
+    }
+    if (!useRuntimeConfig().public.features.payments.qpay) {
+      console.log("[Plugins] ::: [Qpay] ::: Missing Qpay Config!")
       return
     }
 
@@ -18,21 +20,14 @@ export default defineNuxtPlugin(() => {
     return
   }
 
-  const key = KEY.value
-  const baseUrl = "https://merchant.qpay.mn/v2"
-  const sandboxUrl = "https://merchant-sandbox.qpay.mn/v2"
-
   // Token
   const getToken = async () => {
-    let url = `${baseUrl}/auth/token`
-    let options = {
+    const res = await $fetch("/api/qpay", {
       method: "POST",
-      headers: {
-        Authorization: `Basic ${key}`,
+      body: {
+        type: "getToken",
       },
-    }
-
-    const res = await $fetch(url, options)
+    })
 
     return res
   }
@@ -51,16 +46,14 @@ export default defineNuxtPlugin(() => {
 
   // Invoice
   const getInvoice = async (token, data) => {
-    let url = `${baseUrl}/invoice`
-    let options = {
+    const res = await $fetch("/api/qpay", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
+      body: {
+        type: "createInvoice",
+        token: token,
+        data: data,
       },
-      body: JSON.stringify(data),
-    }
-    const res = await $fetch(url, options)
+    })
 
     return res
   }

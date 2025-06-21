@@ -222,44 +222,52 @@ if (config.features.prismic) {
  * 4. Payments
  */
 
-if (config.payment && config.payment.payments) {
-  let sitePayments = []
+if (config.features.payments) {
+  let payments = {}
 
-  // Payments
-  if (config.payment.payments) {
-    if (config.payment.payments.qpay && config.payment.payments.qpay.active) {
-      sitePayments.push({
-        id: "qpay",
-        title: "QPay",
-        logo: "/images/theme/qpay_logo.png",
-        active: true,
-        qpay_invoice_code: config.payment.payments.qpay.invoiceCode,
-      })
-    }
-    if (
-      config.payment.payments.storepay &&
-      config.payment.payments.storepay.active
-    ) {
-      sitePayments.push({
-        id: "storepay",
-        title: "StorePay",
-        logo: "/images/theme/storepay_logo.png",
-        active: true,
-      })
-      siteRuntimeConfig.public.storepay = config.payment.payments.storepay
-    }
-    if (config.payment.payments.card && config.integrations.stripe) {
-      sitePayments.push({
-        id: "card",
-        title: "Credit Card, Debit Card, Klarna",
-        logo: "/images/theme/credit_card_icons.png",
-        active: true,
-      })
+  if (!siteRuntimeConfig.private) {
+    siteRuntimeConfig.private = {}
+  }
+
+  // QPay
+  if (config.features.payments.qpay) {
+    const token = process.env.NUXT_QPAY_TOKEN
+    if (token) {
+      console.log("QPay TOKEN ::: ", token)
+
+      siteRuntimeConfig.private.qpay = {
+        token: token,
+        invoiceCode: config.features.payments.qpay.invoiceCode,
+      }
+      siteRuntimeConfig.public.integrations.qpay = true
+      payments.qpay = {
+        invoiceCode: config.features.payments.qpay.invoiceCode,
+      }
     }
   }
 
-  theme.payment = {
-    payments: sitePayments,
+  // StorePay
+  if (config.features.payments.storepay) {
+    const token = process.env.NUXT_STOREPAY_TOKEN
+    if (token) {
+      console.log("Storepay TOKEN ::: ", token)
+
+      siteRuntimeConfig.private = {}
+      siteRuntimeConfig.private.storepay = {
+        token: token,
+        storeId: config.features.payments.storepay.storeId,
+        storeUsername: config.features.payments.storepay.storeUsername,
+        storePassword: config.features.payments.storepay.storePassword,
+      }
+      siteRuntimeConfig.public.integrations.storepay = true
+      payments.storepay = {
+        storeId: config.features.payments.storepay.storeId,
+      }
+    }
+  }
+
+  if (Object.keys(payments).length > 0) {
+    siteRuntimeConfig.public.features.payments = payments
   }
 }
 

@@ -17,9 +17,9 @@
         <template v-if="payment.invoice">
           <div class="row">
             <div class="col-xs-12 text-center paymentQrCodeArea">
-              <p class="mb-2">
+              <!-- <p class="mb-2">
                 {{ $utils.t("Draft Order Id") }}: {{ payment.invoiceId }}
-              </p>
+              </p> -->
               <p class="mb-4">
                 {{ $utils.t("Invoice Id") }}: {{ payment.invoice.invoice_id }}
               </p>
@@ -38,14 +38,27 @@
 
             <div v-if="payment.invoice.urls" class="row paymentBankIconsArea">
               <div
-                class="col-xs-3 col-md-3 col-lg-2 paymentItem"
+                class="col-xs-3 col-md-3 col-lg-2"
                 v-for="url in payment.invoice.urls"
                 :key="`urls_${url.name}`"
               >
-                <a :href="url.link" target="_blank">
-                  <img :src="url.logo" :alt="url.name" width="80" height="80" />
-                  <p>{{ url.description }}</p>
-                </a>
+                <div class="paymentItem">
+                  <a
+                    :href="url.link"
+                    target="_blank"
+                    class="flex align-items-center"
+                  >
+                    <div>
+                      <img
+                        :src="url.logo"
+                        :alt="url.name"
+                        width="80"
+                        height="80"
+                      />
+                      <p>{{ url.description }}</p>
+                    </div>
+                  </a>
+                </div>
               </div>
             </div>
           </div>
@@ -143,10 +156,10 @@ export default {
       }
     },
     paymentType() {
-      return useAppConfig().theme.payment.payments.find((i) => i.id === "qpay")
+      return usePaymentStore().paymentOptions.find((i) => i.id === "qpay")
     },
     invoiceCode() {
-      return this.paymentType.qpay_invoice_code
+      return this.paymentType.options.invoiceCode
     },
   },
 

@@ -4,7 +4,15 @@ export default defineEventHandler(async (event) => {
   const body = await readBody(event)
   const base = `https://service.storepay.mn:8778`
   const baseUrl = `${base}/lend-merchant`
+  const config = useRuntimeConfig(event)
+
+  if (!config.private.storepay) return
+
+  const keys = config.private.storepay
+  const base_token = keys.token
   const token = body.token
+  const username = keys.storeUsername
+  const password = keys.storePassword
 
   let url = `${baseUrl}`
   let options = {
@@ -16,7 +24,16 @@ export default defineEventHandler(async (event) => {
   }
 
   // Create Invoice
-  if (body.type === "createInvoice") {
+  if (body.type === "getToken") {
+    url = `${base}/merchat-uaa/oauth/token?grant_type=password&username=${username}&password=${password}`
+    options = {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Basic ${base_token}`,
+      },
+    }
+  } else if (body.type === "createInvoice") {
     url = `${baseUrl}/merchant/loan`
     options.method = "POST"
     options.body = JSON.stringify(body.data)
@@ -41,9 +58,6 @@ export default defineEventHandler(async (event) => {
 
   try {
     const res = await $fetch(url, options)
-
-    console.log("[StorePay] ::: API ::: ", res)
-
     return res
   } catch (err) {
     return { err }

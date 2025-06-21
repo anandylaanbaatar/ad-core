@@ -2,9 +2,14 @@ import { defineEventHandler, readBody } from "h3"
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
-  // const baseUrl = `https://merchant-sandbox.qpay.mn/v2`
-
+  const sandboxUrl = `https://merchant-sandbox.qpay.mn/v2`
   const baseUrl = `https://merchant.qpay.mn/v2`
+  const config = useRuntimeConfig(event)
+
+  if (!config.private.qpay) return
+
+  const keys = config.private.qpay
+  const base_token = keys.token
   const token = body.token
 
   let url = `${baseUrl}/invoice`
@@ -17,7 +22,15 @@ export default defineEventHandler(async (event) => {
   }
 
   // Create Invoice
-  if (body.type === "createInvoice") {
+  if (body.type === "getToken") {
+    url = `${baseUrl}/auth/token`
+    options = {
+      method: "POST",
+      headers: {
+        Authorization: `Basic ${base_token}`,
+      },
+    }
+  } else if (body.type === "createInvoice") {
     options.method = "POST"
     options.body = JSON.stringify(body.data)
 
@@ -41,7 +54,6 @@ export default defineEventHandler(async (event) => {
 
   try {
     const res = await $fetch(url, options)
-
     return res
   } catch (err) {
     return { err }

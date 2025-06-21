@@ -6,12 +6,51 @@ export const usePaymentStore = defineStore("payment", {
   state: () => ({
     customerId: null,
     stripeTestMode: false,
-    paymentOptions: useAppConfig().theme.payment.payments,
+    paymentOptions: [
+      {
+        id: "qpay",
+        title: "QPay",
+        logo: "/images/theme/qpay_logo.png",
+        active: false,
+        options: {},
+      },
+      {
+        id: "storepay",
+        title: "StorePay",
+        logo: "/images/theme/storepay_logo.png",
+        active: false,
+        options: {},
+      },
+      {
+        id: "card",
+        title: "Credit Card, Debit Card, Klarna",
+        logo: "/images/theme/credit_card_icons.png",
+        active: false,
+        options: {},
+      },
+    ],
   }),
 
   actions: {
     set(key, data) {
       this[key] = data
+    },
+
+    setPaymentOptions() {
+      const features = useRuntimeConfig().public.features
+
+      if (features && features.payments) {
+        const payments = features.payments
+
+        for (let i = 0; i < this.paymentOptions.length; i++) {
+          const paymentId = this.paymentOptions[i].id
+
+          if (typeof payments[paymentId] !== "undefined") {
+            this.paymentOptions[i].active = true
+            this.paymentOptions[i].options = payments[paymentId]
+          }
+        }
+      }
     },
 
     /**
