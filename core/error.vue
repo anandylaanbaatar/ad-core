@@ -32,6 +32,9 @@ const translate = (value) => {
             )
           }}
         </p>
+
+        <p v-if="error" class="my-2">{{ error["_object"].error.message }}</p>
+
         <Button
           label="Go Back"
           icon="pi pi-arrow-left"
