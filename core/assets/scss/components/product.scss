@@ -115,10 +115,14 @@
     background: rgba(255, 255, 255, 0.1);
     border: 1px solid rgba(255, 255, 255, 0.06);
     border-radius: 10px;
-    color: $white;
+    color: $black;
     transition: all 0.4s ease;
     -webkit-backdrop-filter: saturate(180%) blur(20px);
     backdrop-filter: saturate(180%) blur(20px);
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
   }
 }
 .productItem {
