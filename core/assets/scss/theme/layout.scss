@@ -158,6 +158,15 @@ body {
     .backDrop {
       display: none;
     }
+    .content {
+      width: 100%;
+
+      pre {
+        width: 100%;
+        overflow-x: scroll;
+        -webkit-overflow-scrolling: touch;
+      }
+    }
   }
 }
 
