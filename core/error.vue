@@ -33,7 +33,8 @@ const translate = (value) => {
           }}
         </p>
 
-        <p v-if="error" class="my-2">{{ error["_object"].error.message }}</p>
+        <p v-if="error" class="my-2">{{ error }}</p>
+        <pre v-if="error">{{ error }}</pre>
 
         <Button
           label="Go Back"
