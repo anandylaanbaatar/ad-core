@@ -5,16 +5,16 @@
         <div>
           <Button
             v-if="!menu"
-            icon="pi pi-bars"
+            icon="pi pi-equals"
             @click="openMenu"
-            class="menuToggle mr-3"
+            class="menuToggle mr-1 md:mr-3"
             aria-label="Menu Button"
           ></Button>
           <Button
             v-else
             icon="pi pi-times"
             @click="closeMenu"
-            class="menuToggle mr-3"
+            class="menuToggle mr-1 md:mr-3"
             aria-label="Menu Button"
           ></Button>
 
@@ -32,11 +32,11 @@
 
       <div class="c-header-right">
         <div>
-          <SwitcherDarkMode></SwitcherDarkMode>
+          <SwitcherDarkMode classes="desktopOnly"></SwitcherDarkMode>
 
           <Button
             icon="pi pi-heart"
-            class="desktopOnly ml-3"
+            class="desktopOnly ml-1 md:ml-3"
             @click="$bus.$emit('goTo', '/saved')"
             aria-label="Saved Button"
           ></Button>
@@ -45,14 +45,14 @@
             :badge="cartBadge"
             :label="cartButtonLabel"
             icon="pi pi-shopping-cart"
-            class="ml-3 hideLabelOnMobile"
+            class="ml-0 md:ml-3 hideLabelOnMobile"
             severity="secondary"
             @click="$bus.$emit('sidebarGlobal', { id: 'cart' })"
             aria-label="Cart Button"
           ></Button>
 
           <Button
-            class="iconBtn ml-3"
+            class="iconBtn ml-1 md:ml-3"
             icon="pi pi-user"
             @click="$bus.$emit('sidebarGlobal', { id: 'account' })"
             aria-label="Account Button"

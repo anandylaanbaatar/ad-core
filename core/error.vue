@@ -2,10 +2,7 @@
 const error = useError()
 const i18n = useI18n()
 
-let statusCode = error.statusCode ? error.statusCode : "404"
-
-console.log("[Error] ::: ", error)
-console.log("[Error] ::: Message :: ", error["_object"].error.message)
+let codeBlockActive = ref(false)
 
 const handleError = () => {
   clearError({
@@ -18,10 +15,11 @@ const translate = (value) => {
 </script>
 
 <template>
-  <div class="c-errorPage">
+  <div class="c-errorPage" @click="codeBlockActive = false">
     <div class="content">
       <div>
-        <h2 class="mb-2">{{ statusCode }}</h2>
+        <Logo class="mb-4"></Logo>
+
         <h4 class="mb-2">
           {{ translate("Sorry we couldn't find this page.") }}
         </h4>
@@ -33,14 +31,44 @@ const translate = (value) => {
           }}
         </p>
 
-        <div v-if="error" class="w-full">
-          <pre v-if="error">{{ error }}</pre>
-        </div>
-
         <Button
-          label="Go Back"
-          icon="pi pi-arrow-left"
-          @click="handleError"
+          label="Go Home"
+          icon="pi pi-home"
+          severity="secondary"
+          @click.stop="handleError"
+        ></Button>
+
+        <div
+          v-if="error"
+          class="c-error-content"
+          :class="{ active: codeBlockActive }"
+          @click.stop="codeBlockActive = true"
+        >
+          <div class="d-block relative">
+            <div class="text-center">
+              <i class="pi pi-info-circle text-xl"></i>
+              <p>Report</p>
+            </div>
+
+            <h4>Url</h4>
+            <p v-if="error.url" class="mb-2">{{ error.url }}</p>
+
+            <h4>Status Code</h4>
+            <p v-if="error.statusCode" class="mb-2">{{ error.statusCode }}</p>
+
+            <h4>Message</h4>
+            <p v-if="error.statusMessage" class="mb-2">
+              {{ error.statusMessage }}
+            </p>
+
+            <h4 class="mb-1">Details</h4>
+            <pre v-if="error.message">{{ error.message }}</pre>
+          </div>
+        </div>
+        <Button
+          icon="pi pi-info-circle"
+          class="sm fixed bottom-0 right-0 m-4"
+          @click.stop="codeBlockActive = !codeBlockActive"
         ></Button>
       </div>
     </div>

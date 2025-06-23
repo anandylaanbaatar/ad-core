@@ -5,10 +5,10 @@
     <template v-else>
       <div v-if="hasHeader" class="container">
         <div class="row">
-          <div class="col-xs-12 col-md-6">
+          <div class="col-xs-6">
             <h2 v-if="title">{{ $utils.t(title) }}</h2>
           </div>
-          <div class="col-xs-12 col-md-6 flex flex-wrap justify-content-end">
+          <div class="col-xs-6 flex flex-wrap justify-content-end">
             <template v-if="showArrows">
               <Button
                 icon="pi pi-arrow-left"
