@@ -62,6 +62,9 @@ export const usePaymentStore = defineStore("payment", {
 
       const features = useRuntimeConfig().public.features
       const nuxtApp = useNuxtApp()
+
+      if (!nuxtApp.$stripe) return
+
       let isMultitenant = false
       let tenantId = null
       let isTestMode = this.stripeTestMode
@@ -177,6 +180,11 @@ export const usePaymentStore = defineStore("payment", {
     async getStripeCustomerId(email) {
       return new Promise(async (resolve) => {
         const nuxtApp = useNuxtApp()
+
+        if (!nuxtApp.$stripe) {
+          resolve(null)
+        }
+
         const customerId = await nuxtApp.$stripe.customer.get(email)
 
         if (customerId) {
@@ -189,6 +197,11 @@ export const usePaymentStore = defineStore("payment", {
     async createStripeCustomerId(email) {
       return new Promise(async (resolve) => {
         const nuxtApp = useNuxtApp()
+
+        if (!nuxtApp.$stripe) {
+          resolve(null)
+        }
+
         const customer = await nuxtApp.$stripe.customer.create(email)
 
         if (customer && customer.id) {

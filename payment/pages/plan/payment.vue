@@ -97,6 +97,8 @@ export default {
       }
     },
     async setCustomer() {
+      if (!this.$stripe) return
+
       const user = await this.$fire.actions.user()
       this.user = user
 
