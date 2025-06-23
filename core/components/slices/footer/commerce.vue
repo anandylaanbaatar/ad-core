@@ -27,6 +27,7 @@
               </p>
               <SwitcherLanguage class="mb-1"></SwitcherLanguage>
               <SwitcherCurrency></SwitcherCurrency>
+              <SwitcherDarkMode classes="ml-2"></SwitcherDarkMode>
             </div>
           </div>
 

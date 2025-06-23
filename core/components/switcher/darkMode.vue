@@ -15,15 +15,15 @@
         v-if="!isDarkMode"
         v-tooltip.left="$utils.t('Dark Mode')"
         icon="pi pi-moon"
+        :class="classes"
         @click="toggleDarkMode"
-        class="desktopOnly"
       ></Button>
       <Button
         v-else
         v-tooltip.left="$utils.t('Light Mode')"
         icon="pi pi-sun"
+        :class="classes"
         @click="toggleDarkMode"
-        class="desktopOnly"
       ></Button>
     </template>
   </template>
@@ -33,6 +33,10 @@
 export default {
   props: {
     type: {
+      type: String,
+      default: null,
+    },
+    classes: {
       type: String,
       default: null,
     },
