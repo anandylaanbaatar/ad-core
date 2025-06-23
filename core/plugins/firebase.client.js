@@ -1,5 +1,5 @@
 import { watch } from "vue"
-import { initializeApp } from "firebase/app"
+import { initializeApp, getApps } from "firebase/app"
 import {
   getAuth,
   signInWithPopup,
@@ -41,7 +41,13 @@ import {
   VueFireDatabaseOptionsAPI,
   VueFireFirestoreOptionsAPI,
 } from "vuefire"
-import { getMessaging, onMessage, getToken } from "firebase/messaging"
+// import { getMessaging, onMessage, getToken } from "firebase/messaging"
+import {
+  getAnalytics,
+  isSupported,
+  logEvent,
+  setUserProperties,
+} from "firebase/analytics"
 
 export default defineNuxtPlugin(async (nuxtApp) => {
   const CONFIG = useState(
@@ -62,12 +68,57 @@ export default defineNuxtPlugin(async (nuxtApp) => {
 
   const config = CONFIG.value
   const firebaseConfig = config
-  const app = initializeApp(firebaseConfig)
+  const app =
+    getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0]
   const auth = getAuth(app)
   const firestore = getFirestore(app)
   const database = getDatabase(app)
   const dbRef = ref(getDatabase(app))
   // const messaging = getMessaging(app)
+  let analytics = null
+
+  /**
+   * Analytics
+   */
+
+  if (useRuntimeConfig().public.features.analytics) {
+    if (await isSupported()) {
+      try {
+        analytics = getAnalytics(app)
+
+        const route = useRoute()
+        let tenantId = null
+
+        // Multi Tenancy
+        if (useRuntimeConfig().public.features.multitenancy) {
+          if (useRuntimeConfig().public.features.multitenancy.tenantId) {
+            tenantId = useRuntimeConfig().public.features.multitenancy.tenantId
+          } else if (useRuntimeConfig().public.features.multitenancy.parentId) {
+            tenantId = useRuntimeConfig().public.features.multitenancy.parentId
+          }
+        }
+
+        // Set Tenant ID as user property
+        if (tenantId) {
+          setUserProperties(analytics, { tenant_id: tenantId })
+        }
+
+        nuxtApp.hook("page:finish", () => {
+          let eventData = {
+            page_path: route.fullPath,
+          }
+          if (tenantId) {
+            eventData.tenant_id = tenantId
+          }
+          logEvent("analytics", "page_view", eventData)
+        })
+
+        console.log("[Plugins] ::: [Analytics] ::: Initialized!")
+      } catch (err) {
+        console.warn("[Plugins] ::: [Analytics] ::: Init Error!", err.message)
+      }
+    }
+  }
 
   // Setup VueFire
   nuxtApp.vueApp.use(VueFire, {
@@ -654,6 +705,7 @@ export default defineNuxtPlugin(async (nuxtApp) => {
           // getUserToken,
           // saveUserToken,
         },
+        analytics: analytics,
       },
     },
   }
