@@ -33,8 +33,9 @@ const translate = (value) => {
           }}
         </p>
 
-        <p v-if="error" class="my-2">{{ error }}</p>
-        <pre v-if="error">{{ error }}</pre>
+        <div v-if="error" class="w-full">
+          <pre v-if="error">{{ error }}</pre>
+        </div>
 
         <Button
           label="Go Back"
