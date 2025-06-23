@@ -120,6 +120,8 @@ export default {
       }
     },
     async setPaymentIntent() {
+      if (!this.$stripe) return
+
       // Recurring Subscription
       if (this.plan && this.plan.type === "recurring") {
         const subscription = await this.$stripe.subscription.create(

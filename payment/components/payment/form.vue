@@ -101,6 +101,7 @@ export default {
     },
     async setPaymentIntent() {
       if (!this.product) return
+      if (!this.$stripe) return
 
       // Recurring Subscription
       if (this.product.interval !== "one_off") {

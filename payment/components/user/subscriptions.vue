@@ -191,6 +191,8 @@ export default {
 
   methods: {
     async getSubscriptions() {
+      if (!this.$stripe) return
+
       const { data } = await this.$stripe.subscription.list({
         customerId: this.id,
       })
@@ -223,6 +225,8 @@ export default {
         header: "Cancel Subscription",
         message: "Are you sure you want to cancel your subsription?",
         callback: async () => {
+          if (!this.$stripe) return
+
           const subscriptionId = this.selected
           const res = await this.$stripe.subscription.cancel(subscriptionId)
 

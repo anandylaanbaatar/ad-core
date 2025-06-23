@@ -65,6 +65,8 @@ export const useServicesStore = defineStore("services", {
       if (!integrations().firebase) return
 
       const nuxtApp = useNuxtApp()
+      if (!nuxtApp.$stripe) return
+
       const { data } = await nuxtApp.$stripe.subscription.list({
         limit: 100,
         status: "active",

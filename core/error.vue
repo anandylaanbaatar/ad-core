@@ -50,19 +50,27 @@ const translate = (value) => {
               <p>Report</p>
             </div>
 
-            <h4>Url</h4>
-            <p v-if="error.url" class="mb-2">{{ error.url }}</p>
+            <template v-if="error.url">
+              <h4>Url</h4>
+              <p class="mb-2">{{ error.url }}</p>
+            </template>
 
-            <h4>Status Code</h4>
-            <p v-if="error.statusCode" class="mb-2">{{ error.statusCode }}</p>
+            <template v-if="error.statusCode">
+              <h4>Status Code</h4>
+              <p class="mb-2">{{ error.statusCode }}</p>
+            </template>
 
-            <h4>Message</h4>
-            <p v-if="error.statusMessage" class="mb-2">
-              {{ error.statusMessage }}
-            </p>
+            <template v-if="error.statusMessage">
+              <h4>Message</h4>
+              <p class="mb-2">
+                {{ error.statusMessage }}
+              </p>
+            </template>
 
-            <h4 class="mb-1">Details</h4>
-            <pre v-if="error.message">{{ error.message }}</pre>
+            <template v-if="error.message">
+              <h4 class="mb-1">Details</h4>
+              <pre>{{ error.message }}</pre>
+            </template>
           </div>
         </div>
         <Button
