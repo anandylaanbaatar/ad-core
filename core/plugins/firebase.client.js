@@ -66,6 +66,7 @@ export default defineNuxtPlugin(async (nuxtApp) => {
 
   console.log("[Plugins] ::: [Firebase] ::: Initialized!")
 
+  const isProduction = process.env.NODE_ENV === "production"
   const config = CONFIG.value
   const firebaseConfig = config
   const app =
@@ -82,7 +83,7 @@ export default defineNuxtPlugin(async (nuxtApp) => {
    */
 
   if (useRuntimeConfig().public.features.analytics) {
-    if (await isSupported()) {
+    if ((await isSupported()) && isProduction) {
       try {
         analytics = getAnalytics(app)
 
