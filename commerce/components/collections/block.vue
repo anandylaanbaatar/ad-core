@@ -4,7 +4,11 @@
     <div v-if="collection && collection.level.id !== 'level-3'">
       <div
         v-if="collection.level.id === 'level-1'"
-        class="c-block c-image mb-5 size-md collectionBlock"
+        class="c-block c-image mb-5 collectionBlock"
+        :class="{
+          'size-md': collectionImage,
+          'size-xs': !collectionImage,
+        }"
         :style="blockStyle"
       >
         <div class="c-block-center">
@@ -35,7 +39,11 @@
   <div v-else>
     <div v-if="collectionHandle !== 'all' && collection">
       <div
-        class="c-block c-image size-md mb-5 collectionBlock"
+        class="c-block c-image mb-5 collectionBlock"
+        :class="{
+          'size-md': collectionImage,
+          'size-xs': !collectionImage,
+        }"
         :style="blockStyle"
       >
         <div class="c-block-center">
@@ -76,11 +84,19 @@ export default {
       }
       return
     },
-    blockStyle() {
+    collectionImage() {
       if (this.collection) {
-        if (this.collection.image && this.collection.image.url) {
-          return this.$utils.setBackImage(this.collection.image.url)
+        if (this.collection.image) {
+          if (this.collection.image.url) {
+            return this.collection.image.url
+          }
         }
+      }
+      return
+    },
+    blockStyle() {
+      if (this.collectionImage) {
+        return this.$utils.setBackImage(this.collectionImage)
       }
       return ""
     },

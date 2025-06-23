@@ -33,11 +33,13 @@ div.c-slider {
     }
   }
   .splide__arrows {
+    transition: all 0.4s ease;
+
     .splide__arrow {
       height: 30px;
       width: 30px;
       top: calc(50% - 10px);
-      background: rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.3);
       border: 1px solid rgba(255, 255, 255, 0.06);
       border-radius: 10px;
       color: $white;
@@ -45,6 +47,10 @@ div.c-slider {
       transition: all 0.4s ease;
       -webkit-backdrop-filter: saturate(180%) blur(20px);
       backdrop-filter: saturate(180%) blur(20px);
+
+      svg {
+        fill: $black;
+      }
 
       &--prev {
         left: 10px;
@@ -109,7 +115,6 @@ div.c-slider {
   &.c-product-slider {
     .splide__arrows {
       opacity: 0;
-      visibility: hidden;
       -webkit-transition: opacity 0.4s ease;
       transition: opacity 0.4s ease;
     }
@@ -121,7 +126,6 @@ div.c-slider {
     &:hover {
       .splide__arrows {
         opacity: 1;
-        visibility: visible;
       }
     }
   }

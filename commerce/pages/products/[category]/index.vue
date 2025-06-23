@@ -6,31 +6,13 @@
       <div v-else class="container py-4">
         <div class="row pb-5">
           <!--Collections Block-->
-          <div class="col-xs-12">
+          <div class="col-xs-12 md:p-0">
             <CollectionsBlock></CollectionsBlock>
           </div>
 
-          <!--Meta Info-->
-          <div class="col-xs-6">
-            <div
-              class="flex justify-content-start align-items-center flex-wrap"
-            >
-              <h4 v-if="productCounts !== 0" class="mt-3 opacity-30">
-                {{ productCounts }} - {{ totalProductsCount }}
-                {{ $utils.t("products") }}
-              </h4>
-
-              <!-- <Button
-              icon="pi pi-arrow-left"
-              @click="$bus.$emit('goTo', `/`)"
-              class="smallBtn mr-3"
-            ></Button> -->
-            </div>
-          </div>
-
           <!--Sort & Filter-->
-          <div class="col-xs-6">
-            <div class="flex justify-content-end align-items-center flex-wrap">
+          <div class="col-xs-6 md:p-0">
+            <div class="flex">
               <Button
                 v-if="showFilters"
                 icon="pi pi-times"
@@ -67,11 +49,32 @@
             ></Button> -->
             </div>
           </div>
+
+          <!--Meta Info-->
+          <div class="col-xs-6 md:p-0">
+            <div class="flex justify-content-end align-items-center flex-wrap">
+              <h4 v-if="productCounts !== 0" class="mt-3 opacity-30">
+                {{ productCounts }} - {{ totalProductsCount }}
+                {{ $utils.t("products") }}
+              </h4>
+
+              <!-- <Button
+              icon="pi pi-arrow-left"
+              @click="$bus.$emit('goTo', `/`)"
+              class="smallBtn mr-3"
+            ></Button> -->
+            </div>
+          </div>
         </div>
 
-        <div class="row p-0 m-0">
+        <div class="row no-margin">
+          <!--Collections List-->
+          <div v-if="showFilters" class="col-xs-12 col-md-2 md:p-0">
+            <CollectionsFilter></CollectionsFilter>
+          </div>
+
           <!--Grid-->
-          <div class="col-xs-12" :class="{ 'col-md-10 md:pr-0': showFilters }">
+          <div class="col-xs-12" :class="{ 'col-md-10 md:p-0': showFilters }">
             <ProductsGrid
               ref="productsGrid"
               :key="`products_grid_${key}`"
@@ -82,11 +85,6 @@
               :filters="filters"
               @updateProducts="(amount) => (productCounts = amount)"
             ></ProductsGrid>
-          </div>
-
-          <!--Collections List-->
-          <div v-if="showFilters" class="col-xs-12 col-md-2 md:pl-0">
-            <CollectionsFilter></CollectionsFilter>
           </div>
         </div>
       </div>

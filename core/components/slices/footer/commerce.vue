@@ -201,12 +201,12 @@
               <span
                 class="c-link mr-4"
                 @click="$bus.$emit('goTo', '/terms_of_service')"
-                >Terms of Service</span
+                >{{ $utils.t("Terms of Service") }}</span
               >
               <span
                 class="c-link"
                 @click="$bus.$emit('goTo', '/privacy_policy')"
-                >Privacy Policy</span
+                >{{ $utils.t("Privacy Policy") }}</span
               >
             </p>
           </div>
