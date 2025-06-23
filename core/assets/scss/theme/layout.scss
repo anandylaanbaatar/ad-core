@@ -176,6 +176,15 @@ body {
   text-align: center;
   overflow: hidden;
 
+  .c-logo {
+    height: auto;
+
+    img {
+      height: 50px;
+      border-radius: 10px;
+    }
+  }
+
   h2,
   h4,
   p {
