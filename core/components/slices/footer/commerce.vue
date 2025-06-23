@@ -5,11 +5,11 @@
         <div class="row">
           <!--Top-->
           <div class="col-xs-12 col-md-6 col-lg-4">
-            <Logo v-if="item.logo"></Logo>
+            <Logo v-if="item.logo" class="mb-3"></Logo>
 
             <template v-if="item.show_version">
               <Tag
-                class="cursor-pointer my-3"
+                class="cursor-pointer mb-3"
                 rounded
                 severity="primary"
                 @click="goToExternal('https://commerce.adcreative.studio')"
@@ -21,20 +21,23 @@
               <br />
             </template>
 
-            <template v-if="item.show_language_currency">
+            <div v-if="item.show_language_currency" class="mb-3">
               <p class="mb-1 mt-3">
                 {{ $utils.t("Language") }} & {{ $utils.t("Currency") }}
               </p>
               <SwitcherLanguage class="mb-1"></SwitcherLanguage>
               <SwitcherCurrency></SwitcherCurrency>
-            </template>
+            </div>
           </div>
 
           <div class="col-xs-12 col-md-6 col-lg-8">
             <div class="row">
               <!--Collections-->
               <template v-if="item.collection_links">
-                <div v-if="allCollections" class="col-xs-12 col-md-6 col-lg-4">
+                <div
+                  v-if="allCollections"
+                  class="col-xs-12 col-md-6 col-lg-4 mb-3"
+                >
                   <p class="label mb-2">{{ $utils.t("Collections") }}</p>
 
                   <ul class="c-list">
@@ -54,7 +57,7 @@
 
               <!--Links-->
               <template v-else>
-                <div v-if="item.links" class="col-xs-12 col-md-6 col-lg-4">
+                <div v-if="item.links" class="col-xs-12 col-md-6 col-lg-4 mb-3">
                   <p v-if="item.links_title" class="label mb-2">
                     {{ $utils.t(item.links_title) }}
                   </p>
@@ -79,7 +82,7 @@
               </template>
 
               <!--Pages-->
-              <div class="col-xs-12 col-md-6 col-lg-4">
+              <div class="col-xs-12 col-md-6 col-lg-4 mb-3">
                 <p v-if="item.pages_title" class="label mb-2">
                   {{ $utils.t(item.pages_title) }}
                 </p>
@@ -96,17 +99,8 @@
                 </ul>
               </div>
 
-              <!--Shop The Look-->
-              <!-- <div class="col-xs-12 col-md-6 col-lg-3">
-                <p class="label mb-2">Shop The Look</p>
-                <ul class="c-list">
-                  <li>2024 {{ $utils.t("Collection") }}</li>
-                  <li>Tennis {{ $utils.t("Collection") }}</li>
-                </ul>
-              </div> -->
-
               <!--Social-->
-              <div class="col-xs-12 col-md-6 col-lg-4">
+              <div class="col-xs-12 col-md-6 col-lg-4 mb-3">
                 <p v-if="item.social_title" class="label mb-2">
                   {{ $utils.t(item.social_title) }}
                 </p>

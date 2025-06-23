@@ -1,8 +1,8 @@
 <template>
-  <div v-if="item" class="mb-8 w-full">
+  <div v-if="item" class="mb-6 w-full">
     <div class="container">
       <div class="row">
-        <div class="col-xs-12" :class="gridSize.left">
+        <div class="col-xs-12 mb-4 md:mb-0" :class="gridSize.left">
           <div class="c-block size-m darkBlock">
             <div class="p-6">
               <Tag v-if="item.tag" class="c-custom-tag mb-3">{{
