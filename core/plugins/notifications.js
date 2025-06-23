@@ -17,35 +17,35 @@ export default defineNuxtPlugin(async (nuxtApp) => {
     return
   }
 
-  /**
-   * Web Push
-   * Notifications
-   */
+  // /**
+  //  * Web Push
+  //  * Notifications
+  //  */
 
-  const enableNotifications = async () => {
-    return new Promise(async (resolve) => {
-      Notification.requestPermission()
-        .then(async (permission) => {
-          if (permission === "granted") {
-            const token = await nuxtApp.$fire.actions.getUserToken()
+  // const enableNotifications = async () => {
+  //   return new Promise(async (resolve) => {
+  //     Notification.requestPermission()
+  //       .then(async (permission) => {
+  //         if (permission === "granted") {
+  //           const token = await nuxtApp.$fire.actions.getUserToken()
 
-            if (token) {
-              await nuxtApp.$fire.actions.saveUserToken(token)
-              resolve(true)
-            } else {
-              resolve(null)
-            }
-          }
-        })
-        .catch((err) => {
-          console.log(
-            "[Plugins] ::: [Notifications] ::: Permission Error ::",
-            err.message
-          )
-          resolve(null)
-        })
-    })
-  }
+  //           if (token) {
+  //             await nuxtApp.$fire.actions.saveUserToken(token)
+  //             resolve(true)
+  //           } else {
+  //             resolve(null)
+  //           }
+  //         }
+  //       })
+  //       .catch((err) => {
+  //         console.log(
+  //           "[Plugins] ::: [Notifications] ::: Permission Error ::",
+  //           err.message
+  //         )
+  //         resolve(null)
+  //       })
+  //   })
+  // }
 
   /**
    * Loops
@@ -253,9 +253,9 @@ export default defineNuxtPlugin(async (nuxtApp) => {
             send: loopsSendEvents,
           },
         },
-        push: {
-          enable: enableNotifications,
-        },
+        // push: {
+        //   enable: enableNotifications,
+        // },
       },
     },
   }

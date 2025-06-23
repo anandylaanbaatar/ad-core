@@ -67,7 +67,7 @@ export default defineNuxtPlugin(async (nuxtApp) => {
   const firestore = getFirestore(app)
   const database = getDatabase(app)
   const dbRef = ref(getDatabase(app))
-  const messaging = getMessaging(app)
+  // const messaging = getMessaging(app)
 
   // Setup VueFire
   nuxtApp.vueApp.use(VueFire, {
@@ -220,11 +220,11 @@ export default defineNuxtPlugin(async (nuxtApp) => {
         // )
 
         if (user) {
-          useInAppNotifications().listen(user.uid)
+          // useInAppNotifications().listen(user.uid)
           usePresence(user)
           resolve(user)
         } else {
-          useInAppNotifications().stop()
+          // useInAppNotifications().stop()
           useAuthStore().set("user", null)
           useAuthStore().set("userLoggedIn", false)
           resolve(null)
@@ -547,56 +547,56 @@ export default defineNuxtPlugin(async (nuxtApp) => {
    * Notifications
    */
 
-  onMessage(messaging, (payload) => {
-    console.log("[Firebase] ::: Foreground messaging :: ", payload)
-    useInAppNotifications().add(payload.notification)
-  })
+  // onMessage(messaging, (payload) => {
+  //   console.log("[Firebase] ::: Foreground messaging :: ", payload)
+  //   useInAppNotifications().add(payload.notification)
+  // })
 
-  const getUserToken = async () => {
-    return new Promise(async (resolve) => {
-      const key = useRuntimeConfig().public.features.firebaseWebPushKey
+  // const getUserToken = async () => {
+  //   return new Promise(async (resolve) => {
+  //     const key = useRuntimeConfig().public.features.firebaseWebPushKey
 
-      if (!key) {
-        console.log(
-          "[Plugins] ::: [Firebase] ::: Not Setup Yet. Firebase Web Push Key Missing!"
-        )
-        resolve(null)
-        return
-      }
+  //     if (!key) {
+  //       console.log(
+  //         "[Plugins] ::: [Firebase] ::: Not Setup Yet. Firebase Web Push Key Missing!"
+  //       )
+  //       resolve(null)
+  //       return
+  //     }
 
-      getToken(messaging, { vapidKey: key })
-        .then(async (token) => {
-          console.log(
-            "[Plugins] ::: [Firebase] ::: FCM Token Success ::",
-            token
-          )
-          resolve(token)
-        })
-        .catch((err) => {
-          console.log(
-            "[Plugins] ::: [Firebase] ::: FCM Token Error ::",
-            err.message
-          )
-          resolve(null)
-        })
-    })
-  }
-  const saveUserToken = async (token) => {
-    return new Promise(async (resolve) => {
-      const user = await auth.currentUser
+  //     getToken(messaging, { vapidKey: key })
+  //       .then(async (token) => {
+  //         console.log(
+  //           "[Plugins] ::: [Firebase] ::: FCM Token Success ::",
+  //           token
+  //         )
+  //         resolve(token)
+  //       })
+  //       .catch((err) => {
+  //         console.log(
+  //           "[Plugins] ::: [Firebase] ::: FCM Token Error ::",
+  //           err.message
+  //         )
+  //         resolve(null)
+  //       })
+  //   })
+  // }
+  // const saveUserToken = async (token) => {
+  //   return new Promise(async (resolve) => {
+  //     const user = await auth.currentUser
 
-      console.log("[Plugins] ::: [Firebase] ::: Save User Token :: ", user)
+  //     console.log("[Plugins] ::: [Firebase] ::: Save User Token :: ", user)
 
-      if (user) {
-        await updateDb(`/users/${user.uid}`, {
-          fcmToken: token,
-        })
-        resolve(true)
-      } else {
-        resolve(null)
-      }
-    })
-  }
+  //     if (user) {
+  //       await updateDb(`/users/${user.uid}`, {
+  //         fcmToken: token,
+  //       })
+  //       resolve(true)
+  //     } else {
+  //       resolve(null)
+  //     }
+  //   })
+  // }
 
   /**
    * VueFire
@@ -651,8 +651,8 @@ export default defineNuxtPlugin(async (nuxtApp) => {
           updateUser,
 
           // Notifications
-          getUserToken,
-          saveUserToken,
+          // getUserToken,
+          // saveUserToken,
         },
       },
     },

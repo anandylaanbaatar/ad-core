@@ -191,11 +191,11 @@ if (config.integrations.firebase) {
   if (config.config.firebaseConfig) {
     siteRuntimeConfig.public.firebase = config.config.firebaseConfig
 
-    // Firebase Push Notifications
-    if (config.config.firebaseWebPushKey) {
-      siteRuntimeConfig.public.features.firebaseWebPushKey =
-        config.config.firebaseWebPushKey
-    }
+    // // Firebase Push Notifications
+    // if (config.config.firebaseWebPushKey) {
+    //   siteRuntimeConfig.public.features.firebaseWebPushKey =
+    //     config.config.firebaseWebPushKey
+    // }
 
     // Vuefire Module
     siteConfig.vuefire = {

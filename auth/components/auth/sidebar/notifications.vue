@@ -18,10 +18,10 @@
           захиалгын хүргэлтийн явцын мэдэдлийг хүлээн авах боломжтой болно.
         </p>
 
-        <Button
+        <!-- <Button
           label="Enable Notifications"
           @click="enableNotifications"
-        ></Button>
+        ></Button> -->
       </div>
     </div>
   </div>
@@ -58,13 +58,12 @@ export default {
   },
 
   methods: {
-    async enableNotifications() {
-      const enable = await this.$notifications.push.enable()
-
-      if (enable) {
-        this.notificationsActive = true
-      }
-    },
+    // async enableNotifications() {
+    //   const enable = await this.$notifications.push.enable()
+    //   if (enable) {
+    //     this.notificationsActive = true
+    //   }
+    // },
   },
 }
 </script>

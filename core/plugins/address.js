@@ -70,17 +70,18 @@ export default defineNuxtPlugin((nuxtApp) => {
   }
   const getBrowserLocation = () => {
     return new Promise((resolve, reject) => {
-      if (navigator && navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition((position) => {
-          let latLng = {
-            lat: position.coords.latitude,
-            lng: position.coords.longitude,
-          }
-          resolve(latLng)
-        })
-      } else {
-        reject(null)
+      if (typeof navigator !== "undefined") {
+        if (navigator && navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition((position) => {
+            let latLng = {
+              lat: position.coords.latitude,
+              lng: position.coords.longitude,
+            }
+            resolve(latLng)
+          })
+        }
       }
+      reject(null)
     })
   }
 
