@@ -5,6 +5,7 @@
       :options="languages"
       optionLabel="name"
       placeholder="Language"
+      :class="classes"
       @change="changeLanguage"
     ></Select>
   </div>
@@ -12,6 +13,13 @@
 
 <script>
 export default {
+  props: {
+    classes: {
+      type: String,
+      default: null,
+    },
+  },
+
   data() {
     return {
       language: null,

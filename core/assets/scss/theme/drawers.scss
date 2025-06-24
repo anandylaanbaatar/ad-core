@@ -564,4 +564,21 @@ div.p-drawer.imagePreview {
       }
     }
   }
+  div.p-drawer.imagePreview {
+    .c-slider {
+      .content {
+        min-height: 100%;
+
+        .center {
+          display: flex;
+          align-items: center;
+
+          img {
+            height: auto;
+            width: 100%;
+          }
+        }
+      }
+    }
+  }
 }

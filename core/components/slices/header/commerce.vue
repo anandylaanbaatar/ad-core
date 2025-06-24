@@ -75,11 +75,12 @@
             >
               <div
                 class="c-header-menu-item c-image"
+                :class="{ hasImage: collection.image && collection.image.url }"
                 :style="setStyle(collection)"
                 @click="goTo(`/products/${collection.handle}/`)"
               >
                 <div class="dimmer p-4 text-center">
-                  <h2>{{ getTitle(collection.title) }}</h2>
+                  <h3>{{ getTitle(collection.title) }}</h3>
                 </div>
               </div>
             </div>
@@ -89,11 +90,10 @@
           <div class="col-xs-12 col-md-4 col-lg-2">
             <div
               class="c-header-menu-item c-image allBtn"
-              :style="`background-image:url(https://images.prismic.io/tumen-v2/Z_LLmndAxsiBwXWA_coloured-blurred-background_1112-513.jpg?auto=format,compress);`"
               @click="goTo('/products/all/')"
             >
               <div class="dimmer p-4 text-center">
-                <h2>{{ $utils.t("Browse All") }}</h2>
+                <h4>{{ $utils.t("Browse All") }}</h4>
               </div>
             </div>
           </div>
@@ -137,6 +137,45 @@
               </div>
             </div>
             -->
+          </div>
+
+          <!--Mobile Only Items-->
+          <div class="col-xs-12 mobileOnly block">
+            <div class="c-divider my-2"></div>
+            <div class="c-header-menu-item links">
+              <h3 class="c-link mb-1" @click="goTo('/saved')">
+                {{ $utils.t("Saved") }}
+              </h3>
+
+              <template v-if="user">
+                <h3
+                  class="c-link mb-1"
+                  @click="$bus.$emit('sidebarGlobal', { id: 'account' })"
+                >
+                  {{ $utils.t("Profile") }}
+                </h3>
+              </template>
+              <template v-else>
+                <div class="row">
+                  <div class="col-xs-6">
+                    <Button
+                      class="w-full"
+                      severity="secondary"
+                      @click="$bus.$emit('sidebarGlobal', { id: 'account' })"
+                      >{{ $utils.t("Login") }}</Button
+                    >
+                  </div>
+                  <div class="col-xs-6">
+                    <Button
+                      class="w-full"
+                      severity="primary"
+                      @click="$bus.$emit('sidebarGlobal', { id: 'signUp' })"
+                      >{{ $utils.t("Sign Up") }}</Button
+                    >
+                  </div>
+                </div>
+              </template>
+            </div>
           </div>
         </div>
       </div>
@@ -221,6 +260,12 @@ export default {
         }
       }
       return false
+    },
+    user() {
+      if (useAuthStore().user) {
+        return useAuthStore().user
+      }
+      return
     },
   },
 

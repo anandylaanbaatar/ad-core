@@ -173,15 +173,10 @@ $height: 75px;
       justify-content: center;
       width: 100%;
       height: 100%;
-      color: $white;
       background: var(--ad-background01);
       border-radius: 15px;
       -webkit-transition: all 0.4s ease;
       transition: all 0.4s ease;
-
-      h4 {
-        color: $white;
-      }
 
       &:hover {
         background: var(--ad-background03);
@@ -200,6 +195,11 @@ $height: 75px;
       text-transform: capitalize;
     }
 
+    &.hasImage {
+      .dimmer {
+        color: $white;
+      }
+    }
     &.half {
       min-height: 150px;
     }
@@ -286,7 +286,7 @@ $height: 75px;
 @media screen and (max-width: 768px) {
   .c-header-menu {
     &-item {
-      min-height: 110px;
+      min-height: 80px;
       margin-bottom: 15px;
 
       &.allBtn {
