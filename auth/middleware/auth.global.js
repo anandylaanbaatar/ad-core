@@ -8,16 +8,16 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
 
     // Firebase Auth
     if (features().auth.type === "firebase") {
-      // Set All Users
-      if (authStore.users === null) {
-        await authStore.setUsers()
-      }
-
       // Wait for Auth State
       const user = await nuxtApp.$fire.actions.authState()
 
       // Logged In User
       if (user && !authStore.user) {
+        // Set All Users
+        if (authStore.users === null) {
+          await authStore.setUsers()
+        }
+
         const userData = await nuxtApp.$fire.actions.user()
         const newUserData = await authStore.userDataCheck(userData, user)
 
