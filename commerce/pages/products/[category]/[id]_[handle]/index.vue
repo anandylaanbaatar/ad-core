@@ -20,7 +20,7 @@
       <template v-else>
         <div class="container py-4">
           <!--Toolbar-->
-          <Toolbar class="mb-3 px-3">
+          <Toolbar class="mb-3 px-3 desktopOnly">
             <template #start>
               <Button
                 icon="pi pi-arrow-left"
@@ -52,13 +52,13 @@
               <Button
                 v-if="!isSavedItem"
                 icon="pi pi-heart"
-                class="sm"
+                class="sm desktopOnly"
                 @click.stop="useSaveProduct(product)"
               ></Button>
               <Button
                 v-else
                 icon="pi pi-heart-fill"
-                class="sm"
+                class="sm desktopOnly"
                 @click.stop="useRemoveProduct(product)"
               ></Button>
             </template>
@@ -116,7 +116,7 @@
             <!--Featured Image-->
             <div
               v-if="featuredImage"
-              class="col-xs-12 col-md-4 mb-4 desktopOnly"
+              class="col-xs-12 col-md-4 mb-4 desktopOnly inline"
             >
               <div class="c-product-images">
                 <div
@@ -131,7 +131,7 @@
               <div class="py-3">
                 <!--Tags, Title & Description-->
                 <div class="mb-3">
-                  <div class="mb-2">
+                  <div class="mb-2 flex align-items-center">
                     <Tag
                       class="mr-2 c-link capitalize"
                       @click="$bus.$emit('goTo', `/products/${category}/`)"
@@ -145,18 +145,31 @@
                       <Tag
                         v-if="tag === 'Available'"
                         severity="success"
-                        class="mr-2 mb-3"
+                        class="mr-2"
                         >{{ $utils.t(tag) }}</Tag
                       >
                       <Tag
                         v-else-if="tag === 'Sale'"
                         severity="danger"
-                        class="mr-2 mb-3"
+                        class="mr-2"
                         >{{ $utils.t(tag) }}</Tag
                       >
-                      <Tag v-else severity="info" class="mr-2 mb-3">{{
+                      <Tag v-else severity="info" class="mr-2">{{
                         $utils.t(tag)
                       }}</Tag>
+
+                      <Button
+                        v-if="!isSavedItem"
+                        icon="pi pi-heart"
+                        class="sm ml-auto mobileOnly"
+                        @click.stop="useSaveProduct(product)"
+                      ></Button>
+                      <Button
+                        v-else
+                        icon="pi pi-heart-fill"
+                        class="sm ml-auto mobileOnly"
+                        @click.stop="useRemoveProduct(product)"
+                      ></Button>
                     </template>
                   </div>
 

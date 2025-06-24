@@ -25,9 +25,15 @@
               <p class="mb-1 mt-3">
                 {{ $utils.t("Language") }} & {{ $utils.t("Currency") }}
               </p>
-              <SwitcherLanguage class="mb-1"></SwitcherLanguage>
-              <SwitcherCurrency></SwitcherCurrency>
-              <SwitcherDarkMode classes="ml-2"></SwitcherDarkMode>
+              <div
+                class="flex align-items-center justify-content-center md:justify-content-start"
+              >
+                <div>
+                  <SwitcherLanguage classes="sm"></SwitcherLanguage>
+                  <SwitcherCurrency classes="sm"></SwitcherCurrency>
+                  <SwitcherDarkMode classes="ml-2 sm"></SwitcherDarkMode>
+                </div>
+              </div>
             </div>
           </div>
 

@@ -5,6 +5,7 @@
       :options="currencies"
       optionLabel="name"
       placeholder="Currency"
+      :class="classes"
       @change="changeCurrency"
     ></Select>
   </div>
@@ -12,6 +13,13 @@
 
 <script>
 export default {
+  props: {
+    classes: {
+      type: String,
+      default: null,
+    },
+  },
+
   data() {
     return {
       currency: null,
