@@ -153,4 +153,6 @@ export default async function siteConfigModule(moduleOptions, nuxt) {
   // Turn off db and cleanup app to avoid long running process.
   db.goOffline()
   await app.delete()
+
+  // console.log("[Modules] ::: [Firebase] ::: Init!")
 }

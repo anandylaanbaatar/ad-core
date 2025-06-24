@@ -34,13 +34,13 @@ import {
   serverTimestamp,
   // runTransaction
 } from "firebase/database"
-import {
-  useDatabaseList,
-  useDatabaseObject,
-  VueFire,
-  VueFireDatabaseOptionsAPI,
-  VueFireFirestoreOptionsAPI,
-} from "vuefire"
+// import {
+//   useDatabaseList,
+//   useDatabaseObject,
+//   VueFire,
+//   VueFireDatabaseOptionsAPI,
+//   VueFireFirestoreOptionsAPI,
+// } from "vuefire"
 // import { getMessaging, onMessage, getToken } from "firebase/messaging"
 import {
   getAnalytics,
@@ -83,7 +83,8 @@ export default defineNuxtPlugin(async (nuxtApp) => {
    */
 
   if (useRuntimeConfig().public.features.analytics) {
-    if ((await isSupported()) && isProduction) {
+    const isAnalyticsSupported = await isSupported()
+    if (isAnalyticsSupported && typeof window !== "undefined") {
       try {
         analytics = getAnalytics(app)
 
@@ -122,10 +123,11 @@ export default defineNuxtPlugin(async (nuxtApp) => {
   }
 
   // Setup VueFire
-  nuxtApp.vueApp.use(VueFire, {
-    firebaseApp: app,
-    modules: [VueFireDatabaseOptionsAPI(), VueFireFirestoreOptionsAPI()],
-  })
+  // console.log("[Plugins] ::: [Firebase] ::: Setup VueFire!")
+  // nuxtApp.vueApp.use(VueFire, {
+  //   firebaseApp: app,
+  //   modules: [VueFireDatabaseOptionsAPI(), VueFireFirestoreOptionsAPI()],
+  // })
 
   /**
    * CRUD
@@ -650,16 +652,16 @@ export default defineNuxtPlugin(async (nuxtApp) => {
   //   })
   // }
 
-  /**
-   * VueFire
-   */
+  // /**
+  //  * VueFire
+  //  */
 
-  const bind = (path, type) => {
-    if (type === "list") {
-      return useDatabaseList(ref(database, path))
-    }
-    return useDatabaseObject(ref(database, path))
-  }
+  // const bind = (path, type) => {
+  //   if (type === "list") {
+  //     return useDatabaseList(ref(database, path))
+  //   }
+  //   return useDatabaseObject(ref(database, path))
+  // }
 
   return {
     provide: {
@@ -677,7 +679,7 @@ export default defineNuxtPlugin(async (nuxtApp) => {
         get,
         onValue,
         push,
-        bind,
+        // bind,
         actions: {
           // Database
           read,

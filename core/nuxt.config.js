@@ -91,9 +91,9 @@ const modules = defineNuxtConfig(modulesConfig)
  * Servers
  */
 
-const servers = defineNuxtConfig({
-  server: [resolve("server/**")],
-})
+// const servers = defineNuxtConfig({
+//   server: [resolve("server/**")],
+// })
 
 /**
  * Plugins
@@ -172,4 +172,4 @@ const build = defineNuxtConfig({
   },
 })
 
-export default defu(middlewares, modules, build, app, servers, plugins)
+export default defu(middlewares, modules, build, app, plugins)
