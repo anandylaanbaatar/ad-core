@@ -9,7 +9,9 @@ export default defineNuxtPlugin(async () => {
 
   if (!config.features.auth && !config.features.auth.phoneVerify) return
 
-  console.log("[Plugins] ::: [Phone] ::: Initialized!")
+  if (useRuntimeConfig().public.features.log) {
+    console.log("[Plugins] ::: [Phone] ::: Initialized!")
+  }
 
   const services = {
     numVerify: {

@@ -21,7 +21,9 @@ export default defineNuxtPlugin(() => {
       return
     }
 
-    console.log("[Plugins] ::: [Algolia] ::: Initialized!")
+    if (useRuntimeConfig().public.features.log) {
+      console.log("[Plugins] ::: [Algolia] ::: Initialized!")
+    }
   } else {
     return
   }

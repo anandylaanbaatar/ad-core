@@ -12,8 +12,9 @@ export default defineNuxtPlugin(() => {
       console.log("[Plugins] ::: [Storepay] ::: Missing StorePay Config!")
       return
     }
-
-    console.log("[Plugins] ::: [Storepay] ::: Initialized!")
+    if (useRuntimeConfig().public.features.log) {
+      console.log("[Plugins] ::: [Storepay] ::: Initialized!")
+    }
   } else {
     return
   }

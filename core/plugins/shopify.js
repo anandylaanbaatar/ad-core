@@ -6,8 +6,9 @@ export default defineNuxtPlugin((nuxtApp) => {
       // console.log("[Plugins] ::: [Shopify] ::: Not Initialized!")
       return
     }
-
-    console.log("[Plugins] ::: [Shopify] ::: Initialized!")
+    if (useRuntimeConfig().public.features.log) {
+      console.log("[Plugins] ::: [Shopify] ::: Initialized!")
+    }
   }
 
   /**
@@ -475,7 +476,7 @@ export default defineNuxtPlugin((nuxtApp) => {
     store.set("user", false)
   }
 
-  // NOT USED
+  // Auth State - Check Token Expiry
   const authState = async () => {
     if (import.meta.client) {
       // console.log("[Plugins] ::: [Shopify] ::: Auth State Initialized!")
@@ -490,10 +491,15 @@ export default defineNuxtPlugin((nuxtApp) => {
           console.log("[Plugins] ::: [Shopify] ::: Token Expired Logged Out!")
         } else {
           await store.set("userLoggedIn", true)
-          console.log("[Plugins] ::: [Shopify] ::: Logged In!")
+
+          if (useRuntimeConfig().public.features.log) {
+            console.log("[Plugins] ::: [Shopify] ::: Logged In!")
+          }
         }
       } else {
-        console.log("[Plugins] ::: [Shopify] ::: Logged Out!")
+        if (useRuntimeConfig().public.features.log) {
+          console.log("[Plugins] ::: [Shopify] ::: Logged Out!")
+        }
       }
     }
   }

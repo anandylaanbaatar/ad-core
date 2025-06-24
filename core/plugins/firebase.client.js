@@ -64,7 +64,9 @@ export default defineNuxtPlugin(async (nuxtApp) => {
     return
   }
 
-  console.log("[Plugins] ::: [Firebase] ::: Initialized!")
+  if (useRuntimeConfig().public.features.log) {
+    console.log("[Plugins] ::: [Firebase] ::: Initialized!")
+  }
 
   const isProduction = process.env.NODE_ENV === "production"
   const config = CONFIG.value
@@ -115,7 +117,9 @@ export default defineNuxtPlugin(async (nuxtApp) => {
           logEvent("analytics", "page_view", eventData)
         })
 
-        console.log("[Plugins] ::: [Analytics] ::: Initialized!")
+        if (useRuntimeConfig().public.features.log) {
+          console.log("[Plugins] ::: [Analytics] ::: Initialized!")
+        }
       } catch (err) {
         console.warn("[Plugins] ::: [Analytics] ::: Init Error!", err.message)
       }

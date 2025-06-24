@@ -58,8 +58,9 @@ export default defineNuxtPlugin(async () => {
         return
       }
     }
-
-    console.log(`[Plugins] ::: [Stripe] ::: Initialized! ::: ${mode}`)
+    if (useRuntimeConfig().public.features.log) {
+      console.log(`[Plugins] ::: [Stripe] ::: Initialized! ::: ${mode}`)
+    }
   } else {
     return
   }

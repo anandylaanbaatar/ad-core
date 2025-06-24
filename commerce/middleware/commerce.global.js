@@ -207,6 +207,8 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
       await useGetCartItems()
     }
 
-    console.log("[Middleware] ::: [Commerce] ::: Initialized!")
+    if (useRuntimeConfig().public.features.log) {
+      console.log("[Middleware] ::: [Commerce] ::: Initialized!")
+    }
   }
 })

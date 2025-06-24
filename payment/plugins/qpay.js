@@ -14,8 +14,9 @@ export default defineNuxtPlugin(() => {
       console.log("[Plugins] ::: [Qpay] ::: Missing Qpay Config!")
       return
     }
-
-    console.log("[Plugins] ::: [QPay] ::: Initialized!")
+    if (useRuntimeConfig().public.features.log) {
+      console.log("[Plugins] ::: [QPay] ::: Initialized!")
+    }
   } else {
     return
   }

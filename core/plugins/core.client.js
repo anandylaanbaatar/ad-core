@@ -10,5 +10,7 @@ export default defineNuxtPlugin(async () => {
   // Dark Mode
   store.setDarkMode(null)
 
-  console.log("[Plugins] ::: [Core] ::: Initialized!")
+  if (useRuntimeConfig().public.features.log) {
+    console.log("[Plugins] ::: [Core] ::: Initialized!")
+  }
 })

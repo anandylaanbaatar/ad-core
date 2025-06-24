@@ -253,7 +253,7 @@ export default {
         const userData = await this.$fire.actions.user()
         const newUserData = await useAuthStore().userDataCheck(userData)
 
-        console.log("[Login] ::: User ::", loginData, newUserData)
+        // console.log("[Login] ::: User ::", loginData, newUserData)
 
         if (loginData) {
           let updates = {
@@ -285,7 +285,7 @@ export default {
         const userData = await this.$fire.actions.user()
         const newUserData = await useAuthStore().userDataCheck(userData)
 
-        console.log("[Login] ::: User ::", loginData, newUserData)
+        // console.log("[Login] ::: User ::", loginData, newUserData)
 
         if (loginData) {
           let updates = {

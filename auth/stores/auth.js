@@ -41,7 +41,7 @@ export const useAuthStore = defineStore("auth", {
       nuxtApp.$bus.$emit("goTo", "/")
     },
     async setUsers() {
-      console.log("[Store] ::: [Auth] ::: Set Users!")
+      // console.log("[Store] ::: [Auth] ::: Set Users!")
 
       if (integrations().firebase) {
         const users = await useNuxtApp().$fire.actions.read("/users")
@@ -64,7 +64,7 @@ export const useAuthStore = defineStore("auth", {
       }
     },
     async setUser(user) {
-      console.log("[Store] ::: [Auth] ::: Set User!", user)
+      // console.log("[Store] ::: [Auth] ::: Set User!", user)
 
       if (features().auth.type === "firebase") {
         await this.setUserFirebase(user)

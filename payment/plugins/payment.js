@@ -4,6 +4,8 @@ export default defineNuxtPlugin(async () => {
 
     store.setPaymentOptions()
 
-    console.log("[Plugins] ::: [Payment] ::: Initialized!")
+    if (useRuntimeConfig().public.features.log) {
+      console.log("[Plugins] ::: [Payment] ::: Initialized!")
+    }
   }
 })

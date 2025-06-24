@@ -12,7 +12,9 @@ export default defineNuxtPlugin(async (nuxtApp) => {
       return
     }
 
-    console.log("[Plugins] ::: [Notifications] ::: Initialized!")
+    if (useRuntimeConfig().public.features.log) {
+      console.log("[Plugins] ::: [Notifications] ::: Initialized!")
+    }
   } else {
     return
   }
