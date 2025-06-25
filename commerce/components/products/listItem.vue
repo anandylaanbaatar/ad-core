@@ -2,7 +2,12 @@
   <div
     v-if="item"
     class="c-product box list large w-full"
-    @click="$bus.$emit('goTo', `/shop/t-shirt/${item.id}_${item.handle}`)"
+    @click="
+      $bus.$emit(
+        'goTo',
+        `/products/${productCategoryHandle}/${item.id}_${item.handle}`
+      )
+    "
   >
     <div class="row h-full flex align-items-center">
       <!--Image-->
@@ -49,6 +54,17 @@ export default {
     item: {
       type: Object,
       default: null,
+    },
+  },
+
+  computed: {
+    productCategoryHandle() {
+      if (this.item) {
+        if (this.item.category) {
+          return this.item.category.handle
+        }
+      }
+      return "all"
     },
   },
 }

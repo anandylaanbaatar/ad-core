@@ -6,7 +6,7 @@
       @click="
         $bus.$emit(
           'goTo',
-          `/products/${this.item.category.handle}/${this.item.id}_${this.item.handle}`
+          `/products/${this.productCategoryHandle}/${this.item.id}_${this.item.handle}`
         )
       "
     >
@@ -130,6 +130,14 @@ export default {
   },
 
   computed: {
+    productCategoryHandle() {
+      if (this.item) {
+        if (this.item.category) {
+          return this.item.category.handle
+        }
+      }
+      return "all"
+    },
     itemImage() {
       if (this.item && this.item.image) {
         return this.item.image.url

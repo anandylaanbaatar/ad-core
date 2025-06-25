@@ -22,7 +22,7 @@
           @click.stop="
             $bus.$emit(
               'goTo',
-              `/products/${this.item.category.handle}/${this.item.id}_${this.item.handle}`
+              `/products/${productCategoryHandle}/${this.item.id}_${this.item.handle}`
             )
           "
         ></div>
@@ -35,7 +35,7 @@
           @click.stop="
             $bus.$emit(
               'goTo',
-              `/products/${this.item.category.handle}/${this.item.id}_${this.item.handle}`
+              `/products/${productCategoryHandle}/${this.item.id}_${this.item.handle}`
             )
           "
         >
@@ -102,7 +102,7 @@
       @click.stop="
         $bus.$emit(
           'goTo',
-          `/products/${this.item.category.handle}/${this.item.id}_${this.item.handle}`
+          `/products/${productCategoryHandle}/${this.item.id}_${this.item.handle}`
         )
       "
       class="flex items-center c-product-content"
@@ -150,8 +150,16 @@ export default {
   },
 
   computed: {
+    productCategoryHandle() {
+      if (this.item) {
+        if (this.item.category) {
+          return this.item.category.handle
+        }
+      }
+      return "all"
+    },
     itemPath() {
-      return `/products/${this.item.category.handle}/${this.item.id}_${this.item.handle}`
+      return `/products/${this.productCategoryHandle}/${this.item.id}_${this.item.handle}`
     },
   },
 
