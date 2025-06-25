@@ -210,13 +210,14 @@ if (config.integrations.firebase) {
     }
   }
 }
-// Prismic
-if (config.features.prismic) {
-  siteConfig.prismic = {
-    endpoint: config.features.prismic,
-    preview: false,
-  }
-}
+
+// // Prismic
+// if (config.features.prismic) {
+//   siteConfig.prismic = {
+//     endpoint: config.features.prismic,
+//     preview: false,
+//   }
+// }
 
 /**
  * 4. Payments

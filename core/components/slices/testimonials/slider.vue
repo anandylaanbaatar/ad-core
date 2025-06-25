@@ -106,11 +106,11 @@ export default {
   methods: {
     async getDoc(id) {
       if (integrations().prismic) {
+        if (!this.$prismicClient) return
         this.loading = true
 
         try {
-          const { client } = usePrismic()
-          const items = await client.getSingle("testimonials")
+          const items = await this.$prismicClient.getSingle("testimonials")
 
           if (items) {
             this.reviews = items.data

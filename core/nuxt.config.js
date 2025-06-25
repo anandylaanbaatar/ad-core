@@ -50,7 +50,7 @@ let modulesConfig = {
     "@nuxtjs/i18n",
     "@nuxtjs/robots",
     "nuxt-vuefire",
-    "@nuxtjs/prismic",
+    // "@nuxtjs/prismic",
     resolve("./modules/siteConfig"),
   ],
 
@@ -104,6 +104,7 @@ const plugins = defineNuxtConfig({
     resolve("./plugins/utils.js"),
     resolve("./plugins/address.js"),
     resolve("./plugins/currency.js"),
+    resolve("./plugins/prismic.js"),
     resolve("./plugins/algolia.js"),
     resolve("./plugins/shopify.js"),
     resolve("./plugins/firebase.client.js"),

@@ -34,10 +34,12 @@ export default {
   methods: {
     async getPage(routePage) {
       if (useRuntimeConfig().public.integrations.prismic) {
-        const { client } = usePrismic()
+        if (!this.$prismicClient) return
 
         try {
-          const page = await client.getByUID("page", "home")
+          const page = await this.$prismicClient.getByUID("page", "home")
+
+          console.log("[Prismic] ::: Page :::", page)
 
           this.page = page
           this.slices = page.data.slices

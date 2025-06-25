@@ -71,11 +71,10 @@ export default {
         this.errorPage("No Page Found!")
         return
       }
-
-      const { client } = usePrismic()
+      if (!this.$prismicClient) return
 
       try {
-        const page = await client.getByUID("page", this.pageId)
+        const page = await this.$prismicClient.getByUID("page", this.pageId)
 
         if (page) {
           this.page = page

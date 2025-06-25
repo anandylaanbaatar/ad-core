@@ -32,9 +32,10 @@ export default {
 
   async mounted() {
     if (integrations().prismic) {
+      if (!this.$prismicClient) return
+
       try {
-        const { client } = usePrismic()
-        const item = await client.getSingle("header")
+        const item = await this.$prismicClient.getSingle("header")
 
         if (item && item.data) {
           if (item.data.slices && item.data.slices.length > 0) {

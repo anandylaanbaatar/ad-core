@@ -22,8 +22,8 @@ export default {
 
   async created() {
     if (integrations().prismic) {
-      const { client } = usePrismic()
-      const banner = await client.getSingle("header_banner")
+      if (!this.$prismicClient) return
+      const banner = await this.$prismicClient.getSingle("header_banner")
 
       if (banner) {
         if (banner.data.active) {
