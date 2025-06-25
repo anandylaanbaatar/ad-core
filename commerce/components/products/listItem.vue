@@ -2,12 +2,7 @@
   <div
     v-if="item"
     class="c-product box list large w-full"
-    @click="
-      $bus.$emit(
-        'goTo',
-        `/products/${productCategoryHandle}/${item.id}_${item.handle}`
-      )
-    "
+    @click="$bus.$emit('goTo', productUrl)"
   >
     <div class="row h-full flex align-items-center">
       <!--Image-->
@@ -61,10 +56,15 @@ export default {
     productCategoryHandle() {
       if (this.item) {
         if (this.item.category) {
-          return this.item.category.handle
+          if (this.item.category.handle) {
+            return this.item.category.handle
+          }
         }
       }
       return "all"
+    },
+    productUrl() {
+      return `/products/${this.productCategoryHandle}/${this.item.id}_${this.item.handle}`
     },
   },
 }

@@ -19,12 +19,7 @@
           v-if="item.featuredImage.url"
           class="c-block c-image size-m"
           :style="$utils.setBackImage(item.featuredImage.url)"
-          @click.stop="
-            $bus.$emit(
-              'goTo',
-              `/products/${productCategoryHandle}/${this.item.id}_${this.item.handle}`
-            )
-          "
+          @click.stop="$bus.$emit('goTo', productUrl)"
         ></div>
       </div>
 
@@ -32,12 +27,7 @@
       <div v-else class="w-full text-center">
         <div
           class="c-block c-no-image size-m"
-          @click.stop="
-            $bus.$emit(
-              'goTo',
-              `/products/${productCategoryHandle}/${this.item.id}_${this.item.handle}`
-            )
-          "
+          @click.stop="$bus.$emit('goTo', productUrl)"
         >
           <h5>{{ useAppConfig().theme.name_short }}</h5>
         </div>
@@ -99,12 +89,7 @@
 
     <!--Content-->
     <div
-      @click.stop="
-        $bus.$emit(
-          'goTo',
-          `/products/${productCategoryHandle}/${this.item.id}_${this.item.handle}`
-        )
-      "
+      @click.stop="$bus.$emit('goTo', productUrl)"
       class="flex items-center c-product-content"
     >
       <div class="flex flex-col">
@@ -153,12 +138,14 @@ export default {
     productCategoryHandle() {
       if (this.item) {
         if (this.item.category) {
-          return this.item.category.handle
+          if (this.item.category.handle) {
+            return this.item.category.handle
+          }
         }
       }
       return "all"
     },
-    itemPath() {
+    productUrl() {
       return `/products/${this.productCategoryHandle}/${this.item.id}_${this.item.handle}`
     },
   },

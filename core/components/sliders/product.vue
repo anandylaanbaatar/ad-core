@@ -56,13 +56,23 @@ export default {
 
       return options
     },
-    itemPath() {
-      return `/products/${this.item.category.handle}/${this.item.id}_${this.item.handle}`
+    productCategoryHandle() {
+      if (this.item) {
+        if (this.item.category) {
+          if (this.item.category.handle) {
+            return this.item.category.handle
+          }
+        }
+      }
+      return "all"
+    },
+    productUrl() {
+      return `/products/${this.productCategoryHandle}/${this.item.id}_${this.item.handle}`
     },
     itemImages() {
       return this.item.images.map((image) => {
         let newItem = image
-        let pathUrl = this.itemPath
+        let pathUrl = this.productUrl
 
         if (this.item.variants) {
           let variants = this.item.variants.filter(
