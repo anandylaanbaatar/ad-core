@@ -7,7 +7,9 @@ export default defineNuxtPlugin(async (nuxtApp) => {
       return
     }
 
-    console.log("[Plugins] ::: [Prismic] ::: Initialized!")
+    if (useRuntimeConfig().public.features.log) {
+      console.log("[Plugins] ::: [Prismic] ::: Initialized!")
+    }
   } else {
     return
   }

@@ -68,6 +68,7 @@ export default defineNuxtPlugin(async (nuxtApp) => {
     console.log("[Plugins] ::: [Firebase] ::: Initialized!")
   }
 
+  const runtimeConfig = useRuntimeConfig()
   const isProduction = process.env.NODE_ENV === "production"
   const config = CONFIG.value
   const firebaseConfig = config
@@ -84,7 +85,7 @@ export default defineNuxtPlugin(async (nuxtApp) => {
    * Analytics
    */
 
-  if (useRuntimeConfig().public.features.analytics) {
+  if (runtimeConfig.public.features.analytics) {
     const isAnalyticsSupported = await isSupported()
     if (isAnalyticsSupported && typeof window !== "undefined") {
       try {
@@ -94,11 +95,11 @@ export default defineNuxtPlugin(async (nuxtApp) => {
         let tenantId = null
 
         // Multi Tenancy
-        if (useRuntimeConfig().public.features.multitenancy) {
-          if (useRuntimeConfig().public.features.multitenancy.tenantId) {
-            tenantId = useRuntimeConfig().public.features.multitenancy.tenantId
-          } else if (useRuntimeConfig().public.features.multitenancy.parentId) {
-            tenantId = useRuntimeConfig().public.features.multitenancy.parentId
+        if (runtimeConfig.public.features.multitenancy) {
+          if (runtimeConfig.public.features.multitenancy.tenantId) {
+            tenantId = runtimeConfig.public.features.multitenancy.tenantId
+          } else if (runtimeConfig.public.features.multitenancy.parentId) {
+            tenantId = runtimeConfig.public.features.multitenancy.parentId
           }
         }
 
@@ -117,7 +118,7 @@ export default defineNuxtPlugin(async (nuxtApp) => {
           logEvent("analytics", "page_view", eventData)
         })
 
-        if (useRuntimeConfig().public.features.log) {
+        if (runtimeConfig.public.features.log) {
           console.log("[Plugins] ::: [Analytics] ::: Initialized!")
         }
       } catch (err) {
@@ -149,7 +150,7 @@ export default defineNuxtPlugin(async (nuxtApp) => {
           }
         })
         .catch((err) => {
-          console.log("[Firebase] ::: Error ::", err)
+          console.log("[Firebase] ::: Read Error ::", err)
           resolve(null)
         })
     })
@@ -164,12 +165,14 @@ export default defineNuxtPlugin(async (nuxtApp) => {
     })
   }
   const updateDb = (path, data) => {
+    console.log("Update ", path, data)
+
     return new Promise((resolve, reject) => {
       try {
         update(ref(database, path), data)
         resolve(true)
       } catch (err) {
-        console.log("[Firebase] ::: Error :: ", err.message)
+        console.log("[Firebase] ::: Update Error :: ", err.message)
         resolve(null)
       }
     })
@@ -191,7 +194,7 @@ export default defineNuxtPlugin(async (nuxtApp) => {
 
         resolve(newPostKey)
       } catch (err) {
-        console.log("[Firebase] ::: Error :: ", err.message)
+        console.log("[Firebase] ::: Push Error :: ", err.message)
         resolve(null)
       }
     })
@@ -224,10 +227,10 @@ export default defineNuxtPlugin(async (nuxtApp) => {
 
     // Multitenancy
     if (
-      useRuntimeConfig().public.features.multitenancy &&
-      useRuntimeConfig().public.features.multitenancy.tenantId
+      runtimeConfig.public.features.multitenancy &&
+      runtimeConfig.public.features.multitenancy.tenantId
     ) {
-      tenantId = useRuntimeConfig().public.features.multitenancy.tenantId
+      tenantId = runtimeConfig.public.features.multitenancy.tenantId
       mainPath = `/status/${tenantId}/${uid}`
     }
 
@@ -279,7 +282,9 @@ export default defineNuxtPlugin(async (nuxtApp) => {
 
         if (user) {
           // useInAppNotifications().listen(user.uid)
-          usePresence(user)
+          if (runtimeConfig.public.features.auth.userPresence) {
+            usePresence(user)
+          }
           resolve(user)
         } else {
           // useInAppNotifications().stop()
@@ -298,7 +303,7 @@ export default defineNuxtPlugin(async (nuxtApp) => {
           resolve(user)
         })
         .catch((err) => {
-          console.log("[Firebase] ::: Error ::", err)
+          console.log("[Firebase] ::: SignUp Error ::", err)
 
           reject({
             code: err.code,
@@ -317,7 +322,7 @@ export default defineNuxtPlugin(async (nuxtApp) => {
           resolve(user)
         })
         .catch((err) => {
-          console.log("[Firebase] ::: Error ::", err)
+          console.log("[Firebase] ::: Login Error ::", err)
 
           reject({
             code: err.code,
@@ -474,7 +479,7 @@ export default defineNuxtPlugin(async (nuxtApp) => {
           resolve(user)
         })
         .catch((err) => {
-          console.log("[Firebase] ::: Error ::: ", err.message)
+          console.log("[Firebase] ::: Anon Login Error ::: ", err.message)
           resolve(null)
         })
     })
