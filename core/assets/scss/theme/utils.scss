@@ -1,5 +1,19 @@
 @use "../basics/variables" as *;
 
+// Border
+.border-t {
+  border-top: 1px solid var(--ad-background08);
+}
+.border-r {
+  border-right: 1px solid var(--ad-background08);
+}
+.border-b {
+  border-bottom: 1px solid var(--ad-background08);
+}
+.border-l {
+  border-left: 1px solid var(--ad-background08);
+}
+
 // Float
 .float-left {
   float: left;

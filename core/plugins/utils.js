@@ -80,6 +80,9 @@ export default defineNuxtPlugin((nuxtApp) => {
 
           return value
         },
+        async wait(time) {
+          return new Promise((resolve) => setTimeout(resolve, time))
+        },
 
         // Date & Time
         moment,

@@ -39,6 +39,10 @@ export default {
       type: String,
       default: null,
     },
+    size: {
+      type: String,
+      default: null,
+    },
   },
 
   computed: {
@@ -52,6 +56,10 @@ export default {
       if (this.color) {
         if (classItems) classItems += " "
         classItems += this.color
+      }
+      if (this.size) {
+        if (classItems) classItems += " "
+        classItems += this.size
       }
 
       return classItems

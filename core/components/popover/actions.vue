@@ -2,6 +2,7 @@
   <Button
     :icon="icon"
     :class="classes"
+    :disabled="disabled"
     class="sm"
     @click.stop="(event) => $refs.morePopup.toggle(event)"
   ></Button>
@@ -20,6 +21,10 @@ export default {
     classes: {
       type: String,
       default: null,
+    },
+    disabled: {
+      type: Boolean,
+      default: false,
     },
   },
 }
