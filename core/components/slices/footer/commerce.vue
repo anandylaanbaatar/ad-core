@@ -3,7 +3,7 @@
     <div class="container py-4">
       <div class="c-footer-container">
         <div class="row">
-          <!--Top-->
+          <!--Logo & Settings-->
           <div class="col-xs-12 col-md-6 col-lg-4">
             <Logo v-if="item.logo" class="mb-3"></Logo>
 
@@ -37,6 +37,7 @@
             </div>
           </div>
 
+          <!--Links-->
           <div class="col-xs-12 col-md-6 col-lg-8">
             <div class="row">
               <!--Collections-->
@@ -54,7 +55,7 @@
                       @click="
                         $bus.$emit('goTo', `/products/${collection.handle}/`)
                       "
-                      class="c-link"
+                      class="c-link capitalize"
                     >
                       {{ getTitle(collection.title) }}
                     </li>
@@ -80,7 +81,7 @@
                       <a
                         v-if="link.link && link.link.url"
                         :href="`${link.link.url}`"
-                        class="link"
+                        class="link capitalize"
                         >{{ link.link.text }}</a
                       >
                     </li>
@@ -98,7 +99,7 @@
                   <li
                     v-for="page in item.pages"
                     :key="`footer_item_${page.link.key}`"
-                    class="c-link"
+                    class="c-link capitalize"
                     @click="$bus.$emit('goTo', page.link.url)"
                   >
                     {{ $utils.t(page.link.text) }}
@@ -279,6 +280,10 @@ export default {
           allTopCollections = allTopCollections.filter(
             (i) => i.level.id === "level-1"
           )
+          if (allTopCollections.length > 10) {
+            return (allTopCollections = allTopCollections.splice(0, 10))
+          }
+        } else {
           if (allTopCollections.length > 10) {
             return (allTopCollections = allTopCollections.splice(0, 10))
           }
