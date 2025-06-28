@@ -67,9 +67,11 @@
       <div class="c-header-container">
         <div class="row">
           <!--Collections Block-->
-          <template v-if="filteredCollections && filteredCollections.first">
+          <template
+            v-if="filteredHeaderCollections && filteredHeaderCollections.first"
+          >
             <div
-              v-for="collection in filteredCollections.first"
+              v-for="collection in filteredHeaderCollections.first"
               :key="`collection_${collection.id}`"
               class="col-xs-6 col-md-4 col-lg-2"
             >
@@ -100,13 +102,13 @@
 
           <!--Link Block-->
           <div
-            v-if="filteredCollections && filteredCollections.last"
+            v-if="filteredHeaderCollections && filteredHeaderCollections.last"
             class="col-xs-6 col-md-4 col-lg-2"
           >
             <div class="c-header-menu-item half links">
               <p class="mb-2">{{ $utils.t("Collections") }}</p>
               <h3
-                v-for="collection in filteredCollections.last"
+                v-for="collection in filteredHeaderCollections.last"
                 :key="`menu_collection_${collection.id}`"
                 @click="goTo(`/products/${collection.handle}/`)"
                 class="c-link mb-1"
@@ -202,7 +204,6 @@ export default {
       menu: false,
       hide: false,
       height: null,
-      collections: null,
     }
   },
 
@@ -223,31 +224,83 @@ export default {
     isAdvanced() {
       return useCommerceStore().advancedCollections
     },
-    allCollections() {
-      let allTopCollections = useCommerceStore().collections
+    headerCollections() {
+      if (useCommerceStore().collections) {
+        return useCommerceStore().collections
+      }
+      return
+    },
+    filteredHeaderCollections() {
+      if (this.headerCollections) {
+        let filteredCol = this.headerCollections
+        let col1 = []
+        let col2 = []
 
-      if (allTopCollections) {
         if (this.isAdvanced) {
-          allTopCollections = allTopCollections.filter(
+          filteredCol = filteredCol.filter((i) => i.level.id === "level-1")
+        }
+
+        if (filteredCol.length > 4) {
+          for (let i = 0; i < filteredCol.length; i++) {
+            if (i < 4) {
+              col1.push(filteredCol[i])
+            } else {
+              col2.push(filteredCol[i])
+            }
+          }
+          if (col2.length > 9) {
+            col2 = col2.splice(0, 9)
+          }
+        } else {
+          col1 = filteredCol
+          col2 = filteredCol
+        }
+
+        return {
+          first: col1,
+          last: col2,
+        }
+      }
+      return
+    },
+
+    allCollections() {
+      let headerTopCollections = useCommerceStore().collections
+
+      console.log("Header Collections ::: ", headerTopCollections)
+
+      if (headerTopCollections) {
+        if (this.isAdvanced) {
+          headerTopCollections = headerTopCollections.filter(
             (i) => i.level.id === "level-1"
           )
-          if (allTopCollections.length > 10) {
-            return (allTopCollections = allTopCollections.splice(0, 10))
+          if (headerTopCollections.length > 10) {
+            return (headerTopCollections = headerTopCollections.splice(0, 10))
           }
         }
 
-        return allTopCollections
+        return headerTopCollections
       }
 
       return []
     },
     filteredCollections() {
       if (this.allCollections) {
+        const headerTopCollections = this.allCollections
+
+        console.log("Top Collections ::: ", headerTopCollections)
+
         return {
-          first: this.allCollections.slice(0, 4),
-          last: this.allCollections.slice(4, this.allCollections.length),
+          first: headerTopCollections,
+          last: headerTopCollections,
         }
+
+        // return {
+        //   first: headerTopCollections.slice(0, 4),
+        //   last: headerTopCollections.slice(4, headerTopCollections.length),
+        // }
       }
+      return
     },
     cartButtonLabel() {
       return this.$utils.t("Cart")
@@ -270,8 +323,6 @@ export default {
   },
 
   mounted() {
-    this.collections = this.allCollections
-
     if (window) {
       this.height = window.innerHeight
     }

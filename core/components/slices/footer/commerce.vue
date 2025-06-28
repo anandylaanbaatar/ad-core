@@ -43,14 +43,14 @@
               <!--Collections-->
               <template v-if="item.collection_links">
                 <div
-                  v-if="allCollections"
+                  v-if="filteredFooterCollections"
                   class="col-xs-12 col-md-6 col-lg-4 mb-3"
                 >
                   <p class="label mb-2">{{ $utils.t("Collections") }}</p>
 
                   <ul class="c-list">
                     <li
-                      v-for="collection in allCollections"
+                      v-for="collection in filteredFooterCollections"
                       :key="`footer_collection_item_${collection.id}`"
                       @click="
                         $bus.$emit('goTo', `/products/${collection.handle}/`)
@@ -272,27 +272,38 @@ export default {
     isAdvanced() {
       return useCommerceStore().advancedCollections
     },
-    allCollections() {
-      let allTopCollections = useCommerceStore().collections
+    footerCollections() {
+      if (useCommerceStore().collections) {
+        return useCommerceStore().collections
+      }
+      return
+    },
+    filteredFooterCollections() {
+      if (this.footerCollections) {
+        const allCol = this.footerCollections
+        let filteredCol = null
+        const col = []
 
-      if (allTopCollections) {
         if (this.isAdvanced) {
-          allTopCollections = allTopCollections.filter(
-            (i) => i.level.id === "level-1"
-          )
-          if (allTopCollections.length > 10) {
-            return (allTopCollections = allTopCollections.splice(0, 10))
-          }
+          filteredCol = allCol.filter((i) => i.level.id === "level-1")
         } else {
-          if (allTopCollections.length > 10) {
-            return (allTopCollections = allTopCollections.splice(0, 10))
-          }
+          filteredCol = allCol
         }
 
-        return allTopCollections
+        if (filteredCol.length > 10) {
+          for (let i = 0; i < filteredCol.length; i++) {
+            if (i < 10) {
+              col.push(filteredCol[i])
+            }
+          }
+        } else {
+          col = filteredCol
+        }
+
+        return col
       }
 
-      return []
+      return
     },
   },
 

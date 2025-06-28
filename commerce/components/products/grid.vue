@@ -21,8 +21,11 @@
         <Button
           v-if="pageInfo && pageInfo.hasNextPage"
           :label="$utils.t('View More')"
-          @click="getProducts"
+          severity="secondary"
+          class="sm my-3"
+          @click="getProducts(true)"
         ></Button>
+
         <p v-else class="c-align-center p-3">
           {{ $utils.t("End of Products List.") }}
         </p>
@@ -51,6 +54,8 @@
           <Button
             v-if="pageInfo && pageInfo.hasNextPage"
             :label="$utils.t('View More')"
+            severity="secondary"
+            class="sm my-3"
             @click="getProducts(true)"
           ></Button>
 

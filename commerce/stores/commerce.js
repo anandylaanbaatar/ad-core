@@ -166,7 +166,7 @@ export const useCommerceStore = defineStore("commerce", {
       }
 
       if (allCollections) {
-        let allStoreCollections = allCollections.map((i) => {
+        const allStoreCollections = allCollections.map((i) => {
           let newCollection = i
 
           // Advanced Collections
