@@ -308,16 +308,15 @@ div.p-inputgroup {
     }
   }
   .p-inputgroupaddon {
-    background: transparent;
+    background: rgba(0, 0, 0, 0.08);
+    padding: 10px;
+    min-width: auto;
+    border-radius: 10px;
+    border-block-end: none;
+    border-block-start: none;
     border: 1px solid transparent;
-  }
-}
-// Color
-div.p-colorpicker {
-  .p-colorpicker-preview {
-    width: 30px;
-    height: 30px;
-    border-radius: 250px;
+    color: $black;
+    opacity: 0.6;
   }
 }
 .my-app-dark {
@@ -362,7 +361,8 @@ div.p-colorpicker {
       }
     }
     .p-inputgroupaddon {
-      background: transparent;
+      background: rgba(255, 255, 255, 0.08);
+      color: $white;
       border: 1px solid transparent;
     }
   }
@@ -370,6 +370,15 @@ div.p-colorpicker {
 @media screen and (max-width: 768px) {
   .p-inputtext {
     font-size: 14px;
+  }
+}
+
+// Color
+div.p-colorpicker {
+  .p-colorpicker-preview {
+    width: 30px;
+    height: 30px;
+    border-radius: 250px;
   }
 }
 
