@@ -59,7 +59,7 @@
               item.title !== 'Default' &&
               item.title !== 'default'
             "
-            class="description font3 ml-3"
+            class="description font3 ml-3 uppercase"
           >
             {{ this.$utils.addDots(item.title, 23) }}
           </span>
