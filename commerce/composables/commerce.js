@@ -62,12 +62,6 @@ export const useCreateCart = async (product) => {
 
     await useAddItem(product)
     await useUpdateCart()
-
-    $bus.$emit("toast", {
-      severity: "secondary",
-      summary: $utils.t("Cart"),
-      detail: $utils.t("Added item to cart."),
-    })
   } else {
     $bus.$emit("toast", {
       severity: "danger",
@@ -124,12 +118,6 @@ export const useRemoveFromCart = async (product) => {
 
     let amount = removeItemData.cartLinesRemove.cart.totalQuantity
     await store.set("cartBadge", amount.toString())
-
-    $bus.$emit("toast", {
-      severity: "secondary",
-      summary: $utils.t("Cart"),
-      detail: $utils.t("Removed item from cart."),
-    })
   } else {
     $bus.$emit("toast", {
       severity: "danger",

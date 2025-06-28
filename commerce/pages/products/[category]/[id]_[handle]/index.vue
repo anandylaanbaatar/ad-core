@@ -206,7 +206,7 @@
                       }"
                       @click="selectVariant(variant)"
                     >
-                      {{ variant.title }}
+                      {{ variant.title.toUpperCase() }}
                     </li>
                   </ul>
                 </div>
