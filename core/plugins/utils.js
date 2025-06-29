@@ -264,6 +264,15 @@ export default defineNuxtPlugin((nuxtApp) => {
           let fileName = `${fileName_noExt}_${fileTimestamp}.${fileExtension}`
           return encodeURI(fileName)
         },
+        chunkArray(arr, size = 10) {
+          const chunks = []
+
+          for (let i = 0; i < arr.length; i += size) {
+            chunks.push(arr.slice(i, i + size))
+          }
+
+          return chunks
+        },
 
         // Country
         getFlagByCode,
