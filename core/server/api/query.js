@@ -1625,7 +1625,7 @@ export default defineEventHandler(async (event) => {
     // REST Admin
   } else {
     let request = {
-      apiVersion: "2024-07",
+      apiVersion: keys.api_version,
     }
 
     if (body.method === "get") {

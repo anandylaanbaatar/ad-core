@@ -40,7 +40,7 @@
           <!--Links-->
           <div class="col-xs-12 col-md-6 col-lg-8">
             <div class="row">
-              <!--Collections-->
+              <!--Collections
               <template v-if="item.collection_links">
                 <div
                   v-if="filteredFooterCollections"
@@ -62,32 +62,31 @@
                   </ul>
                 </div>
               </template>
+              -->
 
               <!--Links-->
-              <template v-else>
-                <div v-if="item.links" class="col-xs-12 col-md-6 col-lg-4 mb-3">
-                  <p v-if="item.links_title" class="label mb-2">
-                    {{ $utils.t(item.links_title) }}
-                  </p>
-                  <ul class="c-list contactList">
-                    <li
-                      v-for="link in item.links"
-                      :key="`footer_link_${link.link.key}`"
-                      class="c-link"
+              <div v-if="item.links" class="col-xs-12 col-md-6 col-lg-4 mb-3">
+                <p v-if="item.links_title" class="label mb-2">
+                  {{ $utils.t(item.links_title) }}
+                </p>
+                <ul class="c-list contactList">
+                  <li
+                    v-for="link in item.links"
+                    :key="`footer_link_${link.link.key}`"
+                    class="c-link"
+                  >
+                    <p v-if="link.label" class="label mb-2">
+                      {{ link.label }}
+                    </p>
+                    <a
+                      v-if="link.link && link.link.url"
+                      :href="`${link.link.url}`"
+                      class="link capitalize"
+                      >{{ link.link.text }}</a
                     >
-                      <p v-if="link.label" class="label mb-2">
-                        {{ link.label }}
-                      </p>
-                      <a
-                        v-if="link.link && link.link.url"
-                        :href="`${link.link.url}`"
-                        class="link capitalize"
-                        >{{ link.link.text }}</a
-                      >
-                    </li>
-                  </ul>
-                </div>
-              </template>
+                  </li>
+                </ul>
+              </div>
 
               <!--Pages-->
               <div class="col-xs-12 col-md-6 col-lg-4 mb-3">
