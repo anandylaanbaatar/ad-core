@@ -13,7 +13,7 @@
     <!--Email Login Form-->
     <template v-if="type === null || type === 'email'">
       <div class="c-field col-xs-12">
-        <label for="email">{{ $utils.t("Email Address") }}</label>
+        <!-- <label for="email">{{ $utils.t("Email Address") }}</label> -->
         <InputText
           id="email"
           v-model="form.email"
@@ -28,13 +28,7 @@
       </div>
       <div class="c-field col-xs-12">
         <label for="password" class="w-full">
-          {{ $utils.t("Password") }}
-
-          <span
-            class="c-link float-right"
-            @click="$bus.$emit('sidebarGlobal', { id: 'resetPassword' })"
-            >{{ $utils.t("Forgot Password") }}</span
-          >
+          <!-- {{ $utils.t("Password") }} -->
         </label>
 
         <Password
@@ -67,6 +61,15 @@
             ></Button>
           </template>
         </div>
+      </div>
+      <div class="c-field col-xs-12 m-0">
+        <p class="text-sm font3 opacity-50">
+          <span
+            class="c-link float-right"
+            @click="$bus.$emit('sidebarGlobal', { id: 'resetPassword' })"
+            >{{ $utils.t("Forgot Password") }}</span
+          >
+        </p>
       </div>
       <!--Error Message-->
       <div class="c-field col-xs-12">
@@ -136,8 +139,8 @@
     </template>
 
     <!--Terms-->
-    <div class="c-field col-xs-12 mb-4">
-      <p class="text-xs">
+    <div v-if="useCoreStore().language === 'en'" class="c-field col-xs-12 mb-4">
+      <p class="text-xs opacity-60">
         By continuing, you agree and confirm you’ve read the
         <strong @click="$bus.$emit('goTo', '/terms_of_service')" class="c-link"
           >Terms and Conditions</strong
@@ -146,6 +149,22 @@
         <strong @click="$bus.$emit('goTo', '/privacy_policy')" class="c-link"
           >Privacy Policy</strong
         >.
+      </p>
+    </div>
+    <div
+      v-else-if="useCoreStore().language === 'mn'"
+      class="c-field col-xs-12 mb-4"
+    >
+      <p class="text-xs opacity-60">
+        Та нэвтрэх үйлдэл хийснээр манай
+        <strong @click="$bus.$emit('goTo', '/terms_of_service')" class="c-link"
+          >Үйлчилгээний нөхцөл</strong
+        >
+        болон
+        <strong @click="$bus.$emit('goTo', '/privacy_policy')" class="c-link"
+          >“Нууцлалын бодлого</strong
+        >
+        -г зөвшөөрч байна гэж үзнэ.
       </p>
     </div>
 
