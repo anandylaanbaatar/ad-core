@@ -49,20 +49,23 @@
   <div v-if="item && isActive" class="c-header-product-menu mobileOnly">
     <div class="menuBtn">
       <Button
-        v-if="!showMenu"
+        v-if="showMenu === false"
         rounded
         icon="pi pi-bars"
-        @click="showMenu = true"
+        @click="showMobileMenu"
       ></Button>
       <Button
         v-else
         rounded
         icon="pi pi-times"
-        @click="showMenu = false"
+        @click="hideMobileMenu"
       ></Button>
     </div>
-    <div class="menuArea" :class="{ active: showMenu }">
-      <ul class="c-list mb-3">
+    <div
+      class="menuArea"
+      :class="{ active: showMenu, hide: showMenu === 'hide' }"
+    >
+      <ul class="c-list">
         <li v-for="link in links" :key="`list_item_${link.key}`">
           <div
             class="c-list-item font3"
@@ -160,7 +163,7 @@ export default {
     goTo(link) {
       if (!link) return
 
-      this.showMenu = false
+      this.hideMobileMenu(true)
 
       if (link.includes("#")) {
         location.href = link
@@ -199,6 +202,17 @@ export default {
       } else {
         return btn.variant
       }
+    },
+
+    showMobileMenu() {
+      this.showMenu = true
+    },
+    hideMobileMenu(force) {
+      this.showMenu = "hide"
+
+      setTimeout(() => {
+        this.showMenu = false
+      }, 400)
     },
   },
 }
