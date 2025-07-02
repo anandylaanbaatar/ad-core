@@ -109,7 +109,7 @@ const getProductsQuery = (type, options) => {
   }
 
   if (options.query) {
-    queryFilter = `, query: "${options.query}"`
+    queryFilter = `, query:*${options.query}*`
   }
   if (options.ids) {
     let queryList = ""
@@ -117,6 +117,16 @@ const getProductsQuery = (type, options) => {
     for (let i = 0; i < options.ids.length; i++) {
       if (queryList !== "") queryList += ` OR `
       queryList += `(id:${options.ids[i]})`
+    }
+
+    queryFilter = `, query: "${queryList}"`
+  }
+  if (options.handles) {
+    let queryList = ""
+
+    for (let i = 0; i < options.handles.length; i++) {
+      if (queryList !== "") queryList += " OR "
+      queryList += `(handle:${options.handles[i]})`
     }
 
     queryFilter = `, query: "${queryList}"`
@@ -130,6 +140,11 @@ const getProductsQuery = (type, options) => {
   let reverseKey = `, reverse: true`
   let sortKey = `, sortKey: ${options.sort}`
 
+  if (options.direction) {
+    if (options.direction === "asc") {
+      reverseKey = `, reverse: false`
+    }
+  }
   if (options.category !== "all") {
     if (options.sort === "CREATED_AT") {
       sortKey = `, sortKey: CREATED`
@@ -186,6 +201,103 @@ const getProductsQuery = (type, options) => {
 
   return query
 }
+const getCollectionsQuery = (type, options) => {
+  let query = ""
+
+  let collectionNode = `
+    id
+    handle
+    title
+    image {
+      id
+      url
+      width
+      height  
+    }
+    seo {
+      title
+      description
+    }
+  `
+  let collectionEdges = `
+    edges {
+      cursor
+      node {
+        ${collectionNode}
+      }
+    }
+  `
+  let pageInfo = `
+    pageInfo {
+      endCursor
+      hasNextPage
+      hasPreviousPage
+      startCursor
+    }
+  `
+
+  // Filters
+  let queryFilter = ``
+  if (typeof options.limit === "undefined") {
+    options.limit = 150
+  }
+  if (typeof options.sort === "undefined") {
+    options.sort = "TITLE"
+  }
+
+  if (options.query) {
+    queryFilter = `, query:*${options.query}*`
+  }
+  if (options.ids) {
+    let queryList = ""
+
+    for (let i = 0; i < options.ids.length; i++) {
+      if (queryList !== "") queryList += ` OR `
+      queryList += `(id:${options.ids[i]})`
+    }
+
+    queryFilter = `, query: "${queryList}"`
+  }
+  if (options.handles) {
+    let queryList = ""
+
+    for (let i = 0; i < options.handles.length; i++) {
+      if (queryList !== "") queryList += " OR "
+      queryList += `(handle:${options.handles[i]})`
+    }
+
+    queryFilter = `, query: "${queryList}"`
+  }
+
+  let pagination = ``
+  if (options.cursor) {
+    pagination = `, after: "${options.cursor}"`
+  }
+
+  let reverseKey = `, reverse: true`
+  let sortKey = `, sortKey: ${options.sort}`
+
+  if (options.direction) {
+    if (options.direction === "asc") {
+      reverseKey = `, reverse: false`
+    }
+  }
+  if (options.sort === "UPDATED_AT") {
+    sortKey = `, sortKey: UPDATED_AT`
+  }
+
+  query = `
+    query {
+      collections(first: ${options.limit}${queryFilter}${sortKey}${reverseKey}${pagination}) {
+        ${collectionEdges}
+        ${pageInfo}
+      }
+    }
+  `
+
+  return query
+}
+
 const getQuery = (type, body) => {
   let query = ``
 
@@ -1396,33 +1508,7 @@ const getQuery = (type, body) => {
 
   // Collections
   if (type === "collections") {
-    let filters = {
-      limit: body && body.limit ? body.limit : 150,
-    }
-
-    query = `
-      query {
-        collections(first: ${filters.limit}) {
-          edges {
-            cursor
-            node {
-              id
-              handle
-              title
-              image {
-                id
-                url
-                width
-                height  
-              }
-              seo {
-                title
-              }
-            }
-          }
-        }
-      }
-    `
+    query = getCollectionsQuery(type, body)
   } else if (type === "collection") {
     query = `
       query {

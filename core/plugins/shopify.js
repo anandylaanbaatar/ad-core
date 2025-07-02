@@ -251,9 +251,12 @@ export default defineNuxtPlugin((nuxtApp) => {
 
     if (allCollections) {
       if (allCollections.collections) {
-        return allCollections.collections.edges.map((i) =>
-          mapCollection(i.node)
-        )
+        return {
+          items: allCollections.collections.edges.map((i) =>
+            mapCollection(i.node)
+          ),
+          meta: allCollections.collections.pageInfo,
+        }
       }
     }
 

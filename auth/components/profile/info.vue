@@ -32,13 +32,16 @@
 
         <template v-if="account.roles">
           <template v-if="account.roles.includes('admin')">
-            <Tag severity="warn" class="mb-2">Admin</Tag><br />
+            <Tag severity="warn" class="mb-2">{{ $utils.t("Admin") }}</Tag
+            ><br />
           </template>
           <template v-if="account.roles.includes('staff')">
-            <Tag severity="warn" class="mb-2">Staff</Tag><br />
+            <Tag severity="warn" class="mb-2">{{ $utils.t("Staff") }}</Tag
+            ><br />
           </template>
           <template v-if="account.roles.includes('user')">
-            <Tag severity="info" class="mb-2">User</Tag><br />
+            <Tag severity="info" class="mb-2">{{ $utils.t("User") }}</Tag
+            ><br />
           </template>
         </template>
 

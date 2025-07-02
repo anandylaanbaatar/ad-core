@@ -30,7 +30,7 @@
           name="uploadImage"
           accept="image/*"
           :maxFileSize="1000000"
-          chooseLabel="Upload Image"
+          :chooseLabel="$utils.t('Upload Image')"
           @select="uploader"
           customUpload
           auto
@@ -101,7 +101,7 @@
       <label for="phone">{{ $utils.t("Phone") }}</label>
 
       <InputGroup>
-        <InputGroupAddon class="c-phoneDropdown-wrapper">
+        <InputGroupAddon class="c-phoneDropdown-wrapper p-0">
           <Select
             v-if="allCountries"
             v-model="formOptional.selectedCountry"
