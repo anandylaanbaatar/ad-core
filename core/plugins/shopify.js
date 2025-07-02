@@ -524,6 +524,45 @@ export default defineNuxtPlugin((nuxtApp) => {
       return errorData
     }
   }
+
+  const customers = async (params) => {
+    const allCustomers = await fetchData({
+      graphqlAdmin: true,
+      params: params,
+      type: "customers",
+    })
+
+    if (allCustomers) {
+      if (allCustomers.customers) {
+        return {
+          items: allCustomers.customers.edges.map((i) => mapCollection(i.node)),
+          meta: allCustomers.customers.pageInfo,
+        }
+      }
+    }
+
+    return null
+  }
+
+  const customersCount = async (params) => {
+    const allCollectionsCount = await fetchData({
+      graphqlAdmin: true,
+      params: params,
+      type: "customersCount",
+    })
+
+    if (allCollectionsCount) {
+      if (
+        allCollectionsCount.customersCount &&
+        allCollectionsCount.customersCount.count
+      ) {
+        return allCollectionsCount.customersCount.count
+      }
+    }
+
+    return null
+  }
+
   const customerByEmail = async (params) => {
     return new Promise(async (resolve) => {
       const res = await fetchData({
@@ -848,6 +887,8 @@ export default defineNuxtPlugin((nuxtApp) => {
         signUp,
         logout,
         customer,
+        customers,
+        customersCount,
         customerByEmail,
         updateCustomer,
         createCustomerAddress,
