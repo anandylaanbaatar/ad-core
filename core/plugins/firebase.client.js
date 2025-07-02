@@ -89,10 +89,11 @@ export default defineNuxtPlugin(async (nuxtApp) => {
     const isAnalyticsSupported = await isSupported()
     if (isAnalyticsSupported && typeof window !== "undefined") {
       try {
-        analytics = getAnalytics(app)
+        analytics = getAnalytics(app) // { autoLog: false }
 
         const route = useRoute()
         let tenantId = null
+        const domain = window.location.hostname
 
         // Multi Tenancy
         if (runtimeConfig.public.features.multitenancy) {
@@ -105,16 +106,23 @@ export default defineNuxtPlugin(async (nuxtApp) => {
 
         // Set Tenant ID as user property
         if (tenantId) {
-          setUserProperties(analytics, { tenant_id: tenantId })
+          setUserProperties(analytics, { tenant_id: tenantId, domain: domain })
         }
 
+        // Log Page View
         nuxtApp.hook("page:finish", () => {
           let eventData = {
             page_path: route.fullPath,
+            page_title: document.title,
+            page_location: window.location.href,
+            domain: domain,
           }
           if (tenantId) {
             eventData.tenant_id = tenantId
           }
+
+          console.log("[Analytics] ::: Event Data ::: ", eventData)
+
           logEvent("analytics", "page_view", eventData)
         })
 
