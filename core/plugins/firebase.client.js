@@ -123,7 +123,7 @@ export default defineNuxtPlugin(async (nuxtApp) => {
 
           // console.log("[Analytics] ::: Event Data ::: ", eventData)
 
-          logEvent("analytics", "page_view", eventData)
+          logEvent(analytics, "page_view", eventData)
         })
 
         if (runtimeConfig.public.features.log) {
