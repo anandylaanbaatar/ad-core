@@ -1700,6 +1700,25 @@ const getQuery = (type, body) => {
         }
       }
     `
+  } else if (type === "collectionById") {
+    query = `
+      query {
+        collection(id: "gid://shopify/Collection/${body.id}") {
+          id
+          handle
+          title
+          image {
+            id
+            url
+            width
+            height  
+          }
+          seo {
+            title
+          }
+        }
+      }
+    `
   } else if (type === "collectionsCount") {
     query = `
       query CollectionsCount {

@@ -121,7 +121,7 @@ export default defineNuxtPlugin(async (nuxtApp) => {
             eventData.tenant_id = tenantId
           }
 
-          console.log("[Analytics] ::: Event Data ::: ", eventData)
+          // console.log("[Analytics] ::: Event Data ::: ", eventData)
 
           logEvent("analytics", "page_view", eventData)
         })

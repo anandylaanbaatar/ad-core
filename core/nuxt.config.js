@@ -106,6 +106,7 @@ const plugins = defineNuxtConfig({
     resolve("./plugins/currency.js"),
     resolve("./plugins/prismic.js"),
     resolve("./plugins/algolia.js"),
+    resolve("./plugins/meilisearch.js"),
     resolve("./plugins/shopify.js"),
     resolve("./plugins/firebase.client.js"),
     resolve("./plugins/forms.js"),

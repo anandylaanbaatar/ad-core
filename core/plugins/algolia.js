@@ -11,6 +11,7 @@ export default defineNuxtPlugin(() => {
     }
     if (!useRuntimeConfig().public.features.algolia) {
       console.log("[Plugins] ::: [Algolia] ::: Missing Index ID")
+      return
     }
     if (!APP_ID_.value) {
       console.log("[Plugins] ::: [Algolia] ::: Missing APP ID!")

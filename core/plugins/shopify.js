@@ -271,6 +271,21 @@ export default defineNuxtPlugin((nuxtApp) => {
 
     return collection
   }
+  const collectionById = async (params) => {
+    const collection = await fetchData({
+      graphql: true,
+      params: params,
+      type: "collectionById",
+    })
+
+    if (collection) {
+      if (collection.collection) {
+        return mapCollection(collection.collection)
+      }
+    }
+
+    return collection
+  }
   const collectionsCount = async (params) => {
     const allCollectionsCount = await fetchData({
       graphqlAdmin: true,
@@ -905,6 +920,7 @@ export default defineNuxtPlugin((nuxtApp) => {
         // Collections
         collections,
         collection,
+        collectionById,
         collectionsCount,
 
         // Cart
