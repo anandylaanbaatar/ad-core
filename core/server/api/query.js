@@ -208,11 +208,12 @@ const getCollectionsQuery = (type, options) => {
     id
     handle
     title
+    descriptionHtml
     image {
       id
       url
       width
-      height  
+      height
     }
     seo {
       title
@@ -550,6 +551,132 @@ const getCustomersQuery = (type, options) => {
     query {
       customers(first: ${options.limit}${queryFilter}${sortKey}${reverseKey}${pagination}) {
         ${edges}
+        ${pageInfo}
+      }
+    }
+  `
+
+  return query
+}
+const getFilesQuery = (type, options) => {
+  let query = ""
+
+  let fileNode = `
+    createdAt
+    updatedAt
+    alt
+    ... on GenericFile {
+      id
+      url
+    }
+    ... on MediaImage {
+      id
+      image {
+        id
+        url
+        width
+        height
+      }
+    }
+    ... on Video {
+      id
+      duration
+      preview {
+        status
+        image {
+          id
+          width
+          height
+          url
+        }
+      }
+      originalSource {
+        url
+        width
+        height
+        format
+        mimeType
+      }
+      sources {
+        url
+        width
+        height
+        format
+        mimeType
+      }
+    }
+  `
+  let fileEdges = `
+    edges {
+      cursor
+      node {
+        ${fileNode}
+      }
+    }
+  `
+  let pageInfo = `
+    pageInfo {
+      endCursor
+      hasNextPage
+      hasPreviousPage
+      startCursor
+    }
+  `
+
+  // Filters
+  let queryFilter = ``
+  if (typeof options.limit === "undefined") {
+    options.limit = 150
+  }
+  if (typeof options.sort === "undefined") {
+    options.sort = "UPDATED_AT"
+  }
+
+  if (options.query) {
+    queryFilter = `, query:*${options.query}*`
+  }
+  if (options.ids) {
+    let queryList = ""
+
+    for (let i = 0; i < options.ids.length; i++) {
+      if (queryList !== "") queryList += ` OR `
+      queryList += `(id:${options.ids[i]})`
+    }
+
+    queryFilter = `, query: "${queryList}"`
+  }
+  if (options.handles) {
+    let queryList = ""
+
+    for (let i = 0; i < options.handles.length; i++) {
+      if (queryList !== "") queryList += " OR "
+      queryList += `(handle:${options.handles[i]})`
+    }
+
+    queryFilter = `, query: "${queryList}"`
+  }
+
+  let pagination = ``
+  if (options.cursor) {
+    pagination = `, after: "${options.cursor}"`
+  }
+
+  let reverseKey = `, reverse: true`
+  let sortKey = `, sortKey: ${options.sort}`
+
+  if (options.direction) {
+    if (options.direction === "asc") {
+      reverseKey = `, reverse: false`
+    }
+  }
+  if (options.sort === "CREATED_AT") {
+    sortKey = `, sortKey: CREATED_AT`
+  }
+
+  query = `
+    query {
+      files(first: ${options.limit}${queryFilter}${sortKey}${reverseKey}${pagination}) {
+        ${fileEdges}
         ${pageInfo}
       }
     }
@@ -1687,14 +1814,16 @@ const getQuery = (type, body) => {
             id
             handle
             title
+            descriptionHtml
             image {
               id
               url
               width
-              height  
+              height
             }
             seo {
               title
+              description
             }
           }
         }
@@ -1707,14 +1836,16 @@ const getQuery = (type, body) => {
           id
           handle
           title
+          descriptionHtml
           image {
             id
             url
             width
-            height  
+            height
           }
           seo {
             title
+            description
           }
         }
       }
@@ -1724,6 +1855,79 @@ const getQuery = (type, body) => {
       query CollectionsCount {
         collectionsCount {
           count
+        }
+      }
+    `
+  } else if (type === "collectionDelete") {
+    query = `
+      mutation collectionDelete($input: CollectionDeleteInput!) {
+        collectionDelete(input: $input) {
+          deletedCollectionId
+          shop {
+            id
+            name
+          }
+          userErrors {
+            field
+            message
+          }
+        }
+      }
+    `
+  } else if (type === "collectionCreate") {
+    query = `
+      mutation CollectionCreate($input: CollectionInput!) {
+        collectionCreate(input: $input) {
+          collection {
+            id
+            title
+            handle
+            image {
+              id
+              height
+              width
+              url
+            }
+            seo {
+              title
+            }
+          }
+          userErrors {
+            field
+            message
+          }
+        }
+      }
+    `
+  } else if (type === "collectionUpdate") {
+    query = `
+      mutation CollectionUpdate($input: CollectionInput!) {
+        collectionUpdate(input: $input) {
+          collection {
+            id
+            title
+            description
+            handle
+          }
+          userErrors {
+            field
+            message
+          }
+        }
+      }
+    `
+  } else if (type === "collectionPublish") {
+    query = `
+      mutation collectionPublish($input: CollectionPublishInput!) {
+        collectionPublish(input: $input) {
+          collection {
+            id
+            title
+          }
+          userErrors {
+            field
+            message
+          }
         }
       }
     `
@@ -1798,6 +2002,53 @@ const getQuery = (type, body) => {
     `
   }
 
+  // Files
+  if (type === "files") {
+    query = getFilesQuery(type, body)
+  } else if (type === "fileCreate") {
+    query = `
+      mutation fileCreate($files: [FileCreateInput!]!) {
+        fileCreate(files: $files) {
+          files {
+            id
+            fileStatus
+            alt
+            createdAt
+            ... on MediaImage {
+              image {
+                width
+                height
+              }
+            }
+          }
+          userErrors {
+            field
+            message
+          }
+        }
+      }
+    `
+  } else if (type === "fileUpload") {
+    query = `
+      mutation stagedUploadsCreate($input: [StagedUploadInput!]!) {
+        stagedUploadsCreate(input: $input) {
+          stagedTargets {
+            url
+            resourceUrl
+            parameters {
+              name
+              value
+            }
+          }
+          userErrors {
+            field
+            message
+          }
+        }
+      }
+    `
+  }
+
   return query
 }
 
@@ -1816,6 +2067,12 @@ export default defineEventHandler(async (event) => {
     if (body.params.customKeys) {
       keys = body.params.customKeys
       delete body.params.customKeys
+    }
+  }
+  if (body.dataInput) {
+    if (body.dataInput.customKeys) {
+      keys = body.dataInput.customKeys
+      delete body.dataInput.customKeys
     }
   }
   if (!keys) return
@@ -1850,6 +2107,14 @@ export default defineEventHandler(async (event) => {
     } else if (body.dataInput) {
       if (body.type === "createProductVariant") {
         input = body.dataInput
+      } else if (body.type === "fileUpload") {
+        input = {
+          input: body.dataInput.files,
+        }
+      } else if (body.type === "fileCreate") {
+        input = {
+          files: body.dataInput.files,
+        }
       } else {
         input = {
           input: body.dataInput,

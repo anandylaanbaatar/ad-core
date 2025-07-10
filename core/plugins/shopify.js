@@ -47,7 +47,7 @@ export default defineNuxtPlugin((nuxtApp) => {
 
     return item
   }
-  const mapCollection = (collection) => {
+  const mapItem = (collection) => {
     let item = collection
     let itemIds = getIds(item.id)
 
@@ -90,9 +90,7 @@ export default defineNuxtPlugin((nuxtApp) => {
 
     // Collections && Categories
     if (item.collections) {
-      item.collections = product.collections.edges.map((i) =>
-        mapCollection(i.node)
-      )
+      item.collections = product.collections.edges.map((i) => mapItem(i.node))
       item.category = item.collections[0]
     }
 
@@ -169,7 +167,7 @@ export default defineNuxtPlugin((nuxtApp) => {
         delete allCollectionData.products
 
         return {
-          collection: mapCollection(allCollectionData),
+          collection: mapItem(allCollectionData),
           items: allProducts.edges.map((i) => mapProduct(i.node)),
           meta: allProducts.pageInfo,
         }
@@ -252,9 +250,7 @@ export default defineNuxtPlugin((nuxtApp) => {
     if (allCollections) {
       if (allCollections.collections) {
         return {
-          items: allCollections.collections.edges.map((i) =>
-            mapCollection(i.node)
-          ),
+          items: allCollections.collections.edges.map((i) => mapItem(i.node)),
           meta: allCollections.collections.pageInfo,
         }
       }
@@ -280,7 +276,7 @@ export default defineNuxtPlugin((nuxtApp) => {
 
     if (collection) {
       if (collection.collection) {
-        return mapCollection(collection.collection)
+        return mapItem(collection.collection)
       }
     }
 
@@ -303,6 +299,51 @@ export default defineNuxtPlugin((nuxtApp) => {
     }
 
     return null
+  }
+  const collectionDelete = async (params) => {
+    const data = await fetchData({
+      graphqlAdmin: true,
+      params: params,
+      type: "collectionDelete",
+    })
+
+    return data
+  }
+  const collectionCreate = async (dataInput) => {
+    const data = await fetchData({
+      graphqlAdmin: true,
+      dataInput: dataInput,
+      type: "collectionCreate",
+    })
+
+    return data
+  }
+  const collectionUpdate = async (dataInput) => {
+    const data = await fetchData({
+      graphqlAdmin: true,
+      type: "collectionUpdate",
+      dataInput: dataInput,
+    })
+
+    console.log("Collection ::: Update ::: ", data)
+
+    if (data.graphQLErrors && data.graphQLErrors.length) {
+      return {
+        success: false,
+        error: data.graphQLErrors[0],
+      }
+    }
+
+    return data
+  }
+  const collectionPublish = async (params) => {
+    const data = await fetchData({
+      graphqlAdmin: true,
+      params: params,
+      type: "collectionPublish",
+    })
+
+    return data
   }
 
   /**
@@ -550,7 +591,7 @@ export default defineNuxtPlugin((nuxtApp) => {
     if (allCustomers) {
       if (allCustomers.customers) {
         return {
-          items: allCustomers.customers.edges.map((i) => mapCollection(i.node)),
+          items: allCustomers.customers.edges.map((i) => mapItem(i.node)),
           meta: allCustomers.customers.pageInfo,
         }
       }
@@ -872,6 +913,63 @@ export default defineNuxtPlugin((nuxtApp) => {
     })
   }
 
+  /**
+   * Files
+   */
+
+  const files = async (params) => {
+    const allFiles = await fetchData({
+      graphqlAdmin: true,
+      params: params,
+      type: "files",
+    })
+
+    if (allFiles) {
+      if (allFiles.files) {
+        return {
+          items: allFiles.files.edges.map((i) => mapItem(i.node)),
+          meta: allFiles.files.pageInfo,
+        }
+      }
+    }
+
+    return allFiles
+  }
+  const fileCreate = async (dataInput) => {
+    const createFiles = await fetchData({
+      graphqlAdmin: true,
+      dataInput: dataInput,
+      type: "fileCreate",
+    })
+
+    if (createFiles) {
+      if (createFiles.fileCreate) {
+        if (createFiles.fileCreate.files) {
+          return createFiles.fileCreate.files
+        }
+      }
+    }
+
+    return createFiles
+  }
+  const fileUpload = async (dataInput) => {
+    const uploadFiles = await fetchData({
+      graphqlAdmin: true,
+      dataInput: dataInput,
+      type: "fileUpload",
+    })
+
+    if (uploadFiles) {
+      if (uploadFiles.stagedUploadsCreate) {
+        if (uploadFiles.stagedUploadsCreate.stagedTargets) {
+          return uploadFiles.stagedUploadsCreate.stagedTargets
+        }
+      }
+    }
+
+    return uploadFiles
+  }
+
   authState()
 
   return {
@@ -922,6 +1020,10 @@ export default defineNuxtPlugin((nuxtApp) => {
         collection,
         collectionById,
         collectionsCount,
+        collectionDelete,
+        collectionCreate,
+        collectionUpdate,
+        collectionPublish,
 
         // Cart
         cartItems,
@@ -931,6 +1033,11 @@ export default defineNuxtPlugin((nuxtApp) => {
         createCart,
         updateDiscountCodes,
         updateGiftCardCodes,
+
+        // Files
+        files,
+        fileCreate,
+        fileUpload,
       },
     },
   }

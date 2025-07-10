@@ -222,13 +222,14 @@ button.p-button-contrast {
 }
 
 // Glass Button
-button.p-glass-button {
-  background: rgba(0, 0, 0, 0.3);
+button.p-glass-button,
+button.glassBtn {
+  background: rgba(0, 0, 0, 0.2) !important;
   -webkit-backdrop-filter: saturate(180%) blur(20px);
   backdrop-filter: saturate(180%) blur(20px);
 
   &:hover {
-    background: rgba(0, 0, 0, 0.1);
+    background: rgba(0, 0, 0, 0.3);
   }
 }
 
