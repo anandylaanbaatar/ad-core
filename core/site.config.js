@@ -1,16 +1,18 @@
 import path from "node:path"
 import * as prismic from "@prismicio/client"
+import { createDirectus, rest, readItems } from "@directus/sdk"
 
 /**
  * Base Config
  */
 
 let config = await import(path.resolve("config/site.config.json"))
-let prismicConfig = null
+let mainConfig = null
 
 /**
  * Prismic Config
  */
+let prismicConfig = null
 
 const getSitePrismicConfig = async (repoId) => {
   const endpoint = prismic.getRepositoryEndpoint(repoId)
@@ -118,6 +120,36 @@ if (config.features.prismic) {
   }
 
   console.log("[Site Config] ::: Using Prismic Settings!")
+}
+
+/**
+ * AD Commerce Config
+ */
+
+const getCommerceConfig = async (storeId) => {
+  const url = config.features.directus.apiUrl
+  const $directus = createDirectus(url).with(rest())
+
+  const result = await $directus.request(
+    readItems("global_settings", {
+      filter: {
+        store_id: { _eq: storeId },
+      },
+    })
+  )
+
+  return result
+}
+if (
+  config.integrations.directus &&
+  config.features.directus &&
+  config.theme.storeId
+) {
+  mainConfig = await getCommerceConfig(config.theme.storeId)
+
+  if (mainConfig) {
+    console.log("Using Directus Settings ::: ", mainConfig)
+  }
 }
 
 /**
