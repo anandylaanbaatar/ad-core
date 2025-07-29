@@ -165,6 +165,72 @@ ul {
   }
 }
 
+.c-list-items {
+  display: flex;
+  align-items: center;
+  border: 1px solid rgba(0, 0, 0, 0.03);
+  background: rgba(0, 0, 0, 0.03);
+  padding: 10px;
+  border-radius: 15px;
+  margin-bottom: 0;
+  cursor: pointer;
+  min-height: 50px;
+  position: relative;
+  overflow: hidden;
+  -webkit-transition: all 0.4s ease;
+  transition: all 0.4s ease;
+
+  .image {
+    background-color: rgba(0, 0, 0, 0.08);
+    background-position: center center;
+    background-size: cover;
+    height: 50px;
+    min-height: 50px;
+    width: 50px;
+    border-radius: 8px;
+
+    &.sm {
+      height: 40px;
+      min-height: 40px;
+      width: 40px;
+    }
+    &.xs {
+      height: 30px;
+      min-height: 30px;
+      width: 30px;
+    }
+    &.round {
+      border-radius: 250px;
+    }
+    &.empty {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      i {
+        opacity: 0.4;
+      }
+    }
+  }
+  .content {
+    min-height: 0;
+  }
+
+  &:hover {
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    background: rgba(0, 0, 0, 0.06);
+  }
+}
+.my-app-dark .c-list-items {
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  background: rgba(255, 255, 255, 0.03);
+
+  &:hover {
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.06);
+  }
+}
+
 /*
 * Radio List
 */
