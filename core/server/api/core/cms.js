@@ -70,11 +70,12 @@ export default defineEventHandler(async (event) => {
     const res = await fetch(`${URL}/${path}${filters}`, options)
     const data = await res.json()
 
-    return {
+    let result = {
       success: true,
-      data: data.data,
-      meta: data.meta || null,
+      ...data,
     }
+
+    return result
   } catch (err) {
     return {
       success: false,
