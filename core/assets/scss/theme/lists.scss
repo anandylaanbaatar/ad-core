@@ -180,7 +180,24 @@ ul {
   -webkit-transition: all 0.4s ease;
   transition: all 0.4s ease;
 
+  &-bar {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    border: 1px solid rgba(0, 0, 0, 0.03);
+    background: rgba(0, 0, 0, 0.03);
+    border-radius: 15px;
+    padding: 10px;
+
+    label {
+      margin-bottom: 0 !important;
+    }
+  }
+
   .image {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     background-color: rgba(0, 0, 0, 0.08);
     background-position: center center;
     background-size: cover;
@@ -188,6 +205,13 @@ ul {
     min-height: 50px;
     width: 50px;
     border-radius: 8px;
+
+    .removeImageBtn {
+      display: none;
+    }
+    .addImageBtn {
+      display: none;
+    }
 
     &.sm {
       height: 40px;
@@ -203,12 +227,21 @@ ul {
       border-radius: 250px;
     }
     &.empty {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-
       i {
         opacity: 0.4;
+      }
+    }
+    &:hover {
+      .removeImageBtn {
+        display: flex;
+      }
+      &.empty {
+        i.pi-image {
+          display: none;
+        }
+        .addImageBtn {
+          display: flex;
+        }
       }
     }
   }
@@ -224,6 +257,11 @@ ul {
 .my-app-dark .c-list-items {
   border: 1px solid rgba(255, 255, 255, 0.03);
   background: rgba(255, 255, 255, 0.03);
+
+  &-bar {
+    border: 1px solid rgba(255, 255, 255, 0.03);
+    background: rgba(255, 255, 255, 0.03);
+  }
 
   &:hover {
     border: 1px solid rgba(255, 255, 255, 0.08);

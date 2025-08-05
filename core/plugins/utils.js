@@ -264,6 +264,17 @@ export default defineNuxtPlugin((nuxtApp) => {
           let fileName = `${fileName_noExt}_${fileTimestamp}.${fileExtension}`
           return encodeURI(fileName)
         },
+        getHandle(text) {
+          return text
+            .toLowerCase()
+            .replace(/[^\p{L}\p{N}\s_\-]/gu, "-") // allow Unicode letters, numbers, space, underscore, hyphen
+            .replace(/\s+/g, "-") // replace spaces with hyphens
+            .replace(/_/g, "-") // replace underscores with hyphens
+            .replace(/-+/g, "-") // collapse multiple hyphens
+            .replace(/^-+|-+$/g, "") // trim leading/trailing hyphens
+        },
+
+        // Array and Objects
         chunkArray(arr, size = 10) {
           const chunks = []
 
@@ -272,6 +283,27 @@ export default defineNuxtPlugin((nuxtApp) => {
           }
 
           return chunks
+        },
+        getObjByPath(obj, path) {
+          return path
+            .replace(/\[(\w+)\]/g, ".$1") // convert [0] to .0
+            .split(".")
+            .reduce(
+              (o, key) => (o && o[key] !== undefined ? o[key] : undefined),
+              obj
+            )
+        },
+        setByDotPath(obj, path, value) {
+          const keys = path.split(".")
+          const lastKey = keys.pop()
+          const target = keys.reduce((o, key) => {
+            if (o[key] === undefined) {
+              // Auto-create arrays or objects if needed
+              o[key] = /^\d+$/.test(keys[0]) ? [] : {}
+            }
+            return o[key]
+          }, obj)
+          target[lastKey] = value
         },
 
         // Country

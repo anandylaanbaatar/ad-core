@@ -275,7 +275,10 @@ export default defineNuxtPlugin((app) => {
 
       try {
         const filename = app.$utils.processFileName(file.name)
-        const filesPath = `${features().fileSystem.bunny.filesPath}/${filePath}`
+        let filesPath = `${features().fileSystem.bunny.filesPath}`
+        if (filePath) {
+          filesPath = `${features().fileSystem.bunny.filesPath}/${filePath}`
+        }
         const requestUrl = `${storageUrl}/${filesPath}/${filename}`
         const downloadUrl = `${siteUrl}/${filesPath}/${filename}`
         const downloadOriginUrl = `${cdnUrl}/${filesPath}/${filename}`

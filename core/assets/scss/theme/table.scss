@@ -9,6 +9,31 @@
   // }
 }
 
+.p-datatable-table {
+  .p-datatable-header-cell {
+    background: var(--ad-background08);
+  }
+  .p-datatable-tbody {
+    > tr {
+      > td {
+        background: var(--ad-background02);
+        transition: all 0.4s ease;
+      }
+
+      &:hover {
+        td {
+          background: var(--ad-background06);
+        }
+      }
+      &:last-child {
+        > td {
+          border: 0;
+        }
+      }
+    }
+  }
+}
+
 .c-calendar {
   max-width: 100%;
 

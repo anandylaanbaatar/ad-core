@@ -128,6 +128,11 @@ div.p-message {
 }
 .my-app-dark {
   div.p-message {
+    &.p-message-secondary {
+      background: var(--ad-background03);
+      border: 1px solid var(--ad-background08);
+      color: rgba(255, 255, 255, 0.6);
+    }
     &.p-message-contrast {
       background: $white;
       border: 2px solid $white;

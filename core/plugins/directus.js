@@ -1,4 +1,4 @@
-import moment from "moment-timezone"
+// import moment from "moment-timezone"
 
 export default defineNuxtPlugin((nuxtApp) => {
   if (!import.meta.client) {
@@ -55,7 +55,10 @@ export default defineNuxtPlugin((nuxtApp) => {
           images.files_id.id,
           images.files_id.file_id,
           images.files_id.url,
-          variants.*
+          variants.*,
+          variants.image.id,
+          variants.image.url,
+          variants.image.file_id
         `,
       },
     })
