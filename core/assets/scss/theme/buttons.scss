@@ -221,6 +221,33 @@ button.p-button-contrast {
   }
 }
 
+// Split Buttons
+div.p-splitbutton {
+  button.p-splitbutton-button {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+  button.p-splitbutton-dropdown {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+  }
+
+  &.sm {
+    button.p-splitbutton-button {
+      width: auto;
+      height: 30px;
+      min-height: 30px;
+      min-width: 30px;
+    }
+    button.p-splitbutton-dropdown {
+      width: 30px;
+      height: 30px;
+      min-height: 30px;
+      min-width: 30px;
+    }
+  }
+}
+
 // Glass Button
 button.p-glass-button,
 button.glassBtn {
