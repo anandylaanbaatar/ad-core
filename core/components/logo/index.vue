@@ -26,6 +26,8 @@
       :alt="theme.name_short"
       class="mobileLogo"
     />
+
+    <h2 v-else class="mt-2">{{ theme.name }}</h2>
   </div>
 </template>
 
