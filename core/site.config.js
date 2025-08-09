@@ -124,6 +124,13 @@ if (
 
     // Commerce
     if (mainConfig.store_theme === "commerce") {
+      if (!config.commerce) {
+        config.commerce = {
+          allowTax: false,
+          location: null,
+          shippingLines: null,
+        }
+      }
       if (mainConfig.commerce_allow_tax) {
         config.commerce.allowTax = mainConfig.commerce_allow_tax
       }
