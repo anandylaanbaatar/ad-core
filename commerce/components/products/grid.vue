@@ -121,6 +121,9 @@ export default {
     collections() {
       return useCommerceStore().collections
     },
+    tenantId() {
+      return useRuntimeConfig().public.features.multitenancy.tenantId
+    },
   },
 
   watch: {
@@ -149,6 +152,9 @@ export default {
       let options = {
         limit: this.limit,
         page: 0,
+        options: {
+          tenant_id: this.tenantId,
+        },
       }
 
       // Collection Filter
