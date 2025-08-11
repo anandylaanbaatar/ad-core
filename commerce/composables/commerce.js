@@ -24,51 +24,44 @@ export const useUpdateCart = async () => {
   await useGetCartItems()
 }
 export const useAddToCart = async (product) => {
-  const cartId = localStorage.getItem("cartId")
+  const cart = useCommerceStore().cart
 
-  if (cartId) {
+  if (cart) {
     await useAddItem(product)
   } else {
     await useCreateCart(product)
   }
 }
 export const useAddItem = async (product) => {
-  const { $shopify, $bus, $utils } = useNuxtApp()
-  const cartId = localStorage.getItem("cartId")
+  useCommerceStore().addToCart(product)
+  useUpdateCart()
 
-  const addItemData = await $shopify.addItem({
-    cartId: cartId,
-    amount: product.amount,
-    variantId: product.variantId,
-  })
+  // const { $shopify, $bus, $utils } = useNuxtApp()
+  // const cartId = localStorage.getItem("cartId")
 
-  if (addItemData) {
-    useUpdateCart()
-    $bus.$emit("sidebarGlobal", { id: "cart" })
-  } else {
-    $bus.$emit("toast", {
-      severity: "danger",
-      summary: $utils.t("Cart"),
-      detail: $utils.t("Error adding item to cart."),
-    })
-  }
+  // const addItemData = await $shopify.addItem({
+  //   cartId: cartId,
+  //   amount: product.amount,
+  //   variantId: product.variantId,
+  // })
+
+  // if (addItemData) {
+  //   useUpdateCart()
+  //   $bus.$emit("sidebarGlobal", { id: "cart" })
+  // } else {
+  //   $bus.$emit("toast", {
+  //     severity: "danger",
+  //     summary: $utils.t("Cart"),
+  //     detail: $utils.t("Error adding item to cart."),
+  //   })
+  // }
 }
 export const useCreateCart = async (product) => {
-  const { $shopify, $bus, $utils } = useNuxtApp()
-  const createCartData = await $shopify.createCart()
+  const tenantId = useRuntimeConfig().public.features.multitenancy.tenantId
+  localStorage.setItem(`${tenantId}_cart`, JSON.stringify([product]))
 
-  if (createCartData) {
-    localStorage.setItem("cartId", createCartData.cartCreate.cart.id)
-
-    await useAddItem(product)
-    await useUpdateCart()
-  } else {
-    $bus.$emit("toast", {
-      severity: "danger",
-      summary: $utils.t("Cart"),
-      detail: $utils.t("Error adding item to cart."),
-    })
-  }
+  await useAddItem(product)
+  await useUpdateCart()
 }
 export const useUpdateItem = async (product) => {
   const { $shopify, $bus, $utils } = useNuxtApp()
@@ -126,6 +119,7 @@ export const useRemoveFromCart = async (product) => {
     })
   }
 }
+
 export const useUpdateDiscountCode = async (discountCodes) => {
   const { $shopify, $bus, $utils } = useNuxtApp()
   const cartId = localStorage.getItem("cartId")

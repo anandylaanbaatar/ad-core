@@ -72,7 +72,8 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
         }
       }
     }
-  } else if (to.name === `products-category`) {
+  }
+  if (to.name === `products-category`) {
     if (to.params && to.params.category) {
       meta.url = `${siteUrl}${to.path}`
       let isCollectionSet = false
@@ -204,12 +205,9 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
       if (localStorage.getItem("accessToken")) {
         localStorage.removeItem("accessToken")
       }
-    }
-
-    // Set Default Cart Items
-    if (!commerceStore.initCart) {
-      commerceStore.set("initCart", true)
-      await useGetCartItems()
+      if (localStorage.getItem("cartId")) {
+        localStorage.removeItem("cartId")
+      }
     }
 
     if (useRuntimeConfig().public.features.log) {

@@ -12,8 +12,7 @@ export const useCommerceStore = defineStore("commerce", {
 
     // Cart
     initCart: null,
-    cart: null,
-    cartBadge: "0",
+    cart: [],
 
     // Saved Items
     savedItems: [],
@@ -44,6 +43,15 @@ export const useCommerceStore = defineStore("commerce", {
         ? useAppConfig().theme.commerce?.shippingLines
         : null,
   }),
+
+  getters: {
+    cartTotalItems(state) {
+      return state.cart.reduce((sum, item) => sum + item.qty, 0)
+    },
+    cartTotalPrice(state) {
+      return state.cart.reduce((sum, item) => sum + item.price * item.qty, 0)
+    },
+  },
 
   actions: {
     set(key, data) {
@@ -171,6 +179,82 @@ export const useCommerceStore = defineStore("commerce", {
 
         this.collections = allStoreCollections
       }
+    },
+
+    // Cart
+    loadCartFromStorage() {
+      if (import.meta.client) {
+        const tenantId =
+          useRuntimeConfig().public.features.multitenancy.tenantId
+        const stored = localStorage.getItem(`${tenantId}_cart`)
+
+        if (stored) {
+          this.cart = JSON.parse(stored)
+        } else {
+          this.saveCartToStorage()
+        }
+      }
+    },
+    saveCartToStorage() {
+      if (import.meta.client) {
+        const tenantId =
+          useRuntimeConfig().public.features.multitenancy.tenantId
+        localStorage.setItem(`${tenantId}_cart`, JSON.stringify(this.cart))
+      }
+    },
+    addToCart(item) {
+      const productId = item.id
+      const qty = item.qty ?? 1
+      const variantSku = item.variantSku ?? null
+      const merge = item.merge ?? true
+      const key = variantSku ? `${productId}-${variantSku}` : `${productId}`
+
+      const existingIndex = this.cart.findIndex((i) => i.key === key)
+
+      if (existingIndex > -1) {
+        if (merge) {
+          this.cart[existingIndex].qty += qty
+        } else {
+          this.cart.push({ id: productId, qty, variantSku, key })
+        }
+      } else {
+        this.cart.push({ id: productId, qty, variantSku, key })
+      }
+
+      this.saveCartToStorage()
+
+      useNuxtApp().$bus.$emit("toast", {
+        severity: "success",
+        summary: useNuxtApp().$utils.t("Cart"),
+        detail: useNuxtApp().$utils.t("Successfully added item to cart."),
+      })
+    },
+    removeFromCart(key) {
+      this.cart = this.cart.filter((i) => i.key !== key)
+      this.saveCartToStorage()
+
+      useNuxtApp().$bus.$emit("toast", {
+        severity: "success",
+        summary: useNuxtApp().$utils.t("Cart"),
+        detail: useNuxtApp().$utils.t("Successfully removed item from cart."),
+      })
+    },
+    updateQuantity(key, qty) {
+      const index = this.cart.findIndex((i) => i.key === key)
+
+      if (index > -1) {
+        if (qty <= 0) {
+          this.removeFromCart(key)
+        } else {
+          this.cart[index].qty = qty
+        }
+      }
+
+      this.saveCartToStorage()
+    },
+    clearCart() {
+      this.cart = []
+      this.saveCartToStorage()
     },
 
     // async setCollections() {

@@ -102,11 +102,11 @@ const modules = defineNuxtConfig(modulesConfig)
 const plugins = defineNuxtConfig({
   plugins: [
     resolve("./plugins/utils.js"),
+    resolve("./plugins/algolia.js"),
     resolve("./plugins/address.js"),
     resolve("./plugins/currency.js"),
     resolve("./plugins/prismic.js"),
     resolve("./plugins/directus.js"),
-    resolve("./plugins/algolia.js"),
     resolve("./plugins/meilisearch.js"),
     resolve("./plugins/shopify.js"),
     resolve("./plugins/firebase.client.js"),

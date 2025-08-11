@@ -213,14 +213,7 @@ export default {
       return useAppConfig().theme
     },
     cartBadge() {
-      const store = useCommerceStore()
-      let amount = "0"
-
-      if (store.cartBadge && store.cartBadge !== "0") {
-        amount = store.cartBadge
-      }
-
-      return amount
+      return useCommerceStore().cartTotalItems
     },
     isAdvanced() {
       return useCommerceStore().advancedCollections

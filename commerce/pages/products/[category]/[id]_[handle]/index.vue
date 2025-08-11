@@ -374,7 +374,7 @@ export default {
     },
   },
 
-  async created() {
+  async mounted() {
     this.loading = true
 
     const id = useRoute().params.id
@@ -425,11 +425,15 @@ export default {
         })
       }
     },
-    async addToCart() {
-      useAddToCart({
+    addToCart() {
+      let options = {
+        id: this.product.id,
         variantSku: this.select.variantSku,
-        amount: this.select.amount,
-      })
+        qty: this.select.amount,
+        merge: true,
+      }
+
+      useCommerceStore().addToCart(options)
     },
   },
 }

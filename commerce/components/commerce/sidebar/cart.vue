@@ -29,12 +29,9 @@
       <div class="productsGrid row">
         <div class="productsGridScroll w-full">
           <ProductsCartItem
-            v-for="(item, index) in cart.items"
-            :product="item"
-            :cartLineId="item.uid"
-            :item="item.merchandise"
-            :quantity="item.quantity"
-            :key="`product_item_${index}`"
+            v-for="cartItem in cartItems"
+            :cartItem="cartItem"
+            :key="`product_cartItem_${cartItem.key}`"
           ></ProductsCartItem>
         </div>
       </div>
@@ -49,7 +46,7 @@
           <div class="col-xs-6">
             <div class="w-full text-right">
               <h4>
-                {{ $currency.format(cart.cost.checkoutChargeAmount.amount) }}
+                {{ $currency.format(cartTotals.subtotalAmount) }}
               </h4>
             </div>
           </div>
@@ -60,7 +57,7 @@
           <div class="col-xs-6">
             <div v-if="theme().type === 'commerce'" class="w-full text-right">
               <h4 v-if="useCommerceStore().allowTax">
-                {{ $currency.format(cart.cost.totalTaxAmount.amount) }}
+                {{ $currency.format(cartTotals.taxAmount) }}
               </h4>
               <h4 v-else>-</h4>
             </div>
@@ -75,14 +72,12 @@
             <div class="w-full text-right">
               <!-- <h4
                 v-if="
-                  cart.cost.checkoutChargeAmount.amount !==
-                  cart.cost.totalAmount.amount
+                  cartTotals.discountAmount
                 "
               >
-                -{{
+                {{
                   $currency.format(
-                    cart.cost.checkoutChargeAmount.amount -
-                      cart.cost.totalAmount.amount
+                    cartTotals.discountAmount
                   )
                 }}
               </h4> -->
@@ -96,10 +91,10 @@
           <div class="col-xs-6">
             <div v-if="theme().type === 'commerce'" class="w-full text-right">
               <h3 v-if="useCommerceStore().allowTax">
-                {{ $currency.format(cart.cost.totalAmount.amount) }}
+                {{ $currency.format(cartTotals.taxAmount) }}
               </h3>
               <h3 v-else>
-                {{ $currency.format(cart.cost.subtotalAmount.amount) }}
+                {{ $currency.format(cartTotals.totalAmount) }}
               </h3>
             </div>
           </div>
@@ -130,7 +125,9 @@ export default {
 
   data() {
     return {
+      init: false,
       active: false,
+      cartItems: null,
     }
   },
 
@@ -138,40 +135,101 @@ export default {
     cart() {
       return useCommerceStore().cart
     },
-    cartTotalQuantity() {
-      if (this.cart && this.cart.totalQuantity) {
-        return this.cart.totalQuantity
+    isEmpty() {
+      if (this.cart && this.cart.length > 0) {
+        return false
       }
-      return
+      return true
+    },
+    cartTotals() {
+      let totals = {
+        items: useCommerceStore().cartTotalItems,
+        taxAmount: 0,
+        discountAmount: 0,
+        shippingAmount: 0,
+        subtotalAmount: 0,
+        totalAmount: 0,
+      }
+
+      if (!this.isEmpty && this.cartItems) {
+        for (let i = 0; i < this.cartItems.length; i++) {
+          const cartItem = this.cartItems[i]
+
+          if (cartItem.variant && cartItem.variant.price) {
+            totals.subtotalAmount += cartItem.qty * cartItem.variant.price
+          } else if (cartItem.product && cartItem.product.price) {
+            totals.subtotalAmount += cartItem.qty * cartItem.product.price
+          }
+        }
+      }
+
+      totals.totalAmount = totals.subtotalAmount
+
+      return totals
     },
     header() {
       let amount = ``
 
-      if (this.cartTotalQuantity) {
-        amount = ` (${this.cartTotalQuantity})`
+      if (this.cartTotals.items) {
+        amount = ` (${this.cartTotals.items})`
       }
 
       return `${this.$utils.t("Cart")}${amount}`
     },
-    isEmpty() {
-      if (this.cart) {
-        if (this.cart.items && this.cart.items.length > 0) {
-          return false
-        }
-      }
-      return true
-    },
-    isShopify() {
-      if (features().auth.connect) {
-        return features().auth.connect.shopify
-      }
-    },
   },
 
   async mounted() {
-    if (this.isShopify) {
-      await useGetCartItems()
-    }
+    await this.getProducts()
+
+    this.$bus.$on("updateCart", async () => {
+      await this.getProducts()
+    })
+  },
+
+  methods: {
+    reset() {
+      this.cartItems = null
+    },
+    async getProducts() {
+      this.reset()
+
+      if (this.cart && this.cart.length) {
+        const cartIds = this.cart.map((i) => i.id)
+        const productsRes = await this.$algolia.getMultiple(cartIds)
+        const products = productsRes.results ?? null
+        let cartItems = []
+
+        if (products) {
+          for (let i = 0; i < this.cart.length; i++) {
+            const cartItem = this.cart[i]
+            const product = products.find((j) => j.id === cartItem.id)
+
+            let data = {
+              ...cartItem,
+            }
+            if (product) {
+              data.product = product
+
+              if (cartItem.variantSku && product.variants) {
+                const variant = product.variants.find(
+                  (j) => j.sku === cartItem.variantSku
+                )
+
+                if (variant) {
+                  data.variant = variant
+                }
+              }
+            }
+
+            cartItems.push(data)
+          }
+
+          this.cartItems = cartItems
+        }
+
+        console.log("Cart Items ::: ", this.cartItems)
+      }
+    },
   },
 }
 </script>
