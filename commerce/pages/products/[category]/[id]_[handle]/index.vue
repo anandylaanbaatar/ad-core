@@ -93,13 +93,13 @@
 
             <!--Single Image-->
             <div
-              v-else-if="product.featuredImage"
+              v-else-if="product.featured_image"
               class="col-xs-12 col-md-8 mb-4"
             >
               <div class="c-product-images">
                 <div
                   class="c-block c-image size-xl"
-                  :style="$utils.setBackImage(product.featuredImage.url)"
+                  :style="$utils.setBackImage(product.featured_image.url)"
                 ></div>
               </div>
             </div>
@@ -175,11 +175,10 @@
 
                   <h1 class="mb-2">{{ product.title }}</h1>
 
-                  <p
+                  <div
                     class="font1 text-surface-500 dark:text-surface-400 text-sm mb-3"
-                  >
-                    {{ product.description }}
-                  </p>
+                    v-html="product.description"
+                  ></div>
 
                   <h3 class="font3 ml-auto">
                     {{ productPrice.priceFormatted }}
@@ -201,12 +200,12 @@
                       :key="`product_item_variant_${variant.id}`"
                       class="c-size"
                       :class="{
-                        active: select.variantId === variant.uid,
-                        notAvailable: variant.quantityAvailable === 0,
+                        active: select.variantSku === variant.sku,
+                        notAvailable: variant.inventory_available === 0,
                       }"
                       @click="selectVariant(variant)"
                     >
-                      {{ variant.title.toUpperCase() }}
+                      {{ variant.sku.toUpperCase() }}
                     </li>
                   </ul>
                 </div>
@@ -214,7 +213,7 @@
                 <!--Availability-->
                 <div v-if="select.variant" class="row w-full mt-2 mb-4">
                   <Message
-                    v-if="select.variant.quantityAvailable > 0"
+                    v-if="select.variant.inventory_available > 0"
                     severity="success"
                     class="c-message w-full"
                     :closable="false"
@@ -223,12 +222,12 @@
                       <i class="pi pi-exclamation-triangle"></i>
                     </template>
                     <span class="w-full"
-                      >{{ select.variant.quantityAvailable }}
+                      >{{ select.variant.inventory_available }}
                       {{ $utils.t("Available In Stock") }}</span
                     >
                   </Message>
                   <Message
-                    v-else-if="select.variant.quantityAvailable === 0"
+                    v-else-if="select.variant.inventory_available === 0"
                     severity="error"
                     class="c-message w-full"
                     :closable="false"
@@ -242,7 +241,7 @@
 
                 <!--Add to Cart-->
                 <Button
-                  v-if="select.variant.quantityAvailable > 0"
+                  v-if="select.variant.inventory_available > 0"
                   :label="$utils.t('Add To Cart')"
                   icon="pi pi-shopping-cart"
                   iconPos="right"
@@ -316,7 +315,7 @@ export default {
 
       select: {
         amount: 1,
-        variantId: null,
+        variantSku: null,
         variant: null,
       },
 
@@ -336,13 +335,12 @@ export default {
       return false
     },
     featuredImage() {
-      if (this.product.images.length > 1) {
-        if (this.product.variants.length === 1) {
-          return this.product.images[1].url
-        } else {
-          return this.select.variant.image.url
+      if (this.product) {
+        if (this.product.featured_image) {
+          return this.product.featured_image.url
         }
       }
+      return
     },
     productPrice() {
       let prices = {
@@ -357,9 +355,9 @@ export default {
           prices.price = this.product.price
           prices.priceFormatted = this.$currency.format(this.product.price)
 
-          if (this.select.variantId && this.product.variants.length > 0) {
+          if (this.select.variantSku && this.product.variants.length > 0) {
             let variant = this.product.variants.find(
-              (i) => i.uid === this.select.variantId
+              (i) => i.sku === this.select.variantSku
             )
 
             if (variant && variant.compareAtPrice) {
@@ -385,9 +383,9 @@ export default {
     this.id = id
     this.category = category
 
-    const productData = await this.$shopify.product({
-      productId: id,
-    })
+    const productData = await this.$algolia.getSingle(id)
+
+    console.log("Product ::: ", productData)
 
     if (productData) {
       this.product = productData
@@ -397,7 +395,7 @@ export default {
         if (this.$route.query.variant) {
           this.selectVariant(
             this.product.variants.find(
-              (variant) => variant.id === this.$route.query.variant
+              (variant) => variant.sku === this.$route.query.variant
             )
           )
         } else {
@@ -416,20 +414,20 @@ export default {
   methods: {
     async selectVariant(variant, isDefault) {
       this.select.variant = variant
-      this.select.variantId = variant.uid
+      this.select.variantSku = variant.sku
 
       if (!isDefault) {
         this.$router.push({
           path: this.$route.path,
           query: {
-            variant: variant.id,
+            variant: variant.sku,
           },
         })
       }
     },
     async addToCart() {
       useAddToCart({
-        variantId: this.select.variantId,
+        variantSku: this.select.variantSku,
         amount: this.select.amount,
       })
     },

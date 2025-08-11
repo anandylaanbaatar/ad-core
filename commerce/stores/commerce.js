@@ -1,4 +1,3 @@
-// import moment from "moment"
 import { defineStore } from "pinia"
 
 export const useCommerceStore = defineStore("commerce", {
@@ -29,20 +28,20 @@ export const useCommerceStore = defineStore("commerce", {
 
     allowTax:
       theme().type === "commerce"
-        ? useAppConfig().theme.commerce.allowTax
+        ? useAppConfig().theme.commerce?.allowTax
         : null,
 
     // Location
     locations: null,
     selectedLocation:
       theme().type === "commerce"
-        ? useAppConfig().theme.commerce.location
+        ? useAppConfig().theme.commerce?.location
         : null,
 
     // Shipping
     shippingLines:
       theme().type === "commerce"
-        ? useAppConfig().theme.commerce.shippingLines
+        ? useAppConfig().theme.commerce?.shippingLines
         : null,
   }),
 
@@ -142,77 +141,113 @@ export const useCommerceStore = defineStore("commerce", {
     async setCollections() {
       const appConfig = useRuntimeConfig()
 
-      if (!appConfig.public.integrations.shopify) {
+      if (!appConfig.public.features.multitenancy.tenantId) {
         return
       }
 
       const nuxtApp = useNuxtApp()
 
-      const allCollections = await nuxtApp.$shopify.collections({
-        limit: 150,
+      const allCollections = await nuxtApp.$directus.collection.list({
+        tenant_id: appConfig.public.features.multitenancy.tenantId,
       })
 
-      // Collections Count
-      const collectionsCount = await nuxtApp.$shopify.collectionsCount()
-      if (collectionsCount) {
-        this.collectionsCount = collectionsCount
-      }
+      // console.log("Collections ::: ", allCollections)
 
-      // Products Count
-      const productsCount = await nuxtApp.$shopify.productsCount()
+      if (allCollections?.success && allCollections?.data) {
+        const allStoreCollections = allCollections.data
 
-      if (productsCount) {
-        this.productsCount = productsCount
-      }
+        // .map((i) => {
+        //   let newCollection = i
+        //   const level = i.sub_collections ? "Level-2" : "Level-1"
 
-      if (allCollections && allCollections.items) {
-        let allStoreCollections = allCollections.items.map((i) => {
-          let newCollection = i
+        //   newCollection.level = {
+        //     id: i.id,
+        //     code: level,
+        //     title: i.title,
+        //   }
 
-          // Advanced Collections
-          if (newCollection.title.includes("|")) {
-            this.advancedCollections = true
-            let titleItems = newCollection.title.split("|")
-
-            newCollection.level = {
-              id: titleItems[0].trim().toLowerCase(),
-              code: titleItems[1].trim(),
-              title: titleItems[2].trim(),
-            }
-            newCollection.title = titleItems[2].trim()
-          }
-          return newCollection
-        })
-
-        if (this.advancedCollections) {
-          // Sort by Code
-          allStoreCollections = allStoreCollections.sort((a, b) => {
-            return parseInt(a.level.code) - parseInt(b.level.code)
-          })
-
-          // Move all other collections to the end
-          let allOtherCollections = allStoreCollections.filter((i) => {
-            if (parseInt(i.level.code) < 1000) {
-              return i
-            }
-          })
-          if (allOtherCollections.length > 0) {
-            let mainCollections = allStoreCollections.filter((i) => {
-              if (parseInt(i.level.code) > 999) {
-                return i
-              }
-            })
-            allStoreCollections = [...mainCollections, ...allOtherCollections]
-          }
-        }
+        //   return newCollection
+        // })
 
         this.collections = allStoreCollections
-      } else {
-        console.log("[Store] ::: Locations :: Error getting collections!")
       }
     },
 
+    // async setCollections() {
+    //   const appConfig = useRuntimeConfig()
+
+    //   if (!appConfig.public.integrations.shopify) {
+    //     return
+    //   }
+
+    //   const nuxtApp = useNuxtApp()
+
+    //   const allCollections = await nuxtApp.$shopify.collections({
+    //     limit: 150,
+    //   })
+
+    //   // Collections Count
+    //   const collectionsCount = await nuxtApp.$shopify.collectionsCount()
+    //   if (collectionsCount) {
+    //     this.collectionsCount = collectionsCount
+    //   }
+
+    //   // Products Count
+    //   const productsCount = await nuxtApp.$shopify.productsCount()
+
+    //   if (productsCount) {
+    //     this.productsCount = productsCount
+    //   }
+
+    //   if (allCollections && allCollections.items) {
+    //     let allStoreCollections = allCollections.items.map((i) => {
+    //       let newCollection = i
+
+    //       // Advanced Collections
+    //       if (newCollection.title.includes("|")) {
+    //         this.advancedCollections = true
+    //         let titleItems = newCollection.title.split("|")
+
+    //         newCollection.level = {
+    //           id: titleItems[0].trim().toLowerCase(),
+    //           code: titleItems[1].trim(),
+    //           title: titleItems[2].trim(),
+    //         }
+    //         newCollection.title = titleItems[2].trim()
+    //       }
+    //       return newCollection
+    //     })
+
+    //     if (this.advancedCollections) {
+    //       // Sort by Code
+    //       allStoreCollections = allStoreCollections.sort((a, b) => {
+    //         return parseInt(a.level.code) - parseInt(b.level.code)
+    //       })
+
+    //       // Move all other collections to the end
+    //       let allOtherCollections = allStoreCollections.filter((i) => {
+    //         if (parseInt(i.level.code) < 1000) {
+    //           return i
+    //         }
+    //       })
+    //       if (allOtherCollections.length > 0) {
+    //         let mainCollections = allStoreCollections.filter((i) => {
+    //           if (parseInt(i.level.code) > 999) {
+    //             return i
+    //           }
+    //         })
+    //         allStoreCollections = [...mainCollections, ...allOtherCollections]
+    //       }
+    //     }
+
+    //     this.collections = allStoreCollections
+    //   } else {
+    //     console.log("[Store] ::: Locations :: Error getting collections!")
+    //   }
+    // },
+
     // Saved Items
+
     setSavedItems(savedItems) {
       if (savedItems) {
         this.savedItems = savedItems
@@ -226,8 +261,6 @@ export const useCommerceStore = defineStore("commerce", {
       } else {
         this.savedItems = []
       }
-
-      // console.log("[Store] ::: Saved Items :: ", this.savedItems)
     },
   },
 })

@@ -118,6 +118,9 @@ export default {
 
       return grid
     },
+    collections() {
+      return useCommerceStore().collections
+    },
   },
 
   watch: {
@@ -127,8 +130,8 @@ export default {
     },
   },
 
-  async created() {
-    if (useRuntimeConfig().public.integrations.shopify) {
+  async mounted() {
+    if (useRuntimeConfig().public.integrations.algolia) {
       await this.getProducts()
     } else {
       this.loading = false
@@ -142,59 +145,99 @@ export default {
       } else {
         this.loading = true
       }
-      let cursor = null
 
-      // Pagination
-      if (this.pageInfo) {
-        if (this.pageInfo.hasNextPage) {
-          if (this.pageInfo.endCursor) {
-            cursor = this.pageInfo.endCursor
+      let options = {
+        limit: this.limit,
+        page: 0,
+      }
+
+      // Collection Filter
+      if (this.category && this.collections) {
+        const collection = this.collections.find(
+          (i) => i.handle === this.category
+        )
+
+        if (collection) {
+          options.options = {
+            "collections.collection_id.id": collection.id,
           }
         }
       }
 
-      // Options
-      let options = {
-        limit: this.limit,
-        cursor: cursor,
-        category: this.category ? this.category : "all",
-        sort: "CREATED_AT",
+      const products = await this.$algolia.search(options)
+
+      if (products?.hits?.length > 0) {
+        this.products = products.hits
       }
 
-      // Filters
-      if (this.filters) {
-        if (this.filters.query) {
-          options.query = this.filters.query
-        }
-        if (this.filters.ids) {
-          options.ids = this.filters.ids
-        }
-        if (this.filters.sort) {
-          options.sort = this.filters.sort
-        }
-      }
+      console.log("Products ::: ", this.filters, this.category, products)
 
-      const products = await this.$shopify.productsV2(options)
-
-      this.pageInfo = products.meta
-
-      if (this.products === null) {
-        if (this.exclude) {
-          this.products = products.items.filter(
-            (item) => item.id !== this.exclude
-          )
-        } else {
-          this.products = products.items
-        }
-      } else {
-        this.products = this.products.concat(products.items)
-      }
       if (isViewMore) {
         this.moreLoading = false
       } else {
         this.loading = false
       }
     },
+
+    // async getProductsV1(isViewMore) {
+    //   if (isViewMore) {
+    //     this.moreLoading = true
+    //   } else {
+    //     this.loading = true
+    //   }
+    //   let cursor = null
+
+    //   // Pagination
+    //   if (this.pageInfo) {
+    //     if (this.pageInfo.hasNextPage) {
+    //       if (this.pageInfo.endCursor) {
+    //         cursor = this.pageInfo.endCursor
+    //       }
+    //     }
+    //   }
+
+    //   // Options
+    //   let options = {
+    //     limit: this.limit,
+    //     cursor: cursor,
+    //     category: this.category ? this.category : "all",
+    //     sort: "CREATED_AT",
+    //   }
+
+    //   // Filters
+    //   if (this.filters) {
+    //     if (this.filters.query) {
+    //       options.query = this.filters.query
+    //     }
+    //     if (this.filters.ids) {
+    //       options.ids = this.filters.ids
+    //     }
+    //     if (this.filters.sort) {
+    //       options.sort = this.filters.sort
+    //     }
+    //   }
+
+    //   const products = await this.$shopify.productsV2(options)
+
+    //   this.pageInfo = products.meta
+
+    //   if (this.products === null) {
+    //     if (this.exclude) {
+    //       this.products = products.items.filter(
+    //         (item) => item.id !== this.exclude
+    //       )
+    //     } else {
+    //       this.products = products.items
+    //     }
+    //   } else {
+    //     this.products = this.products.concat(products.items)
+    //   }
+    //   if (isViewMore) {
+    //     this.moreLoading = false
+    //   } else {
+    //     this.loading = false
+    //   }
+    // },
   },
 }
 </script>

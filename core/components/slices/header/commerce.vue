@@ -83,6 +83,7 @@
               >
                 <div class="dimmer p-4 text-center">
                   <h3>{{ getTitle(collection.title) }}</h3>
+                  <!-- <p>{{ collection.handle }}</p> -->
                 </div>
               </div>
             </div>

@@ -14,11 +14,11 @@
       ></SlidersProduct>
 
       <!--Single Image-->
-      <div v-else-if="item.featuredImage" class="w-full text-center">
+      <div v-else-if="item.featured_image" class="w-full text-center">
         <div
-          v-if="item.featuredImage.url"
+          v-if="item.featured_image.url"
           class="c-block c-image size-m"
-          :style="$utils.setBackImage(item.featuredImage.url)"
+          :style="$utils.setBackImage(item.featured_image.url)"
           @click.stop="$bus.$emit('goTo', productUrl)"
         ></div>
       </div>
@@ -49,20 +49,20 @@
 
           <!--Inventory-->
           <Tag
-            v-if="item.totalInventory && item.totalInventory < 5"
-            :value="`${$utils.t('Low in Stock')} (${item.totalInventory})`"
+            v-if="totalInventory < 5"
+            :value="`${$utils.t('Low in Stock')} (${totalInventory})`"
             severity="warn"
             class="mr10"
           ></Tag>
           <Tag
-            v-else-if="!item.totalInventory || item.totalInventory === 0"
+            v-else-if="totalInventory === 0"
             :value="`${$utils.t('Out of Stock')}`"
             severity="danger"
             class="mr-10"
           ></Tag>
           <Tag
-            v-else-if="item.totalInventory && item.totalInventory >= 5"
-            :value="`${$utils.t('Available In Stock')} (${item.totalInventory})`"
+            v-else-if="totalInventory >= 5"
+            :value="`${$utils.t('Available In Stock')} (${totalInventory})`"
             severity="success"
             class="mr-10"
           ></Tag>
@@ -95,12 +95,6 @@
       <div class="flex flex-col">
         <div>
           <p class="block font-bold mb-1">{{ item.title }}</p>
-          <!-- <p
-            class="block text-surface-500 dark:text-surface-400 text-sm mt-2 mb-2"
-          >
-            (Unisex) Premium Quality
-          </p> -->
-
           <p class="font-bold">
             {{ $currency.format(item.price) }}
           </p>
@@ -137,9 +131,9 @@ export default {
   computed: {
     productCategoryHandle() {
       if (this.item) {
-        if (this.item.category) {
-          if (this.item.category.handle) {
-            return this.item.category.handle
+        if (this.item.collections) {
+          if (this.item.collections.handle) {
+            return this.item.collections.handle
           }
         }
       }
@@ -148,9 +142,24 @@ export default {
     productUrl() {
       return `/products/${this.productCategoryHandle}/${this.item.id}_${this.item.handle}`
     },
-  },
+    totalInventory() {
+      if (this.item) {
+        if (this.item.variants) {
+          let total = 0
 
-  computed: {
+          for (let i = 0; i < this.item.variants.length; i++) {
+            const variant = this.item.variants[i]
+
+            if (variant.inventory_available) {
+              total += parseInt(variant.inventory_available)
+            }
+          }
+
+          return total
+        }
+      }
+      return 0
+    },
     isSavedItem() {
       const savedItems = useCommerceStore().savedItems
       if (savedItems.indexOf(this.item.id) > -1) {

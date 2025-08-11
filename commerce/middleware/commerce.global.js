@@ -4,6 +4,13 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
   let siteUrl = appConfig.siteUrl
   let siteName = appConfig.name
   let siteDesc = appConfig.description
+
+  if (appConfig.type === "commerce") {
+    if (!siteDesc) {
+      siteDesc = "Онлайн Дэлгүүр | AD Commerce"
+    }
+  }
+
   let meta = {
     url: siteUrl,
     title: `${siteName} | ${siteDesc}`,
@@ -50,9 +57,7 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
 
   if (to.name === `products-category-id_handle`) {
     if (to.params && to.params.id) {
-      const res = await nuxtApp.$shopify.product({
-        productId: to.params.id,
-      })
+      const res = await nuxtApp.$algolia.getSingle(to.params.id)
 
       if (res) {
         meta.url = `${siteUrl}${to.path}`
@@ -81,7 +86,7 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
             (i) => i.handle === to.params.category
           )
           if (collection) {
-            meta.title = `${collection.title} | Collections | ${siteName}`
+            meta.title = `${collection.title} | ${nuxtApp.$utils.t("Collections")} | ${siteName}`
 
             if (collection.image && collection.image.url) {
               meta.image = collection.image.url
@@ -92,7 +97,7 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
 
       // Set Collection Title as All
       if (!isCollectionSet) {
-        meta.title = `All | Collections | ${siteName}`
+        meta.title = `${nuxtApp.$utils.t("All")} | ${nuxtApp.$utils.t("Collections")} | ${siteName}`
       }
     }
   }
