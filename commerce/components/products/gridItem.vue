@@ -72,14 +72,14 @@
           <Button
             v-if="!isSavedItem"
             icon="pi pi-heart"
-            class="sm p-glass-button"
+            class="sm p-glass-button color-white"
             @click.stop="useSaveProduct(item)"
             aria-label="Save Button"
           ></Button>
           <Button
             v-else
             icon="pi pi-heart-fill"
-            class="sm p-glass-button"
+            class="sm p-glass-button color-white"
             @click.stop="useRemoveProduct(item)"
             aria-label="Remove Button"
           ></Button>

@@ -8,14 +8,14 @@
       :class="{ lightOnly: theme.logo.desktop_dark }"
     />
     <img
-      v-if="theme.logo.desktop_dark"
+      v-else-if="theme.logo.desktop_dark"
       :src="theme.logo.desktop_dark"
       :alt="theme.name_short"
       class="desktopLogo darkOnly"
     />
 
     <img
-      v-if="theme.logo.mobile_dark && darkMode"
+      v-else-if="theme.logo.mobile_dark && darkMode"
       :src="theme.logo.mobile_dark"
       :alt="theme.name_short"
       class="mobileLogo"

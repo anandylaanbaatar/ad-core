@@ -210,7 +210,7 @@ export const useRemoveProduct = async (product) => {
   await store.setSavedItems(newSavedItems)
 
   $bus.$emit("toast", {
-    severity: "secondary",
+    severity: "success",
     summary: $utils.t("Product"),
     detail: $utils.t("Successfully removed from wishlist."),
   })
