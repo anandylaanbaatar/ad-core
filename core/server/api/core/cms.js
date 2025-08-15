@@ -1,10 +1,65 @@
 import { defineEventHandler, readBody } from "h3"
 
+const getQuery = (params) => {
+  let query = ``
+
+  const getQueryKey = () => {
+    if (query.length === 0) {
+      return "?"
+    } else {
+      return "&"
+    }
+  }
+
+  // Filters
+  if (params) {
+    // Tenant Id
+    if (params.tenantId) {
+      query += `${getQueryKey()}filter[tenant_id][_eq]=${params.tenantId}`
+    }
+    // External Id
+    if (params.externalId) {
+      query += `${getQueryKey()}filter[external_id][_eq]=${params.externalId}`
+    }
+    // Source Id
+    if (params.sourceId) {
+      query += `${getQueryKey()}filter[source_id][_contains]=${params.sourceId}`
+    }
+    // Source Ids
+    if (params.sourceIds) {
+      query += `${getQueryKey()}filter[source_id][_in]=${params.sourceIds}`
+    }
+
+    // Pagination
+    if (params.page) {
+      query += `${getQueryKey()}page=${params.page}`
+    }
+    if (params.limit) {
+      query += `${getQueryKey()}limit=${params.limit}`
+    }
+    if (params.counts) {
+      query += `${getQueryKey()}meta=total_count,filter_count`
+    }
+
+    // Fields
+    if (params.fields) {
+      query += `${getQueryKey()}fields=${params.fields}`
+    }
+
+    // Sort
+    if (params.sort) {
+      query += `${getQueryKey()}sort=${params.sort}`
+    }
+  }
+
+  return query
+}
+
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
   const config = useRuntimeConfig(event)
   const URL =
-    config.public.features.directus?.apiUrl || "https://api.adcommerce.mn"
+    config.public.features.directus?.apiUrl || "https://cms.adcommerce.mn"
   const TOKEN = process.env.NUXT_DIRECTUS_ADMIN_TOKEN
 
   if (!TOKEN) {
@@ -22,52 +77,15 @@ export default defineEventHandler(async (event) => {
         Authorization: `Bearer ${TOKEN}`,
       },
     }
-    let path = body.path
-    let filters = ``
-
-    const getQueryKey = () => {
-      if (filters.length === 0) {
-        return "?"
-      } else {
-        return "&"
-      }
-    }
-
-    // Set Method
-    if (body.method !== "GET" && body.method !== "DELETE") {
+    // Set Body Params
+    if (body.method === "POST" || body.method === "PATCH") {
       options.body = JSON.stringify(body.params)
-    } else {
-      // Filters
-      if (body.params) {
-        // Tenant Id
-        if (body.params.tenantId) {
-          filters += `${getQueryKey()}filter[tenant_id][_eq]=${body.params.tenantId}`
-        }
-
-        // Pagination
-        if (body.params.page) {
-          filters += `${getQueryKey()}page=${body.params.page}`
-        }
-        if (body.params.limit) {
-          filters += `${getQueryKey()}limit=${body.params.limit}`
-        }
-        if (body.params.counts) {
-          filters += `${getQueryKey()}meta=total_count,filter_count`
-        }
-
-        // Fields
-        if (body.params.fields) {
-          filters += `${getQueryKey()}fields=${body.params.fields}`
-        }
-
-        // Sort
-        if (body.params.sort) {
-          filters += `${getQueryKey()}sort=${body.params.sort}`
-        }
-      }
     }
 
-    const res = await fetch(`${URL}/${path}${filters}`, options)
+    const res = await fetch(
+      `${URL}/${body.path}${getQuery(body.params)}`,
+      options
+    )
 
     // Delete Response
     if (body.method === "DELETE") {
@@ -83,6 +101,16 @@ export default defineEventHandler(async (event) => {
       }
     } else {
       const data = await res.json()
+      // const errors = data.errors || null
+
+      console.log("Directus ::: ", data)
+
+      // if (errors) {
+      //   return {
+      //     success: false,
+      //     errors: errors,
+      //   }
+      // }
 
       let result = {
         success: true,

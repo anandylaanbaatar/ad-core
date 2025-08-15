@@ -15,7 +15,7 @@ export default defineNuxtPlugin((nuxtApp) => {
    */
 
   const fetchData = async (data) => {
-    return new Promise(async (resolve) => {
+    return new Promise(async (resolve, reject) => {
       await $fetch("/api/core/cms", {
         method: "post",
         headers: {
@@ -36,6 +36,39 @@ export default defineNuxtPlugin((nuxtApp) => {
    * Products
    */
 
+  const productItem = async (params) => {
+    const res = await fetchData({
+      method: "GET",
+      path: `items/products`,
+      type: "getProductByExternalId",
+      params: {
+        ...params,
+        fields: `
+          *,
+          collections.id,
+          collections.sort,
+          collections.collection_id.*,
+          featured_image.id,
+          featured_image.file_id,
+          featured_image.url,
+          featured_image.source_id,
+          images.id,
+          images.sort,
+          images.files_id.id,
+          images.files_id.file_id,
+          images.files_id.url,
+          images.files_id.source_id,
+          variants.*,
+          variants.image.id,
+          variants.image.url,
+          variants.image.file_id,
+          variants.image.source_id
+        `,
+      },
+    })
+
+    return res
+  }
   const productList = async (params) => {
     const res = await fetchData({
       method: "GET",
@@ -236,6 +269,20 @@ export default defineNuxtPlugin((nuxtApp) => {
    * Files
    */
 
+  const fileItem = async (params) => {
+    const res = await fetchData({
+      method: "GET",
+      path: `items/files`,
+      params: {
+        ...params,
+        fields: `
+          *
+        `,
+      },
+    })
+
+    return res
+  }
   const fileList = async (params) => {
     const res = await fetchData({
       method: "GET",
@@ -422,6 +469,7 @@ export default defineNuxtPlugin((nuxtApp) => {
           delete: tenantDelete,
         },
         product: {
+          item: productItem,
           list: productList,
           create: productCreate,
           update: productUpdate,
@@ -434,6 +482,7 @@ export default defineNuxtPlugin((nuxtApp) => {
           delete: collectionDelete,
         },
         file: {
+          item: fileItem,
           list: fileList,
           create: fileCreate,
           update: fileUpdate,

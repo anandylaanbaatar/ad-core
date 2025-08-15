@@ -67,6 +67,15 @@
       margin: 0;
     }
   }
+  &.tiny {
+    min-height: 0;
+
+    svg {
+      width: 35px;
+      height: 35px;
+      margin: 0;
+    }
+  }
   &.xs {
     min-height: 50px;
   }
