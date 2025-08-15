@@ -28,8 +28,12 @@
 
     <!--Image Slider-->
     <div v-else-if="images" class="c-slider">
-      <Splide ref="splide">
-        <SplideSlide v-for="image in images" :key="`image_preview_${image}`">
+      <Splide ref="splide" :options="sliderOptions">
+        <SplideSlide
+          v-for="image in images"
+          :key="`image_preview_${image}`"
+          :index="index"
+        >
           <div class="content" :style="`height:${height}px;`">
             <div class="center">
               <img class="image" :src="image.url" />
@@ -49,6 +53,7 @@ export default {
   data() {
     return {
       images: null,
+      index: null,
       image: null,
       height: null,
     }
@@ -61,6 +66,11 @@ export default {
       }
       return false
     },
+    sliderOptions() {
+      return {
+        start: this.index || 0,
+      }
+    },
   },
 
   mounted() {
@@ -68,7 +78,8 @@ export default {
       this.setHeight()
 
       if (typeof items === "object") {
-        this.images = items
+        this.index = items.index
+        this.images = items.images
       } else if (typeof items === "string") {
         this.image = items
       }
