@@ -156,7 +156,7 @@ export const useCommerceStore = defineStore("commerce", {
       const nuxtApp = useNuxtApp()
 
       const allCollections = await nuxtApp.$directus.collection.list({
-        tenant_id: appConfig.public.features.multitenancy.tenantId,
+        tenantId: appConfig.public.features.multitenancy.tenantId,
       })
 
       // console.log("Collections ::: ", allCollections)

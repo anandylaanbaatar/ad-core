@@ -97,6 +97,12 @@
           <p class="block font-bold mb-1">{{ item.title }}</p>
           <p class="font-bold">
             {{ $currency.format(item.price) }}
+
+            <span
+              v-if="item.compare_price"
+              class="ml-2 line-through opacity-60"
+              >{{ $currency.format(item.compare_price) }}</span
+            >
           </p>
 
           <!-- <Button

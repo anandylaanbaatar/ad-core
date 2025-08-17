@@ -185,7 +185,7 @@
 
                     <span
                       v-if="productPrice.compare"
-                      class="text-black-alpha-40 line-through ml-2"
+                      class="ml-2 line-through opacity-60"
                       >{{ productPrice.compareFormatted }}</span
                     >
                   </h3>
@@ -355,16 +355,29 @@ export default {
           prices.price = this.product.price
           prices.priceFormatted = this.$currency.format(this.product.price)
 
+          if (this.product.compare_price) {
+            prices.compare = this.product.compare_price
+            prices.compareFormatted = this.$currency.format(
+              this.product.compare_price
+            )
+          }
+
           if (this.select.variantSku && this.product.variants.length > 0) {
             let variant = this.product.variants.find(
               (i) => i.sku === this.select.variantSku
             )
 
-            if (variant && variant.compareAtPrice) {
-              prices.compare = variant.compareAtPrice.amount
-              prices.compareFormatted = this.$currency.format(
-                variant.compareAtPrice.amount
-              )
+            if (variant) {
+              if (variant.price) {
+                prices.price = variant.price
+                prices.priceFormatted = this.$currency.format(variant.price)
+              }
+              if (variant.compare_price) {
+                prices.compare = variant.compare_price
+                prices.compareFormatted = this.$currency.format(
+                  variant.compare_price
+                )
+              }
             }
           }
         }

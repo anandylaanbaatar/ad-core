@@ -154,6 +154,7 @@ export default {
         page: 0,
         options: {
           tenant_id: this.tenantId,
+          status: "published",
         },
       }
 
@@ -162,11 +163,8 @@ export default {
         const collection = this.collections.find(
           (i) => i.handle === this.category
         )
-
         if (collection) {
-          options.options = {
-            "collections.collection_id.id": collection.id,
-          }
+          options.options["collections.collection_id.id"] = collection.id
         }
       }
 
@@ -176,7 +174,13 @@ export default {
         this.products = products.hits
       }
 
-      console.log("Products ::: ", this.filters, this.category, products)
+      console.log(
+        "Products ::: ",
+        this.filters,
+        this.category,
+        options,
+        products
+      )
 
       if (isViewMore) {
         this.moreLoading = false
