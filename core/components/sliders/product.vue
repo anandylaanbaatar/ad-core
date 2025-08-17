@@ -78,10 +78,14 @@ export default {
           pathUrl: this.productUrl,
         }
 
-        if (this.item.variants) {
-          let variants = this.item.variants.filter(
-            (variant) => variant.image.id === image.id
-          )
+        if (this.item.variants && this.item.variants.length) {
+          let variants = this.item.variants.filter((variant) => {
+            if (variant.image) {
+              if (variant.image.id === image.id) {
+                return variant
+              }
+            }
+          })
           if (variants && variants.length > 0) {
             newItem.pathUrl += `?variant=${variants[0].sku}`
           }
@@ -90,7 +94,7 @@ export default {
         return newItem
       })
 
-      if (this.item.variants) {
+      if (this.item.variants && this.item.variants.length) {
         for (let i = 0; i < this.item.variants.length; i++) {
           const variant = this.item.variants[i]
 

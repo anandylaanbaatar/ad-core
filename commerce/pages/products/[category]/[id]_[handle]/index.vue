@@ -211,7 +211,10 @@
                 </div>
 
                 <!--Availability-->
-                <div v-if="select.variant" class="row w-full mt-2 mb-4">
+                <div
+                  v-if="select && select.variant"
+                  class="row w-full mt-2 mb-4"
+                >
                   <Message
                     v-if="select.variant.inventory_available > 0"
                     severity="success"
@@ -241,7 +244,11 @@
 
                 <!--Add to Cart-->
                 <Button
-                  v-if="select.variant.inventory_available > 0"
+                  v-if="
+                    select &&
+                    select.variant &&
+                    select.variant.inventory_available > 0
+                  "
                   :label="$utils.t('Add To Cart')"
                   icon="pi pi-shopping-cart"
                   iconPos="right"

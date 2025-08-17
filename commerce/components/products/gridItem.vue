@@ -48,24 +48,26 @@
           </template>
 
           <!--Inventory-->
-          <Tag
-            v-if="totalInventory < 5"
-            :value="`${$utils.t('Low in Stock')} (${totalInventory})`"
-            severity="warn"
-            class="mr10"
-          ></Tag>
-          <Tag
-            v-else-if="totalInventory === 0"
-            :value="`${$utils.t('Out of Stock')}`"
-            severity="danger"
-            class="mr-10"
-          ></Tag>
-          <Tag
-            v-else-if="totalInventory >= 5"
-            :value="`${$utils.t('Available In Stock')} (${totalInventory})`"
-            severity="success"
-            class="mr-10"
-          ></Tag>
+          <template v-if="inventoryTotal !== null">
+            <Tag
+              v-if="inventoryTotal < 5"
+              :value="`${$utils.t('Low in Stock')} (${inventoryTotal})`"
+              severity="warn"
+              class="mr10"
+            ></Tag>
+            <Tag
+              v-else-if="inventoryTotal === 0"
+              :value="`${$utils.t('Out of Stock')}`"
+              severity="danger"
+              class="mr-10"
+            ></Tag>
+            <Tag
+              v-else-if="inventoryTotal >= 5"
+              :value="`${$utils.t('Available In Stock')} (${inventoryTotal})`"
+              severity="success"
+              class="mr-10"
+            ></Tag>
+          </template>
         </div>
 
         <div class="c-block-top-right p-2">
@@ -148,23 +150,21 @@ export default {
     productUrl() {
       return `/products/${this.productCategoryHandle}/${this.item.id}_${this.item.handle}`
     },
-    totalInventory() {
-      if (this.item) {
-        if (this.item.variants) {
-          let total = 0
+    inventoryTotal() {
+      if (this.item && this.item.variants) {
+        let count = 0
 
-          for (let i = 0; i < this.item.variants.length; i++) {
-            const variant = this.item.variants[i]
-
-            if (variant.inventory_available) {
-              total += parseInt(variant.inventory_available)
+        for (let i = 0; i < this.item.variants.length; i++) {
+          if (this.item.variants[i]) {
+            if (this.item.variants[i].inventory_available) {
+              count += this.item.variants[i].inventory_available
             }
           }
-
-          return total
         }
+
+        return count
       }
-      return 0
+      return
     },
     isSavedItem() {
       const savedItems = useCommerceStore().savedItems

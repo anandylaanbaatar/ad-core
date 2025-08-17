@@ -193,13 +193,27 @@ export default {
     async getProducts() {
       this.reset()
 
+      console.log("Cart Saved Items ::: ", this.cart)
+
       if (this.cart && this.cart.length) {
         const cartIds = this.cart.map((i) => i.id)
         const productsRes = await this.$algolia.getMultiple(cartIds)
-        const products = productsRes.results ?? null
+
+        console.log("Cart items res ::: ", productsRes)
+
+        let products = []
         let cartItems = []
 
-        if (products) {
+        if (productsRes && productsRes.results) {
+          for (let i = 0; i < productsRes.results.length; i++) {
+            const item = productsRes.results[i]
+
+            if (item) {
+              newCartItems.push(item)
+            }
+          }
+        }
+        if (products.length) {
           for (let i = 0; i < this.cart.length; i++) {
             const cartItem = this.cart[i]
             const product = products.find((j) => j.id === cartItem.id)
@@ -224,10 +238,31 @@ export default {
             cartItems.push(data)
           }
 
-          this.cartItems = cartItems
+          if (cartItems.length) {
+            this.cartItems = cartItems
+          }
         }
 
-        console.log("Cart Items ::: ", this.cartItems)
+        // Empty Cart
+        if (!this.cartItems) {
+          useCommerceStore().clearCart()
+
+          if (this.cart.length) {
+            this.$bus.$emit("toast", {
+              severity: "info",
+              summary: this.$utils.t("Cart"),
+              detail: "Some products removed because not available!",
+            })
+          }
+        } else if (this.cartItems.length !== this.cart.length) {
+          this.$bus.$emit("toast", {
+            severity: "info",
+            summary: this.$utils.t("Cart"),
+            detail: "Some products removed because not available!",
+          })
+        }
+
+        console.log("Final Cart Items ::: ", this.cartItems)
       }
     },
   },
