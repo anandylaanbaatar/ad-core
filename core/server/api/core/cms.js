@@ -103,7 +103,7 @@ export default defineEventHandler(async (event) => {
       const data = await res.json()
       // const errors = data.errors || null
 
-      console.log("Directus ::: ", data)
+      // console.log("Directus ::: ", data)
 
       // if (errors) {
       //   return {
