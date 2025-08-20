@@ -459,6 +459,51 @@ export default defineNuxtPlugin((nuxtApp) => {
     return res
   }
 
+  /**
+   * Shipping
+   */
+
+  const shippingList = async (params) => {
+    const res = await fetchData({
+      method: "GET",
+      path: `items/shipping`,
+      params: {
+        ...params,
+        fields: `
+          *
+        `,
+      },
+    })
+
+    return res
+  }
+  const shippingCreate = async (params) => {
+    const res = await fetchData({
+      method: "POST",
+      path: "items/shipping",
+      params: params,
+    })
+
+    return res
+  }
+  const shippingUpdate = async (params) => {
+    const res = await fetchData({
+      method: "PATCH",
+      path: `items/shipping/${params.id}`,
+      params: params,
+    })
+
+    return res
+  }
+  const shippingDelete = async (params) => {
+    const res = await fetchData({
+      method: "DELETE",
+      path: `items/shipping/${params.id}`,
+    })
+
+    return res
+  }
+
   return {
     provide: {
       directus: {
@@ -505,6 +550,12 @@ export default defineNuxtPlugin((nuxtApp) => {
           create: locationCreate,
           update: locationUpdate,
           delete: locationDelete,
+        },
+        shipping: {
+          list: shippingList,
+          create: shippingCreate,
+          update: shippingUpdate,
+          delete: shippingDelete,
         },
         taxRate: {
           list: taxRateList,
