@@ -335,7 +335,8 @@ export default defineNuxtPlugin((nuxtApp) => {
       params: {
         ...params,
         fields: `
-          *
+          *,
+          address.*
         `,
       },
     })
