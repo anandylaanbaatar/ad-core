@@ -445,7 +445,7 @@ export default defineNuxtPlugin((nuxtApp) => {
   const tenantUpdate = async (params) => {
     const res = await fetchData({
       method: "PATCH",
-      path: `items/global_settings/${params.id}`,
+      path: `items/global_settings/${params.tenant_id}`,
       params: params,
     })
 
@@ -454,7 +454,7 @@ export default defineNuxtPlugin((nuxtApp) => {
   const tenantDelete = async (params) => {
     const res = await fetchData({
       method: "DELETE",
-      path: `items/global_settings/${params.id}`,
+      path: `items/global_settings/${params.tenant_id}`,
     })
 
     return res
