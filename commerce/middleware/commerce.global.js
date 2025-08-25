@@ -30,6 +30,7 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
   }
   // Client Init
   if (import.meta.client && !commerceStore.clientInit) {
+    await commerceStore.setOrderNumber()
     await commerceStore.setLocations()
     commerceStore.setSavedItems()
     commerceStore.set("clientInit", true)

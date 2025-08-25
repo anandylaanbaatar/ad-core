@@ -15,11 +15,11 @@ export const useCommerceStore = defineStore("commerce", {
     cart: [],
     cartItems: [],
 
+    // Orders
+    orderNumber: null,
+
     // Saved Items
     savedItems: [],
-
-    // Products
-    productsCount: 0,
 
     // Collections
     collections: null,
@@ -341,6 +341,18 @@ export const useCommerceStore = defineStore("commerce", {
       this.cart = []
       this.saveCartToStorage()
       await this.setCartItems()
+    },
+
+    // Orders
+    async setOrderNumber() {
+      const storeId = theme().storeId
+      if (!storeId) return
+
+      const orderNumber = await useNuxtApp().$fire.actions.read(
+        `adcommerce/stores/${storeId}/orderNumber`
+      )
+
+      this.orderNumber = orderNumber
     },
 
     // async setCollections() {

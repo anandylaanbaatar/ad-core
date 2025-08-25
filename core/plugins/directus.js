@@ -197,7 +197,15 @@ export default defineNuxtPlugin((nuxtApp) => {
     const res = await fetchData({
       method: "POST",
       path: "items/orders",
-      params: params,
+      params: {
+        ...params,
+        fields: `
+          *,
+          line_items.*,
+          shipping_address.*,
+          billing_address.*
+        `,
+      },
     })
 
     return res

@@ -270,6 +270,14 @@
                   class="w-full"
                   @click="addToCart"
                 ></Button>
+                <!-- <Button
+                  v-else
+                  :label="$utils.t('Add To Cart')"
+                  icon="pi pi-shopping-cart"
+                  iconPos="right"
+                  class="w-full"
+                  @click="addToCart('single')"
+                ></Button> -->
 
                 <div class="c-divider md"></div>
 
@@ -298,23 +306,13 @@
 
         <!--Similar Products-->
         <div v-if="category" class="mt-6">
-          <!-- <h3 class="mb-5 text-center">{{ $utils.t("Similar Products") }}</h3>
-        <ProductsGrid
-          :key="`products_grid_0`"
-          layout="grid"
-          :category="category"
-          :viewMore="true"
-          :limit="5"
-          :exclude="id"
-        ></ProductsGrid> -->
-
           <ScrollSimilarProducts
             :key="`products_grid_0`"
             layout="grid"
             :hasPadding="true"
             :category="category"
             :viewMore="true"
-            :limit="25"
+            :limit="15"
             :exclude="id"
           ></ScrollSimilarProducts>
         </div>
@@ -468,12 +466,16 @@ export default {
         })
       }
     },
-    addToCart() {
+    addToCart(type) {
       let options = {
         id: this.product.id,
-        variantSku: this.select.variantSku,
-        qty: this.select.amount,
+        variantSku: null,
+        qty: 1,
         merge: true,
+      }
+      if (type !== "single") {
+        options.variantSku = this.select.variantSku
+        options.qty = this.select.amount
       }
 
       useCommerceStore().addToCart(options)

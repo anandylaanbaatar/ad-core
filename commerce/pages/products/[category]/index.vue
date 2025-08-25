@@ -144,9 +144,6 @@ export default {
       }
       return
     },
-    totalProductsCount() {
-      return useCommerceStore().productsCount
-    },
   },
 
   created() {
