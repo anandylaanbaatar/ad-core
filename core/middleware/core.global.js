@@ -131,9 +131,14 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
         const maintenancePath = "/full/maintenance"
 
         if (to.path !== maintenancePath) {
-          return navigateTo({
-            path: maintenancePath,
-          })
+          if (
+            !window.location.href.includes("beta") ||
+            !window.location.href.includes("preview")
+          ) {
+            return navigateTo({
+              path: maintenancePath,
+            })
+          }
         }
       }
     }
