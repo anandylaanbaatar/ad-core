@@ -203,13 +203,7 @@ export default {
 
   computed: {
     account() {
-      if (useCommerceStore()) {
-        if (useCommerceStore().shopifyUser) {
-          console.log("Shopify User ::: ", useCommerceStore().shopifyUser)
-          return useCommerceStore().shopifyUser
-        }
-      }
-      return null
+      return useAuthStore().user
     },
     defaultAddress() {
       if (this.account) {
@@ -348,7 +342,7 @@ export default {
 
       this.form.address.fullAddress = address.formatted_address
 
-      // console.log("Address ::: Selected Address :: ", this.form.address)
+      console.log("Address ::: Selected Address :: ", this.form.address)
 
       this.validation()
     },
@@ -430,55 +424,53 @@ export default {
       }
 
       let formData = {
-        access_token: this.$shopify.getUserToken(),
-        address1: this.form.address.address1,
-        address2: this.form.address.address2,
-        city: this.form.address.city,
-        country: this.form.address.country,
-        province: this.form.address.province,
-        zip: this.form.address.zip,
         firstName: this.account.firstName,
         lastName: this.account.lastName,
         phone: this.account.phone,
+        ...this.form.address,
       }
+      delete formData.search
+      delete formData.id
+
+      console.log("Submit ::: Form ::: ", formData)
 
       // Update
       if (this.isEditMode) {
         formData.id = this.address.id
 
-        const res = await this.$shopify.updateCustomerAddress(formData)
+        // const res = await this.$shopify.updateCustomerAddress(formData)
 
-        console.log("Update Address :: ", res)
+        // console.log("Update Address :: ", res)
 
-        if (this.form.address.isDefaultAddress) {
-          if (
-            res &&
-            res.customerAddressUpdate &&
-            res.customerAddressUpdate.customerAddress
-          ) {
-            let addressId = res.customerAddressUpdate.customerAddress.id
+        // if (this.form.address.isDefaultAddress) {
+        //   if (
+        //     res &&
+        //     res.customerAddressUpdate &&
+        //     res.customerAddressUpdate.customerAddress
+        //   ) {
+        //     let addressId = res.customerAddressUpdate.customerAddress.id
 
-            await this.saveDefaultAddress(addressId)
-          }
-        }
+        //     await this.saveDefaultAddress(addressId)
+        //   }
+        // }
 
         this.$bus.$emit("updateAccount")
         await useCommerceStore().setUser()
         // Create
       } else {
-        const res = await this.$shopify.createCustomerAddress(formData)
+        // const res = await this.$shopify.createCustomerAddress(formData)
 
-        if (this.form.address.isDefaultAddress) {
-          if (
-            res &&
-            res.customerAddressCreate &&
-            res.customerAddressCreate.customerAddress
-          ) {
-            let addressId = res.customerAddressCreate.customerAddress.id
+        // if (this.form.address.isDefaultAddress) {
+        //   if (
+        //     res &&
+        //     res.customerAddressCreate &&
+        //     res.customerAddressCreate.customerAddress
+        //   ) {
+        //     let addressId = res.customerAddressCreate.customerAddress.id
 
-            await this.saveDefaultAddress(addressId)
-          }
-        }
+        //     await this.saveDefaultAddress(addressId)
+        //   }
+        // }
 
         this.$bus.$emit("updateAccount")
         await useCommerceStore().setUser()
@@ -487,12 +479,11 @@ export default {
       this.loading = false
     },
     async saveDefaultAddress(id) {
-      const res = await this.$shopify.updateCustomerDefaultAddress({
-        access_token: this.$shopify.getUserToken(),
-        id: id,
-      })
-
-      console.log("Update Default Address :: ", res)
+      // const res = await this.$shopify.updateCustomerDefaultAddress({
+      //   access_token: this.$shopify.getUserToken(),
+      //   id: id,
+      // })
+      // console.log("Update Default Address :: ", res)
     },
     async deleteAddress() {
       this.loading = true
@@ -508,21 +499,21 @@ export default {
         rejectLabel: this.$utils.t("Cancel"),
         acceptLabel: this.$utils.t("Confirm"),
         accept: async () => {
-          const res = await this.$shopify.deleteCustomerAddress({
-            id: this.address.id,
-            access_token: this.$shopify.getUserToken(),
-          })
+          // const res = await this.$shopify.deleteCustomerAddress({
+          //   id: this.address.id,
+          //   access_token: this.$shopify.getUserToken(),
+          // })
 
-          if (res) {
-            await useCommerceStore().setUser()
+          // if (res) {
+          //   await useCommerceStore().setUser()
 
-            this.$bus.$emit("updateAccount")
-            this.$bus.$emit("toast", {
-              severity: "success",
-              summary: "Address",
-              detail: "Succesfully deleted address.",
-            })
-          }
+          //   this.$bus.$emit("updateAccount")
+          //   this.$bus.$emit("toast", {
+          //     severity: "success",
+          //     summary: "Address",
+          //     detail: "Succesfully deleted address.",
+          //   })
+          // }
 
           this.loading = false
         },

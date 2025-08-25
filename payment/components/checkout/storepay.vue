@@ -11,7 +11,7 @@
           <label for="phone">{{ $utils.t("Phone") }}</label>
 
           <InputGroup>
-            <InputGroupAddon class="c-phoneDropdown-wrapper">
+            <InputGroupAddon class="c-phoneDropdown-wrapper p-0">
               <Select
                 v-if="allCountries"
                 v-model="form.selectedCountry"
@@ -83,7 +83,6 @@
           <div class="c-block text-center relative py-6 mb-3">
             <Button
               icon="pi pi-arrow-left"
-              rounded
               severity="secondary"
               class="sm absolute top-0 left-0 m-3"
               @click="reset"
@@ -91,7 +90,6 @@
             ></Button>
             <Button
               icon="pi pi-user-edit"
-              rounded
               severity="secondary"
               class="c-block-top-right mt-3 mr-3 sm"
               @click="reset"
@@ -107,7 +105,7 @@
               </p>
               <p class="font2">
                 {{ $utils.t("Loan amount") }}:
-                {{ $currency.format(totalAmount.total) }}
+                {{ $currency.format(cart.totals.totalAmount) }}
               </p>
               <p v-if="storepay.invoiceId" class="mt-1">
                 {{ $utils.t("Loan id") }}: {{ storepay.invoiceId }}
@@ -148,32 +146,12 @@
 <script>
 export default {
   props: {
-    cart: {
-      type: Object,
-      default: null,
-    },
-    totalAmount: {
-      type: Object,
-      default: null,
-    },
-    account: {
-      type: Object,
-      default: null,
-    },
-    lineItems: {
-      type: Array,
-      default: null,
-    },
     shippingLine: {
       type: Object,
       default: null,
     },
     shippingAddress: {
       type: Object,
-      default: null,
-    },
-    discountCode: {
-      type: Array,
       default: null,
     },
   },
@@ -215,6 +193,18 @@ export default {
   },
 
   computed: {
+    user() {
+      return useAuthStore().user
+    },
+    cart() {
+      return {
+        cart: useCommerceStore().cart,
+        items: useCommerceStore().cartItems,
+        isEmpty: useCommerceStore().cart.length === 0 ? true : false,
+        totals: useCommerceStore().cartTotals,
+      }
+    },
+
     paymentType() {
       return usePaymentStore().paymentOptions.find((i) => i.id === "storepay")
     },
@@ -232,21 +222,21 @@ export default {
     },
     orderForm() {
       return {
-        email: this.account.email,
-        phone: this.account.phone,
-        lineItems: this.lineItems,
+        email: this.user.email,
+        phone: this.user.phone,
+        // lineItems: this.lineItems,
         shippingLine: this.shippingLine,
         shippingAddress: this.shippingAddress,
         presentmentCurrencyCode: "MNT",
-        discountCodes: this.discountCodes,
+        // discountCodes: this.discountCodes,
         note: `StorePay ::: ${this.storepay.invoiceId}`,
       }
     },
   },
 
   async mounted() {
-    if (this.account && this.account.phone) {
-      const parsedPhone = this.$utils.parsePhoneNumber(this.account.phone)
+    if (this.user && this.user.phone) {
+      const parsedPhone = this.$utils.parsePhoneNumber(this.user.phone)
 
       this.form.selectedCountry = this.allCountries.find(
         (i) => i.code.toLowerCase() === "mn"
@@ -305,13 +295,13 @@ export default {
       if (res && res.status === "Success") {
         let isValid = true
 
-        if (this.totalAmount.total < 100000) {
+        if (this.cart.totals.totalAmount < 100000) {
           isValid = false
           this.showErrorMsg(
             `StorePay-ээр төлбөр төлөхийн тулд нийт төлбөр 100,000₮ өөс дээш бараа худалдан авалт байх ёстой.`,
             -1
           )
-        } else if (this.totalAmount.total > res.value) {
+        } else if (this.cart.totals.totalAmount > res.value) {
           isValid = false
           this.showErrorMsg(
             `Таний StorePay-ийн нийт зээлийн боломжит үлдэгдэл хүрэлцэхгүй байна.`,
@@ -346,7 +336,7 @@ export default {
         token: this.storepay.accessToken,
         storeId: this.paymentType.options.storeId,
         phone: this.form.phone,
-        amount: this.totalAmount.total,
+        amount: this.cart.totals.totalAmount,
         description: theme().name,
       }
 
@@ -371,7 +361,7 @@ export default {
       let qrCodeData = {
         storeCode: this.paymentType.options.storeId,
         description: theme().name,
-        amount: this.totalAmount.total,
+        amount: this.cart.totals.totalAmount,
       }
 
       new QRCode("qrcode", JSON.stringify(qrCodeData))
@@ -405,7 +395,7 @@ export default {
           this.paymentLoading = false
           this.showErrorMsg("Төлбөр ажилттай хийгдсэн байна.")
 
-          await this.createDraftOrder()
+          // await this.createDraftOrder()
         } else {
           this.storepay.isConfirmed = false
           this.showErrorMsg("Эхний төлбөр хараахан хийгдээгүй байна.")
@@ -421,48 +411,48 @@ export default {
     },
 
     // Orders
-    async createDraftOrder() {
-      if (localStorage.getItem("draftOrderId") !== null) {
-        this.draftOrderId = localStorage.getItem("draftOrderId")
+    // async createDraftOrder() {
+    //   if (localStorage.getItem("draftOrderId") !== null) {
+    //     this.draftOrderId = localStorage.getItem("draftOrderId")
 
-        await this.completeDraftOrder()
-        return
-      }
+    //     await this.completeDraftOrder()
+    //     return
+    //   }
 
-      this.checkoutLoading = true
+    //   this.checkoutLoading = true
 
-      const orderData = await this.$shopify.createDraftOrder(this.orderForm)
+    //   const orderData = await this.$shopify.createDraftOrder(this.orderForm)
 
-      if (
-        orderData &&
-        orderData.draftOrderCreate &&
-        orderData.draftOrderCreate.draftOrder
-      ) {
-        let draftOrderId = orderData.draftOrderCreate.draftOrder.id.replace(
-          "gid://shopify/DraftOrder/",
-          ""
-        )
-        localStorage.setItem("draftOrderId", draftOrderId)
-        this.draftOrderId = draftOrderId
+    //   if (
+    //     orderData &&
+    //     orderData.draftOrderCreate &&
+    //     orderData.draftOrderCreate.draftOrder
+    //   ) {
+    //     let draftOrderId = orderData.draftOrderCreate.draftOrder.id.replace(
+    //       "gid://shopify/DraftOrder/",
+    //       ""
+    //     )
+    //     localStorage.setItem("draftOrderId", draftOrderId)
+    //     this.draftOrderId = draftOrderId
 
-        await this.completeDraftOrder()
-      }
+    //     await this.completeDraftOrder()
+    //   }
 
-      this.checkoutLoading = false
-    },
-    async completeDraftOrder() {
-      this.checkoutLoading = true
+    //   this.checkoutLoading = false
+    // },
+    // async completeDraftOrder() {
+    //   this.checkoutLoading = true
 
-      const order = await this.$shopify.completeDraftOrder({
-        orderId: this.draftOrderId,
-      })
+    //   const order = await this.$shopify.completeDraftOrder({
+    //     orderId: this.draftOrderId,
+    //   })
 
-      if (order) {
-        this.$bus.$emit("goTo", "/checkout/success")
-      }
+    //   if (order) {
+    //     this.$bus.$emit("goTo", "/checkout/success")
+    //   }
 
-      this.checkoutLoading = false
-    },
+    //   this.checkoutLoading = false
+    // },
 
     showErrorMsg(msg, timer) {
       if (!msg) return

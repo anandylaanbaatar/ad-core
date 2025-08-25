@@ -33,6 +33,8 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
     await commerceStore.setLocations()
     commerceStore.setSavedItems()
     commerceStore.set("clientInit", true)
+    commerceStore.loadCartFromStorage()
+    await commerceStore.setCartItems()
   }
 
   const collections = commerceStore.collections

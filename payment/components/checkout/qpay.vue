@@ -8,9 +8,11 @@
 
     <section class="mb-5">
       <p v-if="cart" class="mb-5 font2 w-full text-center">
-        {{ $utils.t("Total") }}: {{ $currency.format(totalAmount.total) }} ({{
-          $utils.formatPrice(totalAmount.total) + "₮"
-        }})
+        {{ $utils.t("Total") }}:
+        {{ $currency.format(cart.totals.totalAmount) }}
+        <!-- ({{
+          $utils.formatPrice(cart.totals.totalAmount) + "₮"
+        }}) -->
       </p>
 
       <div class="paymentArea">
@@ -89,32 +91,12 @@
 <script>
 export default {
   props: {
-    cart: {
-      type: Object,
-      default: null,
-    },
-    totalAmount: {
-      type: Object,
-      default: null,
-    },
-    account: {
-      type: Object,
-      default: null,
-    },
-    lineItems: {
-      type: Array,
-      default: null,
-    },
     shippingLine: {
       type: Object,
       default: null,
     },
     shippingAddress: {
       type: Object,
-      default: null,
-    },
-    discountCode: {
-      type: Array,
       default: null,
     },
   },
@@ -143,15 +125,26 @@ export default {
   },
 
   computed: {
+    user() {
+      return useAuthStore().user
+    },
+    cart() {
+      return {
+        cart: useCommerceStore().cart,
+        items: useCommerceStore().cartItems,
+        isEmpty: useCommerceStore().cart.length === 0 ? true : false,
+        totals: useCommerceStore().cartTotals,
+      }
+    },
     orderForm() {
       return {
-        email: this.account.email,
-        phone: this.account.phone,
-        lineItems: this.lineItems,
+        email: this.user.email,
+        phone: this.user.phone,
+        // lineItems: this.lineItems,
         shippingLine: this.shippingLine,
         shippingAddress: this.shippingAddress,
         presentmentCurrencyCode: "MNT",
-        discountCodes: this.discountCodes,
+        // discountCodes: this.discountCodes,
         note: `QPay`,
       }
     },
@@ -166,7 +159,10 @@ export default {
   async mounted() {
     this.loading = false
 
-    await this.createDraftOrder()
+    // console.log("Qpay ::: ", this.cartTotals)
+    await this.createQPayInvoice()
+
+    // await this.createDraftOrder()
   },
   beforeUnmount() {
     this.reset()
@@ -184,61 +180,6 @@ export default {
         checkPaymentMsg: null,
       }
       this.draftOrderId = null
-    },
-
-    // Orders
-    async createDraftOrder() {
-      if (localStorage.getItem("draftOrderId") !== null) {
-        this.draftOrderId = localStorage.getItem("draftOrderId")
-
-        await this.setInvoiceId()
-        return
-      }
-
-      this.checkoutLoading = true
-
-      const orderData = await this.$shopify.createDraftOrder(this.orderForm)
-
-      if (
-        orderData &&
-        orderData.draftOrderCreate &&
-        orderData.draftOrderCreate.draftOrder
-      ) {
-        let draftOrderId = orderData.draftOrderCreate.draftOrder.id.replace(
-          "gid://shopify/DraftOrder/",
-          ""
-        )
-        localStorage.setItem("draftOrderId", draftOrderId)
-        this.draftOrderId = draftOrderId
-
-        await this.setInvoiceId()
-      }
-
-      this.checkoutLoading = false
-    },
-    async setInvoiceId() {
-      let invoiceData = localStorage.getItem("invoiceId")
-
-      if (invoiceData) {
-        this.payment.invoiceId = JSON.parse(invoiceData)
-      } else {
-        await this.createQPayInvoice()
-      }
-
-      console.log("[QPay] ::: Set Invoice Id :: ", this.payment.invoiceId)
-    },
-    async completeDraftOrder() {
-      this.checkoutLoading = true
-
-      const order = await this.$shopify.completeDraftOrder({
-        orderId: this.draftOrderId,
-      })
-
-      if (order) {
-        this.$bus.$emit("goTo", "/checkout/success")
-      }
-
-      this.checkoutLoading = false
     },
 
     // QPay Payment
@@ -273,17 +214,17 @@ export default {
     },
     async createQPayInvoice() {
       this.payment.loading = true
-      this.payment.invoiceId = this.draftOrderId // Set Draft Order Id
+      this.payment.invoiceId = "1001" // Set Draft Order Id
 
       await this.setQPayToken()
 
       let qpayInvoice = {
         invoice_code: this.invoiceCode,
-        sender_invoice_no: this.payment.invoiceId,
+        sender_invoice_no: this.payment.invoiceId, //
         invoice_receiver_code: "terminal",
         invoice_description: `${useAppConfig().theme.name} - ${this.payment.invoiceId}`,
-        amount: this.totalAmount.total,
-        callback_url: `${useAppConfig().theme.siteUrl}/checkout/success?invoice=${this.payment.invoiceId}`,
+        amount: this.cart.totals.totalAmount,
+        callback_url: `${window.location.href}/checkout/success?invoice=${this.payment.invoiceId}`,
       }
 
       console.log("QPay ::: Create Invoice :: ", qpayInvoice)
@@ -349,7 +290,7 @@ export default {
 
           // Test Mode
           if (this.testMode) {
-            await this.completeDraftOrder()
+            // await this.createOrder()
           } else {
             // Payment Successfull
             if (data && data.count > 0) {
@@ -357,7 +298,7 @@ export default {
                 "Payment successfull."
               )
 
-              await this.completeDraftOrder()
+              // await this.createOrder()
               return
 
               // Payment Not Complete Yet
@@ -386,6 +327,99 @@ export default {
           }, 3000)
         })
     },
+
+    // Orders
+    async createDraftOrder() {
+      const createDraftOrder = await this.$directus.order.create({
+        tenant_id: null,
+        order_number: null,
+        status: "pending",
+        fulfillment_status: "open",
+        payment_status: "not_paid",
+        customer: {
+          id: null,
+        },
+        shipping_address: null,
+        billing_address: null,
+        line_items: null,
+        sub_total: null,
+        tax_total: null,
+        discount_total: null,
+        shipping_total: null,
+        total: null,
+      })
+
+      console.log("Draft Order ::: ", createDraftOrder)
+    },
+    async completeDraftOrder() {
+      this.checkoutLoading = true
+
+      const createOrder = await this.$directus.order.update({
+        tenant_id: null,
+        id: null,
+        status: "completed",
+      })
+      if (createOrder) {
+        this.$bus.$emit("goTo", "/checkout/success")
+      }
+
+      this.checkoutLoading = false
+    },
+
+    // Orders
+    // async createDraftOrder() {
+    //   if (localStorage.getItem("draftOrderId") !== null) {
+    //     this.draftOrderId = localStorage.getItem("draftOrderId")
+
+    //     await this.setInvoiceId()
+    //     return
+    //   }
+
+    //   this.checkoutLoading = true
+
+    //   const orderData = await this.$shopify.createDraftOrder(this.orderForm)
+
+    //   if (
+    //     orderData &&
+    //     orderData.draftOrderCreate &&
+    //     orderData.draftOrderCreate.draftOrder
+    //   ) {
+    //     let draftOrderId = orderData.draftOrderCreate.draftOrder.id.replace(
+    //       "gid://shopify/DraftOrder/",
+    //       ""
+    //     )
+    //     localStorage.setItem("draftOrderId", draftOrderId)
+    //     this.draftOrderId = draftOrderId
+
+    //     await this.setInvoiceId()
+    //   }
+
+    //   this.checkoutLoading = false
+    // },
+    // async setInvoiceId() {
+    //   let invoiceData = localStorage.getItem("invoiceId")
+
+    //   if (invoiceData) {
+    //     this.payment.invoiceId = JSON.parse(invoiceData)
+    //   } else {
+    //     await this.createQPayInvoice()
+    //   }
+
+    //   console.log("[QPay] ::: Set Invoice Id :: ", this.payment.invoiceId)
+    // },
+    // async completeDraftOrder() {
+    //   this.checkoutLoading = true
+
+    //   const order = await this.$shopify.completeDraftOrder({
+    //     orderId: this.draftOrderId,
+    //   })
+
+    //   if (order) {
+    //     this.$bus.$emit("goTo", "/checkout/success")
+    //   }
+
+    //   this.checkoutLoading = false
+    // },
   },
 }
 </script>

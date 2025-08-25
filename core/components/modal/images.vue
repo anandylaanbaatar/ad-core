@@ -77,7 +77,9 @@ export default {
     this.$bus.$on("imagePreviewGlobal", (items) => {
       this.setHeight()
 
-      if (typeof items === "object") {
+      console.log("Items ::: ", items, typeof items)
+
+      if (typeof items === "object" || typeof items === "array") {
         this.index = items.index
         this.images = items.images
       } else if (typeof items === "string") {

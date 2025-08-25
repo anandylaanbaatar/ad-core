@@ -84,10 +84,11 @@
                   class="sm"
                   @click.stop="amountSubtract(cartItem.key)"
                 ></Button>
-                <InputNumber
+                <!-- <InputNumber
                   :disabled="true"
                   v-model="currentAmount"
-                ></InputNumber>
+                ></InputNumber> -->
+                <span class="mx-2">{{ currentAmount }}</span>
                 <Button
                   :disabled="updating || productVariantAmountLeft === 0"
                   icon="pi pi-plus"
@@ -99,7 +100,7 @@
               <Button
                 icon="pi pi-trash"
                 class="iconBtn sm ml-2 mb-1"
-                @click.stop="remoteFromCart(cartItem.key)"
+                @click.stop="removeFromCart(cartItem.key)"
                 v-tooltip.top="`${$utils.t('Delete')}`"
               ></Button>
             </div>
@@ -138,7 +139,7 @@ export default {
           this.cartItem.product.collections &&
           this.cartItem.product.collections.length > 0
         ) {
-          return this.cartItem.product.collections[0].handle
+          return this.cartItem.product.collections[0].collection_id.handle
         }
       }
       return "all"
@@ -153,9 +154,10 @@ export default {
       } else if (
         this.cartItem &&
         this.cartItem.product &&
-        this.cartItem.product.image
+        this.cartItem.product.featured_image &&
+        this.cartItem.product.featured_image.url
       ) {
-        return this.cartItem.product.image.url
+        return this.cartItem.product.featured_image.url
       }
       return false
     },
@@ -165,30 +167,31 @@ export default {
   },
 
   mounted() {
+    // console.log("Cart Item ::: ", this.cartItem)
+
     if (this.cartItem && this.cartItem.qty) {
       this.currentAmount = this.cartItem.qty
     } else {
       this.currentAmount = 1
     }
 
-    console.log("Current Amount ::: ", this.currentAmount)
+    // console.log("Current Amount ::: ", this.currentAmount)
   },
 
   methods: {
-    remoteFromCart(itemKey) {
+    removeFromCart(itemKey) {
       this.$confirm.require({
         group: "global",
         message: this.$utils.t("Remove From Cart"),
         header: this.$utils.t("Delete"),
         rejectLabel: this.$utils.t("Cancel"),
         acceptLabel: this.$utils.t("Confirm"),
-        accept: () => {
-          useCommerceStore().removeFromCart(itemKey)
+        accept: async () => {
+          await useCommerceStore().removeFromCart(itemKey)
           this.$bus.$emit("updateCart")
         },
       })
     },
-
     amountSubtract(itemKey) {
       if (this.updating) return
       this.currentAmount -= 1
@@ -223,11 +226,11 @@ export default {
 
       this.amountChange(itemKey, this.currentAmount)
     },
-    amountChange(itemKey, amount) {
+    async amountChange(itemKey, amount) {
       if (this.updating) return
       this.updating = true
 
-      useCommerceStore().updateQuantity(itemKey, amount)
+      await useCommerceStore().updateQuantity(itemKey, amount)
 
       this.prevAmount = amount
       this.updating = false

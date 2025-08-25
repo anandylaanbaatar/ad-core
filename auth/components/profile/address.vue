@@ -41,9 +41,9 @@
     <div v-else class="emptyArea">
       <div>
         <i class="pi pi-address-book"></i>
-        <h4 class="font3 mb-3">
+        <p class="mb-3">
           {{ $utils.t("No address found. Please add new address.") }}
-        </h4>
+        </p>
 
         <Button
           :label="$utils.t('New Address')"

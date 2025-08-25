@@ -13,6 +13,7 @@ export const useCommerceStore = defineStore("commerce", {
     // Cart
     initCart: null,
     cart: [],
+    cartItems: [],
 
     // Saved Items
     savedItems: [],
@@ -50,6 +51,33 @@ export const useCommerceStore = defineStore("commerce", {
     },
     cartTotalPrice(state) {
       return state.cart.reduce((sum, item) => sum + item.price * item.qty, 0)
+    },
+    cartTotals(state) {
+      let totals = {
+        itemsTotal: state.cartTotalItems,
+        taxAmount: 0,
+        discountAmount: 0,
+        shippingAmount: 0,
+        subtotalAmount: 0,
+        totalAmount: 0,
+      }
+
+      if (state.cartItems.length) {
+        for (let i = 0; i < state.cartItems.length; i++) {
+          const cartItem = state.cartItems[i]
+
+          // SubTotal
+          if (cartItem.variant && cartItem.variant.price) {
+            totals.subtotalAmount += cartItem.qty * cartItem.variant.price
+          } else if (cartItem.product && cartItem.product.price) {
+            totals.subtotalAmount += cartItem.qty * cartItem.product.price
+          }
+        }
+      }
+
+      totals.totalAmount = totals.subtotalAmount
+
+      return totals
     },
   },
 
@@ -202,7 +230,60 @@ export const useCommerceStore = defineStore("commerce", {
         localStorage.setItem(`${tenantId}_cart`, JSON.stringify(this.cart))
       }
     },
-    addToCart(item) {
+    async setCartItems() {
+      this.loadCartFromStorage()
+
+      const cart = this.cart
+      const cartIds = cart.map((i) => i.id)
+      const nuxtApp = useNuxtApp()
+      let productsRes = null
+      let products = []
+      let cartItems = []
+
+      if (cartIds.length) {
+        productsRes = await nuxtApp.$algolia.getMultiple(cartIds)
+      }
+      if (productsRes && productsRes.results) {
+        for (let i = 0; i < productsRes.results.length; i++) {
+          const item = productsRes.results[i]
+
+          if (item) {
+            products.push(item)
+          }
+        }
+      }
+      if (products.length) {
+        for (let i = 0; i < cart.length; i++) {
+          const cartItem = cart[i]
+          const product = products.find((j) => j.id === cartItem.id)
+
+          let data = {
+            ...cartItem,
+          }
+          if (product) {
+            data.product = product
+
+            if (cartItem.variantSku && product.variants) {
+              const variant = product.variants.find(
+                (j) => j.sku === cartItem.variantSku
+              )
+
+              if (variant) {
+                data.variant = variant
+              }
+            }
+          }
+
+          cartItems.push(data)
+        }
+      }
+      if (!cartItems.length) {
+        this.clearCart()
+      }
+
+      this.cartItems = cartItems
+    },
+    async addToCart(item) {
       const productId = item.id
       const qty = item.qty ?? 1
       const variantSku = item.variantSku ?? null
@@ -222,6 +303,7 @@ export const useCommerceStore = defineStore("commerce", {
       }
 
       this.saveCartToStorage()
+      await this.setCartItems()
 
       useNuxtApp().$bus.$emit("toast", {
         severity: "success",
@@ -229,9 +311,11 @@ export const useCommerceStore = defineStore("commerce", {
         detail: useNuxtApp().$utils.t("Successfully added item to cart."),
       })
     },
-    removeFromCart(key) {
+    async removeFromCart(key) {
       this.cart = this.cart.filter((i) => i.key !== key)
+
       this.saveCartToStorage()
+      await this.setCartItems()
 
       useNuxtApp().$bus.$emit("toast", {
         severity: "success",
@@ -239,7 +323,7 @@ export const useCommerceStore = defineStore("commerce", {
         detail: useNuxtApp().$utils.t("Successfully removed item from cart."),
       })
     },
-    updateQuantity(key, qty) {
+    async updateQuantity(key, qty) {
       const index = this.cart.findIndex((i) => i.key === key)
 
       if (index > -1) {
@@ -251,10 +335,12 @@ export const useCommerceStore = defineStore("commerce", {
       }
 
       this.saveCartToStorage()
+      await this.setCartItems()
     },
-    clearCart() {
+    async clearCart() {
       this.cart = []
       this.saveCartToStorage()
+      await this.setCartItems()
     },
 
     // async setCollections() {

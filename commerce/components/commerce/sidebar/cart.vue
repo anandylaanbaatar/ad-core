@@ -1,10 +1,10 @@
 <template>
   <div
     class="sidebar cartSidebar overflow-y-auto"
-    :class="{ 'h-full': isEmpty }"
+    :class="{ 'h-full': cart.isEmpty }"
   >
     <!--Empty-->
-    <div v-if="isEmpty" class="emptyArea">
+    <div v-if="cart.isEmpty" class="emptyArea">
       <div>
         <i class="pi pi-shopping-cart"></i>
         <h4>{{ $utils.t("Cart is Empty") }}</h4>
@@ -29,7 +29,7 @@
       <div class="productsGrid row">
         <div class="productsGridScroll w-full">
           <ProductsCartItem
-            v-for="cartItem in cartItems"
+            v-for="cartItem in cart.items"
             :cartItem="cartItem"
             :key="`product_cartItem_${cartItem.key}`"
           ></ProductsCartItem>
@@ -46,7 +46,7 @@
           <div class="col-xs-6">
             <div class="w-full text-right">
               <h4>
-                {{ $currency.format(cartTotals.subtotalAmount) }}
+                {{ $currency.format(cart.totals.subtotalAmount) }}
               </h4>
             </div>
           </div>
@@ -57,7 +57,7 @@
           <div class="col-xs-6">
             <div v-if="theme().type === 'commerce'" class="w-full text-right">
               <h4 v-if="useCommerceStore().allowTax">
-                {{ $currency.format(cartTotals.taxAmount) }}
+                {{ $currency.format(cart.totals.taxAmount) }}
               </h4>
               <h4 v-else>-</h4>
             </div>
@@ -72,12 +72,12 @@
             <div class="w-full text-right">
               <!-- <h4
                 v-if="
-                  cartTotals.discountAmount
+                  cart.totals.discountAmount
                 "
               >
                 {{
                   $currency.format(
-                    cartTotals.discountAmount
+                    cart.totals.discountAmount
                   )
                 }}
               </h4> -->
@@ -91,21 +91,21 @@
           <div class="col-xs-6">
             <div v-if="theme().type === 'commerce'" class="w-full text-right">
               <h3 v-if="useCommerceStore().allowTax">
-                {{ $currency.format(cartTotals.taxAmount) }}
+                {{ $currency.format(cart.totals.taxAmount) }}
               </h3>
               <h3 v-else>
-                {{ $currency.format(cartTotals.totalAmount) }}
+                {{ $currency.format(cart.totals.totalAmount) }}
               </h3>
             </div>
           </div>
 
-          <div class="col-xs-12">
+          <div v-if="!isCheckoutPage" class="col-xs-12">
             <Button
               block
               large
               :label="$utils.t('Checkout')"
               class="w-full checkoutBtn"
-              @click="$bus.$emit('goTo', '/checkout/v2')"
+              @click="$bus.$emit('goTo', '/checkout')"
             ></Button>
           </div>
         </div>
@@ -127,143 +127,23 @@ export default {
     return {
       init: false,
       active: false,
-      cartItems: null,
     }
   },
 
   computed: {
     cart() {
-      return useCommerceStore().cart
-    },
-    isEmpty() {
-      if (this.cart && this.cart.length > 0) {
-        return false
+      return {
+        cart: useCommerceStore().cart,
+        items: useCommerceStore().cartItems,
+        isEmpty: useCommerceStore().cart.length === 0 ? true : false,
+        totals: useCommerceStore().cartTotals,
       }
-      return true
     },
-    cartTotals() {
-      let totals = {
-        items: useCommerceStore().cartTotalItems,
-        taxAmount: 0,
-        discountAmount: 0,
-        shippingAmount: 0,
-        subtotalAmount: 0,
-        totalAmount: 0,
+    isCheckoutPage() {
+      if (this.$route.path.includes("checkout")) {
+        return true
       }
-
-      if (!this.isEmpty && this.cartItems) {
-        for (let i = 0; i < this.cartItems.length; i++) {
-          const cartItem = this.cartItems[i]
-
-          if (cartItem.variant && cartItem.variant.price) {
-            totals.subtotalAmount += cartItem.qty * cartItem.variant.price
-          } else if (cartItem.product && cartItem.product.price) {
-            totals.subtotalAmount += cartItem.qty * cartItem.product.price
-          }
-        }
-      }
-
-      totals.totalAmount = totals.subtotalAmount
-
-      return totals
-    },
-    header() {
-      let amount = ``
-
-      if (this.cartTotals.items) {
-        amount = ` (${this.cartTotals.items})`
-      }
-
-      return `${this.$utils.t("Cart")}${amount}`
-    },
-  },
-
-  async mounted() {
-    await this.getProducts()
-
-    this.$bus.$on("updateCart", async () => {
-      await this.getProducts()
-    })
-  },
-
-  methods: {
-    reset() {
-      this.cartItems = null
-    },
-    async getProducts() {
-      this.reset()
-
-      console.log("Cart Saved Items ::: ", this.cart)
-
-      if (this.cart && this.cart.length) {
-        const cartIds = this.cart.map((i) => i.id)
-        const productsRes = await this.$algolia.getMultiple(cartIds)
-
-        console.log("Cart items res ::: ", productsRes)
-
-        let products = []
-        let cartItems = []
-
-        if (productsRes && productsRes.results) {
-          for (let i = 0; i < productsRes.results.length; i++) {
-            const item = productsRes.results[i]
-
-            if (item) {
-              newCartItems.push(item)
-            }
-          }
-        }
-        if (products.length) {
-          for (let i = 0; i < this.cart.length; i++) {
-            const cartItem = this.cart[i]
-            const product = products.find((j) => j.id === cartItem.id)
-
-            let data = {
-              ...cartItem,
-            }
-            if (product) {
-              data.product = product
-
-              if (cartItem.variantSku && product.variants) {
-                const variant = product.variants.find(
-                  (j) => j.sku === cartItem.variantSku
-                )
-
-                if (variant) {
-                  data.variant = variant
-                }
-              }
-            }
-
-            cartItems.push(data)
-          }
-
-          if (cartItems.length) {
-            this.cartItems = cartItems
-          }
-        }
-
-        // Empty Cart
-        if (!this.cartItems) {
-          useCommerceStore().clearCart()
-
-          if (this.cart.length) {
-            this.$bus.$emit("toast", {
-              severity: "info",
-              summary: this.$utils.t("Cart"),
-              detail: "Some products removed because not available!",
-            })
-          }
-        } else if (this.cartItems.length !== this.cart.length) {
-          this.$bus.$emit("toast", {
-            severity: "info",
-            summary: this.$utils.t("Cart"),
-            detail: "Some products removed because not available!",
-          })
-        }
-
-        console.log("Final Cart Items ::: ", this.cartItems)
-      }
+      return false
     },
   },
 }

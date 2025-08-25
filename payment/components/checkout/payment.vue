@@ -68,37 +68,26 @@
     <!--QPay-->
     <CheckoutQpay
       v-if="options.payment === 'qpay'"
-      :cart="cart"
-      :totalAmount="totalAmount"
-      :account="account"
-      :lineItems="lineItems"
       :shippingLine="shippingLine"
       :shippingAddress="shippingAddress"
-      :discountCodes="discountCodes"
     ></CheckoutQpay>
 
     <!--StorePay-->
     <CheckoutStorepay
       v-else-if="options.payment === 'storepay'"
-      :cart="cart"
-      :totalAmount="totalAmount"
-      :account="account"
-      :lineItems="lineItems"
       :shippingLine="shippingLine"
       :shippingAddress="shippingAddress"
-      :discountCodes="discountCodes"
     ></CheckoutStorepay>
 
     <!--Stripe-->
     <CheckoutStripe
       v-else-if="options.payment === 'stripe'"
       :cart="cart"
-      :totalAmount="totalAmount"
-      :account="account"
+      :cartTotals="cartTotals"
+      :account="user"
       :lineItems="lineItems"
       :shippingLine="shippingLine"
       :shippingAddress="shippingAddress"
-      :discountCodes="discountCodes"
     ></CheckoutStripe>
   </section>
 </template>
@@ -107,10 +96,6 @@
 export default {
   props: {
     options: {
-      type: Object,
-      default: null,
-    },
-    account: {
       type: Object,
       default: null,
     },
@@ -126,16 +111,43 @@ export default {
   },
 
   computed: {
+    user() {
+      return useAuthStore().user
+    },
     cart() {
       return useCommerceStore().cart
     },
+    cartTotals() {
+      let totals = {
+        items: useCommerceStore().cartTotalItems,
+        taxAmount: 0,
+        discountAmount: 0,
+        shippingAmount: 0,
+        subtotalAmount: 0,
+        totalAmount: 0,
+      }
+
+      if (!this.isEmpty && this.cartItems) {
+        for (let i = 0; i < this.cartItems.length; i++) {
+          const cartItem = this.cartItems[i]
+
+          if (cartItem.variant && cartItem.variant.price) {
+            totals.subtotalAmount += cartItem.qty * cartItem.variant.price
+          } else if (cartItem.product && cartItem.product.price) {
+            totals.subtotalAmount += cartItem.qty * cartItem.product.price
+          }
+        }
+      }
+
+      totals.totalAmount = totals.subtotalAmount
+
+      return totals
+    },
+
     allAddresses() {
-      if (this.account && this.account.addresses) {
-        if (
-          this.account.addresses.edges &&
-          this.account.addresses.edges.length > 0
-        ) {
-          let addressItems = this.account.addresses.edges.map((i) => {
+      if (this.user && this.user.addresses) {
+        if (this.user.addresses.edges && this.user.addresses.edges.length > 0) {
+          let addressItems = this.user.addresses.edges.map((i) => {
             let item = i.node
 
             if (item.address2) {
@@ -261,73 +273,74 @@ export default {
       }
       return null
     },
-    discountCodes() {
-      if (this.cart && this.cart.discountCodes) {
-        if (this.cart.discountCodes.length > 0) {
-          let allApplicableDiscountCodes = this.cart.discountCodes.filter(
-            (i) => i.applicable
-          )
-          if (allApplicableDiscountCodes.length > 0) {
-            return allApplicableDiscountCodes.map((i) => {
-              return `${i.code}`
-            })
-          }
-        }
-      }
-      return null
-    },
+    // discountCodes() {
+    //   if (this.cart && this.cart.discountCodes) {
+    //     if (this.cart.discountCodes.length > 0) {
+    //       let allApplicableDiscountCodes = this.cart.discountCodes.filter(
+    //         (i) => i.applicable
+    //       )
+    //       if (allApplicableDiscountCodes.length > 0) {
+    //         return allApplicableDiscountCodes.map((i) => {
+    //           return `${i.code}`
+    //         })
+    //       }
+    //     }
+    //   }
+    //   return null
+    // },
 
     // Calculated
-    totalAmount() {
-      let cartAmount = 0
-      let taxAmount = 0
-      let shippingAmount = 0
-      let totalAmount = 0
-      let formatted = 0
-      let chargeAmount = 0
-      let discountAmount = 0
 
-      if (this.cart && this.cart.cost && this.cart.cost.totalAmount) {
-        if (theme().type === "commerce" && useCommerceStore().allowTax) {
-          cartAmount = parseFloat(this.cart.cost.totalAmount.amount)
-        } else {
-          cartAmount = parseFloat(this.cart.cost.subtotalAmount.amount)
-        }
-      }
-      if (this.shippingLine) {
-        shippingAmount = parseFloat(this.shippingLine.price)
-      }
-      if (this.cart && this.cart.cost && this.cart.cost.checkoutChargeAmount) {
-        chargeAmount = parseFloat(this.cart.cost.checkoutChargeAmount.amount)
-      }
-      if (this.cart) {
-        let discountCodes = this.cart.discountCodes.filter(
-          (i) => i.applicable === true
-        )
-        if (discountCodes.length > 0) {
-          discountAmount = cartAmount - chargeAmount
-        } else if (chargeAmount !== cartAmount) {
-          discountAmount = cartAmount - chargeAmount
-        }
-      }
+    // totalAmount() {
+    //   let cartAmount = 0
+    //   let taxAmount = 0
+    //   let shippingAmount = 0
+    //   let totalAmount = 0
+    //   let formatted = 0
+    //   let chargeAmount = 0
+    //   let discountAmount = 0
 
-      totalAmount = cartAmount + shippingAmount
-      formatted = this.$utils.formatPrice(totalAmount)
+    //   if (this.cart && this.cart.cost && this.cart.cost.totalAmount) {
+    //     if (theme().type === "commerce" && useCommerceStore().allowTax) {
+    //       cartAmount = parseFloat(this.cart.cost.totalAmount.amount)
+    //     } else {
+    //       cartAmount = parseFloat(this.cart.cost.subtotalAmount.amount)
+    //     }
+    //   }
+    //   if (this.shippingLine) {
+    //     shippingAmount = parseFloat(this.shippingLine.price)
+    //   }
+    //   if (this.cart && this.cart.cost && this.cart.cost.checkoutChargeAmount) {
+    //     chargeAmount = parseFloat(this.cart.cost.checkoutChargeAmount.amount)
+    //   }
+    //   // if (this.cart) {
+    //   //   let discountCodes = this.cart.discountCodes.filter(
+    //   //     (i) => i.applicable === true
+    //   //   )
+    //   //   if (discountCodes.length > 0) {
+    //   //     discountAmount = cartAmount - chargeAmount
+    //   //   } else if (chargeAmount !== cartAmount) {
+    //   //     discountAmount = cartAmount - chargeAmount
+    //   //   }
+    //   // }
 
-      let finalAmount = {
-        cart: cartAmount,
-        tax: taxAmount,
-        shipping: shippingAmount,
-        total: totalAmount,
-        discount: discountAmount,
-        charge: chargeAmount,
-        formatted: formatted,
-      }
+    //   totalAmount = cartAmount + shippingAmount
+    //   formatted = this.$utils.formatPrice(totalAmount)
 
-      // console.log("Total Amount ::: ", finalAmount)
+    //   let finalAmount = {
+    //     cart: cartAmount,
+    //     tax: taxAmount,
+    //     shipping: shippingAmount,
+    //     total: totalAmount,
+    //     discount: discountAmount,
+    //     charge: chargeAmount,
+    //     formatted: formatted,
+    //   }
 
-      return finalAmount
-    },
+    //   // console.log("Total Amount ::: ", finalAmount)
+
+    //   return finalAmount
+    // },
 
     // Payment
     paymentOptions() {
@@ -335,13 +348,13 @@ export default {
     },
     orderForm() {
       return {
-        email: this.account.email,
-        phone: this.account.phone,
+        email: this.user.email,
+        phone: this.user.phone,
         lineItems: this.lineItems,
         shippingLine: this.shippingLine,
         shippingAddress: this.shippingAddress,
         presentmentCurrencyCode: "MNT",
-        discountCodes: this.discountCodes,
+        // discountCodes: this.discountCodes,
       }
     },
   },

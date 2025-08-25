@@ -139,9 +139,9 @@ export default {
   computed: {
     productCategoryHandle() {
       if (this.item) {
-        if (this.item.collections) {
-          if (this.item.collections.handle) {
-            return this.item.collections.handle
+        if (this.item.collections && this.item.collections.length) {
+          if (this.item.collections[0].collection_id.handle) {
+            return this.item.collections[0].collection_id.handle
           }
         }
       }

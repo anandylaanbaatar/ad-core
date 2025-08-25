@@ -8,12 +8,7 @@
         v-for="order in allOrders"
         :key="`order_item_${order.id}`"
         class="d-block px-3 relative c-link mb-2"
-        @click="
-          $bus.$emit(
-            'goTo',
-            `/orders/${order.id.replace('gid://shopify/Order/', '')}`
-          )
-        "
+        @click="$bus.$emit('goTo', `/orders/${order.id}`)"
       >
         <Tag v-if="order.cancelReason" severity="danger" class="mb-1">
           {{ $utils.t("Cancelled") }}
@@ -46,7 +41,7 @@
     <div v-else class="emptyArea">
       <div>
         <i class="pi pi-box"></i>
-        <h4>{{ $utils.t("No Orders Yet") }}</h4>
+        <p>{{ $utils.t("No Orders Yet") }}</p>
       </div>
     </div>
   </div>

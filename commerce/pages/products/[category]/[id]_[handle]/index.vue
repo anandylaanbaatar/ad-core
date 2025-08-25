@@ -67,10 +67,7 @@
           <!--Contents-->
           <div class="row">
             <!--Images Slider-->
-            <div
-              v-if="product.images.length > 1"
-              class="col-xs-12 col-md-4 mb-4"
-            >
+            <div v-if="productImages" class="col-xs-12 col-md-4 mb-4">
               <div class="c-product-images relative">
                 <SlidersProduct
                   class="c-product-detailed-slider"
@@ -84,7 +81,12 @@
                       v-tooltip.left="`Image Preview`"
                       icon="pi pi-external-link"
                       class="sm imagePreviewBtn"
-                      @click="$bus.$emit('imagePreviewGlobal', product.images)"
+                      @click="
+                        $bus.$emit('imagePreviewGlobal', {
+                          images: productImages,
+                          index: 0,
+                        })
+                      "
                     ></Button>
                   </div>
                 </div>
@@ -132,11 +134,24 @@
                 <!--Tags, Title & Description-->
                 <div class="mb-3">
                   <div class="mb-2 flex align-items-center">
-                    <Tag
-                      class="mr-2 c-link capitalize"
-                      @click="$bus.$emit('goTo', `/products/${category}/`)"
-                      >{{ $utils.t(category) }}</Tag
+                    <template
+                      v-if="product.collections && product.collections.length"
                     >
+                      <Tag
+                        v-for="collection in product.collections"
+                        severity="success"
+                        class="mr-2 c-link capitalize"
+                        @click="
+                          $bus.$emit(
+                            'goTo',
+                            `/products/${collection.collection_id.handle}/`
+                          )
+                        "
+                        >{{
+                          $utils.t(collection.collection_id.title.toLowerCase())
+                        }}</Tag
+                      >
+                    </template>
 
                     <template
                       v-for="tag in product.tags"
@@ -145,16 +160,16 @@
                       <Tag
                         v-if="tag === 'Available'"
                         severity="success"
-                        class="mr-2"
+                        class="mr-2 capitalize"
                         >{{ $utils.t(tag) }}</Tag
                       >
                       <Tag
                         v-else-if="tag === 'Sale'"
                         severity="danger"
-                        class="mr-2"
+                        class="mr-2 capitalize"
                         >{{ $utils.t(tag) }}</Tag
                       >
-                      <Tag v-else severity="info" class="mr-2">{{
+                      <Tag v-else severity="info" class="mr-2 capitalize">{{
                         $utils.t(tag)
                       }}</Tag>
 
@@ -391,6 +406,14 @@ export default {
       }
 
       return prices
+    },
+    productImages() {
+      if (this.product && this.product.images) {
+        if (this.product.images.length) {
+          return this.product.images.map((i) => i.files_id)
+        }
+      }
+      return
     },
   },
 

@@ -78,7 +78,6 @@
 
       <Button
         icon="pi pi-plus"
-        rounded
         severity="secondary"
         class="c-block-top-right sm mt-2 mr-3"
         @click="$bus.$emit('sidebarGlobal', { id: 'address' })"
@@ -140,12 +139,12 @@
           </p>
 
           <Button
-            link
-            :label="$utils.t('New Address')"
-            severity="contrast"
-            icon="pi pi-plus"
+            severity="secondary"
+            class="sm inline-flex align-items-center"
             @click="$bus.$emit('sidebarGlobal', { id: 'address' })"
-          ></Button>
+          >
+            {{ $utils.t("New Address") }}
+          </Button>
         </div>
       </div>
 
@@ -225,10 +224,6 @@ export default {
       type: Object,
       default: null,
     },
-    account: {
-      type: Object,
-      default: null,
-    },
   },
 
   data() {
@@ -238,13 +233,13 @@ export default {
   },
 
   computed: {
+    user() {
+      return useAuthStore().user
+    },
     allAddresses() {
-      if (this.account && this.account.addresses) {
-        if (
-          this.account.addresses.edges &&
-          this.account.addresses.edges.length > 0
-        ) {
-          let addressItems = this.account.addresses.edges.map((i) => {
+      if (this.user && this.user.addresses) {
+        if (this.user.addresses.edges && this.user.addresses.edges.length > 0) {
+          let addressItems = this.user.addresses.edges.map((i) => {
             let item = i.node
 
             if (item.address2) {
@@ -450,9 +445,9 @@ export default {
       }
     },
     checkAddress(address) {
-      if (this.account && this.account.defaultAddress) {
+      if (this.user && this.user.defaultAddress) {
         if (
-          this.account.defaultAddress.formatted.join(", ") ===
+          this.user.defaultAddress.formatted.join(", ") ===
           address.formatted.join(", ")
         ) {
           return true

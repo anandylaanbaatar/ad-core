@@ -2,7 +2,7 @@
   <Loader v-if="loading"></Loader>
 
   <template v-else>
-    <section v-if="account" class="mb-5">
+    <section v-if="user" class="mb-5">
       <h3 class="mb-3">{{ $utils.t("Account") }}</h3>
 
       <ul class="c-radio">
@@ -13,11 +13,13 @@
             <div class="row">
               <div class="col-xs-8">
                 <div>
-                  <h3>{{ account.firstName }} {{ account.lastName }}</h3>
-                  <p class="mt-1">
-                    <i class="pi pi-envelope"></i> {{ account.email }} |
-                    <i class="pi pi-phone"></i>
-                    {{ $utils.formatPhone(account.phone) }}
+                  <h3>{{ user.firstName }} {{ user.lastName }}</h3>
+                  <p v-if="user.email" class="mt-1 flex align-items-center">
+                    <i class="pi pi-envelope mr-2"></i> {{ user.email }}
+                    <template v-if="user.phone">
+                      <i class="pi pi-phone ml-3 mr-2"></i>
+                      {{ $utils.formatPhone(user.phone) }}
+                    </template>
                   </p>
                 </div>
               </div>
@@ -34,10 +36,9 @@
 
 <script>
 export default {
-  props: {
-    account: {
-      type: Object,
-      default: null,
+  computed: {
+    user() {
+      return useAuthStore().user
     },
   },
 
