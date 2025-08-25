@@ -186,7 +186,12 @@ export default defineNuxtPlugin((nuxtApp) => {
         ...params,
         fields: `
           *,
-          line_items.*
+          line_items.*,
+          line_items.product.*,
+          line_items.product.featured_image.*,
+          line_items.product_variant.*,
+          shipping_address.*,
+          billing_address.*
         `,
       },
     })
