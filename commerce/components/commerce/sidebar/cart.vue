@@ -1,10 +1,10 @@
 <template>
   <div
     class="sidebar cartSidebar overflow-y-auto"
-    :class="{ 'h-full': isEmpty }"
+    :class="{ 'h-full': cart.isEmpty }"
   >
     <!--Empty-->
-    <div v-if="isEmpty" class="emptyArea">
+    <div v-if="cart.isEmpty" class="emptyArea">
       <div>
         <i class="pi pi-shopping-cart"></i>
         <h4>{{ $utils.t("Cart is Empty") }}</h4>
@@ -29,12 +29,9 @@
       <div class="productsGrid row">
         <div class="productsGridScroll w-full">
           <ProductsCartItem
-            v-for="(item, index) in cart.items"
-            :product="item"
-            :cartLineId="item.uid"
-            :item="item.merchandise"
-            :quantity="item.quantity"
-            :key="`product_item_${index}`"
+            v-for="cartItem in cart.items"
+            :cartItem="cartItem"
+            :key="`product_cartItem_${cartItem.key}`"
           ></ProductsCartItem>
         </div>
       </div>
@@ -49,7 +46,7 @@
           <div class="col-xs-6">
             <div class="w-full text-right">
               <h4>
-                {{ $currency.format(cart.cost.checkoutChargeAmount.amount) }}
+                {{ $currency.format(cart.totals.subtotalAmount) }}
               </h4>
             </div>
           </div>
@@ -60,7 +57,7 @@
           <div class="col-xs-6">
             <div v-if="theme().type === 'commerce'" class="w-full text-right">
               <h4 v-if="useCommerceStore().allowTax">
-                {{ $currency.format(cart.cost.totalTaxAmount.amount) }}
+                {{ $currency.format(cart.totals.taxAmount) }}
               </h4>
               <h4 v-else>-</h4>
             </div>
@@ -75,14 +72,12 @@
             <div class="w-full text-right">
               <!-- <h4
                 v-if="
-                  cart.cost.checkoutChargeAmount.amount !==
-                  cart.cost.totalAmount.amount
+                  cart.totals.discountAmount
                 "
               >
-                -{{
+                {{
                   $currency.format(
-                    cart.cost.checkoutChargeAmount.amount -
-                      cart.cost.totalAmount.amount
+                    cart.totals.discountAmount
                   )
                 }}
               </h4> -->
@@ -96,21 +91,21 @@
           <div class="col-xs-6">
             <div v-if="theme().type === 'commerce'" class="w-full text-right">
               <h3 v-if="useCommerceStore().allowTax">
-                {{ $currency.format(cart.cost.totalAmount.amount) }}
+                {{ $currency.format(cart.totals.taxAmount) }}
               </h3>
               <h3 v-else>
-                {{ $currency.format(cart.cost.subtotalAmount.amount) }}
+                {{ $currency.format(cart.totals.totalAmount) }}
               </h3>
             </div>
           </div>
 
-          <div class="col-xs-12">
+          <div v-if="!isCheckoutPage" class="col-xs-12">
             <Button
               block
               large
               :label="$utils.t('Checkout')"
               class="w-full checkoutBtn"
-              @click="$bus.$emit('goTo', '/checkout/v2')"
+              @click="$bus.$emit('goTo', '/checkout')"
             ></Button>
           </div>
         </div>
@@ -130,48 +125,26 @@ export default {
 
   data() {
     return {
+      init: false,
       active: false,
     }
   },
 
   computed: {
     cart() {
-      return useCommerceStore().cart
-    },
-    cartTotalQuantity() {
-      if (this.cart && this.cart.totalQuantity) {
-        return this.cart.totalQuantity
-      }
-      return
-    },
-    header() {
-      let amount = ``
-
-      if (this.cartTotalQuantity) {
-        amount = ` (${this.cartTotalQuantity})`
-      }
-
-      return `${this.$utils.t("Cart")}${amount}`
-    },
-    isEmpty() {
-      if (this.cart) {
-        if (this.cart.items && this.cart.items.length > 0) {
-          return false
-        }
-      }
-      return true
-    },
-    isShopify() {
-      if (features().auth.connect) {
-        return features().auth.connect.shopify
+      return {
+        cart: useCommerceStore().cart,
+        items: useCommerceStore().cartItems,
+        isEmpty: useCommerceStore().cart.length === 0 ? true : false,
+        totals: useCommerceStore().cartTotals,
       }
     },
-  },
-
-  async mounted() {
-    if (this.isShopify) {
-      await useGetCartItems()
-    }
+    isCheckoutPage() {
+      if (this.$route.path.includes("checkout")) {
+        return true
+      }
+      return false
+    },
   },
 }
 </script>

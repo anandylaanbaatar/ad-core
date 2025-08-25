@@ -11,6 +11,7 @@ export default defineNuxtPlugin(() => {
     }
     if (!useRuntimeConfig().public.features.algolia) {
       console.log("[Plugins] ::: [Algolia] ::: Missing Index ID")
+      return
     }
     if (!APP_ID_.value) {
       console.log("[Plugins] ::: [Algolia] ::: Missing APP ID!")
@@ -38,7 +39,6 @@ export default defineNuxtPlugin(() => {
    * Channels
    */
 
-  // Filters and Categories
   const channelFilters = () => {
     return new Promise(async (resolve, reject) => {
       try {
@@ -64,43 +64,6 @@ export default defineNuxtPlugin(() => {
       } catch (err) {
         reject(err)
       }
-    })
-  }
-
-  // Search
-  const search = async (filters) => {
-    return new Promise((resolve) => {
-      let limit = filters.limit || 30
-      let query = filters.query || ""
-      let options = {
-        page: filters.page,
-        hitsPerPage: limit,
-      }
-
-      if (filters.options) {
-        options.filters = ""
-        options.filters += `(`
-
-        for (const key in filters.options) {
-          let option = filters.options[key]
-          if (options.filters.length > 1) options.filters += ` AND `
-          options.filters += `${key}:${option}`
-        }
-
-        options.filters += `)`
-      }
-
-      // console.log("[Algolia] ::: Search :: ", options)
-
-      mainIndex
-        .search(query, options)
-        .then((res) => {
-          resolve(res)
-        })
-        .catch((err) => {
-          console.log("[Algolia] ::: Error :: ", err.message)
-          resolve(null)
-        })
     })
   }
   const searchChannels = async (filters) => {
@@ -148,6 +111,67 @@ export default defineNuxtPlugin(() => {
         })
         .catch((err) => {
           reject(err)
+        })
+    })
+  }
+
+  // Search
+  const search = async (filters) => {
+    return new Promise((resolve) => {
+      let limit = filters.limit || 30
+      let query = filters.query || ""
+      let options = {
+        page: filters.page,
+        hitsPerPage: limit,
+      }
+
+      if (filters.options) {
+        options.filters = ""
+        options.filters += `(`
+
+        for (const key in filters.options) {
+          let option = filters.options[key]
+          if (options.filters.length > 1) options.filters += ` AND `
+          options.filters += `${key}:${option}`
+        }
+
+        options.filters += `)`
+      }
+
+      mainIndex
+        .search(query, options)
+        .then((res) => {
+          resolve(res)
+        })
+        .catch((err) => {
+          console.log("[Algolia] ::: Error :: ", err.message)
+          resolve(null)
+        })
+    })
+  }
+  const getSingle = async (objectID) => {
+    return new Promise(async (resolve) => {
+      mainIndex
+        .getObject(objectID)
+        .then((res) => {
+          resolve(res)
+        })
+        .catch((err) => {
+          console.log("[Algolia] ::: Get Object ::: Error :: ", err.message)
+          resolve(null)
+        })
+    })
+  }
+  const getMultiple = async (ids) => {
+    return new Promise(async (resolve) => {
+      mainIndex
+        .getObjects(ids)
+        .then((res) => {
+          resolve(res)
+        })
+        .catch((err) => {
+          console.log("[Algolia] ::: Get Objects ::: Error ::", err.message)
+          resolve(null)
         })
     })
   }
@@ -234,6 +258,8 @@ export default defineNuxtPlugin(() => {
 
         // Search
         search,
+        getSingle,
+        getMultiple,
 
         // Indexing
         saveObject,

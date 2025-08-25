@@ -61,7 +61,7 @@
         <label for="phone">{{ $utils.t("Phone") }}</label>
 
         <InputGroup>
-          <InputGroupAddon class="c-phoneDropdown-wrapper">
+          <InputGroupAddon class="c-phoneDropdown-wrapper p-0">
             <Select
               v-model="formOptional.selectedCountry"
               :options="allCountries"
@@ -197,8 +197,8 @@
     </template>
 
     <!--Terms-->
-    <div class="c-field col-xs-12 mb-4">
-      <p class="text-xs">
+    <div v-if="useCoreStore().language === 'en'" class="c-field col-xs-12 mb-4">
+      <p class="text-xs opacity-60">
         By continuing, you agree and confirm you’ve read the
         <strong @click="$bus.$emit('goTo', '/terms_of_service')" class="c-link"
           >Terms and Conditions</strong
@@ -207,6 +207,22 @@
         <strong @click="$bus.$emit('goTo', '/privacy_policy')" class="c-link"
           >Privacy Policy</strong
         >.
+      </p>
+    </div>
+    <div
+      v-else-if="useCoreStore().language === 'mn'"
+      class="c-field col-xs-12 mb-4"
+    >
+      <p class="text-xs opacity-60">
+        Та нэвтрэх үйлдэл хийснээр манай
+        <strong @click="$bus.$emit('goTo', '/terms_of_service')" class="c-link"
+          >Үйлчилгээний нөхцөл</strong
+        >
+        болон
+        <strong @click="$bus.$emit('goTo', '/privacy_policy')" class="c-link"
+          >“Нууцлалын бодлого</strong
+        >
+        -г зөвшөөрч байна гэж үзнэ.
       </p>
     </div>
 

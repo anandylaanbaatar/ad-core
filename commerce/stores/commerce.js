@@ -1,4 +1,3 @@
-// import moment from "moment"
 import { defineStore } from "pinia"
 
 export const useCommerceStore = defineStore("commerce", {
@@ -13,14 +12,14 @@ export const useCommerceStore = defineStore("commerce", {
 
     // Cart
     initCart: null,
-    cart: null,
-    cartBadge: "0",
+    cart: [],
+    cartItems: [],
+
+    // Orders
+    orderNumber: null,
 
     // Saved Items
     savedItems: [],
-
-    // Products
-    productsCount: 0,
 
     // Collections
     collections: null,
@@ -29,22 +28,58 @@ export const useCommerceStore = defineStore("commerce", {
 
     allowTax:
       theme().type === "commerce"
-        ? useAppConfig().theme.commerce.allowTax
+        ? useAppConfig().theme.commerce?.allowTax
         : null,
 
     // Location
     locations: null,
     selectedLocation:
       theme().type === "commerce"
-        ? useAppConfig().theme.commerce.location
+        ? useAppConfig().theme.commerce?.location
         : null,
 
     // Shipping
     shippingLines:
       theme().type === "commerce"
-        ? useAppConfig().theme.commerce.shippingLines
+        ? useAppConfig().theme.commerce?.shippingLines
         : null,
   }),
+
+  getters: {
+    cartTotalItems(state) {
+      return state.cart.reduce((sum, item) => sum + item.qty, 0)
+    },
+    cartTotalPrice(state) {
+      return state.cart.reduce((sum, item) => sum + item.price * item.qty, 0)
+    },
+    cartTotals(state) {
+      let totals = {
+        itemsTotal: state.cartTotalItems,
+        taxAmount: 0,
+        discountAmount: 0,
+        shippingAmount: 0,
+        subtotalAmount: 0,
+        totalAmount: 0,
+      }
+
+      if (state.cartItems.length) {
+        for (let i = 0; i < state.cartItems.length; i++) {
+          const cartItem = state.cartItems[i]
+
+          // SubTotal
+          if (cartItem.variant && cartItem.variant.price) {
+            totals.subtotalAmount += cartItem.qty * cartItem.variant.price
+          } else if (cartItem.product && cartItem.product.price) {
+            totals.subtotalAmount += cartItem.qty * cartItem.product.price
+          }
+        }
+      }
+
+      totals.totalAmount = totals.subtotalAmount
+
+      return totals
+    },
+  },
 
   actions: {
     set(key, data) {
@@ -142,77 +177,259 @@ export const useCommerceStore = defineStore("commerce", {
     async setCollections() {
       const appConfig = useRuntimeConfig()
 
-      if (!appConfig.public.integrations.shopify) {
+      if (!appConfig.public.features.multitenancy.tenantId) {
         return
       }
 
       const nuxtApp = useNuxtApp()
 
-      const allCollections = await nuxtApp.$shopify.collections({
-        limit: 150,
+      const allCollections = await nuxtApp.$directus.collection.list({
+        tenantId: appConfig.public.features.multitenancy.tenantId,
       })
 
-      // Collections Count
-      const collectionsCount = await nuxtApp.$shopify.collectionsCount()
-      if (collectionsCount) {
-        this.collectionsCount = collectionsCount
-      }
+      // console.log("Collections ::: ", allCollections)
 
-      // Products Count
-      const productsCount = await nuxtApp.$shopify.productsCount()
+      if (allCollections?.success && allCollections?.data) {
+        const allStoreCollections = allCollections.data
 
-      if (productsCount) {
-        this.productsCount = productsCount
-      }
+        // .map((i) => {
+        //   let newCollection = i
+        //   const level = i.sub_collections ? "Level-2" : "Level-1"
 
-      if (allCollections) {
-        const allStoreCollections = allCollections.map((i) => {
-          let newCollection = i
+        //   newCollection.level = {
+        //     id: i.id,
+        //     code: level,
+        //     title: i.title,
+        //   }
 
-          // Advanced Collections
-          if (newCollection.title.includes("|")) {
-            this.advancedCollections = true
-            let titleItems = newCollection.title.split("|")
-
-            newCollection.level = {
-              id: titleItems[0].trim().toLowerCase(),
-              code: titleItems[1].trim(),
-              title: titleItems[2].trim(),
-            }
-            newCollection.title = titleItems[2].trim()
-          }
-          return newCollection
-        })
-
-        if (this.advancedCollections) {
-          // Sort by Code
-          allStoreCollections = allStoreCollections.sort((a, b) => {
-            return parseInt(a.level.code) - parseInt(b.level.code)
-          })
-
-          // Move all other collections to the end
-          let allOtherCollections = allStoreCollections.filter((i) => {
-            if (parseInt(i.level.code) < 1000) {
-              return i
-            }
-          })
-          if (allOtherCollections.length > 0) {
-            let mainCollections = allStoreCollections.filter((i) => {
-              if (parseInt(i.level.code) > 999) {
-                return i
-              }
-            })
-            allStoreCollections = [...mainCollections, ...allOtherCollections]
-          }
-        }
+        //   return newCollection
+        // })
 
         this.collections = allStoreCollections
-      } else {
-        console.log("[Store] ::: Locations :: Error getting collections!")
       }
     },
 
+    // Cart
+    loadCartFromStorage() {
+      if (import.meta.client) {
+        const tenantId =
+          useRuntimeConfig().public.features.multitenancy.tenantId
+        const stored = localStorage.getItem(`${tenantId}_cart`)
+
+        if (stored) {
+          this.cart = JSON.parse(stored)
+        } else {
+          this.saveCartToStorage()
+        }
+      }
+    },
+    saveCartToStorage() {
+      if (import.meta.client) {
+        const tenantId =
+          useRuntimeConfig().public.features.multitenancy.tenantId
+        localStorage.setItem(`${tenantId}_cart`, JSON.stringify(this.cart))
+      }
+    },
+    async setCartItems() {
+      this.loadCartFromStorage()
+
+      const cart = this.cart
+      const cartIds = cart.map((i) => i.id)
+      const nuxtApp = useNuxtApp()
+      let productsRes = null
+      let products = []
+      let cartItems = []
+
+      if (cartIds.length) {
+        productsRes = await nuxtApp.$algolia.getMultiple(cartIds)
+      }
+      if (productsRes && productsRes.results) {
+        for (let i = 0; i < productsRes.results.length; i++) {
+          const item = productsRes.results[i]
+
+          if (item) {
+            products.push(item)
+          }
+        }
+      }
+      if (products.length) {
+        for (let i = 0; i < cart.length; i++) {
+          const cartItem = cart[i]
+          const product = products.find((j) => j.id === cartItem.id)
+
+          let data = {
+            ...cartItem,
+          }
+          if (product) {
+            data.product = product
+
+            if (cartItem.variantSku && product.variants) {
+              const variant = product.variants.find(
+                (j) => j.sku === cartItem.variantSku
+              )
+
+              if (variant) {
+                data.variant = variant
+              }
+            }
+          }
+
+          cartItems.push(data)
+        }
+      }
+      if (!cartItems.length) {
+        this.clearCart()
+      }
+
+      this.cartItems = cartItems
+    },
+    async addToCart(item) {
+      const productId = item.id
+      const qty = item.qty ?? 1
+      const variantSku = item.variantSku ?? null
+      const merge = item.merge ?? true
+      const key = variantSku ? `${productId}-${variantSku}` : `${productId}`
+
+      const existingIndex = this.cart.findIndex((i) => i.key === key)
+
+      if (existingIndex > -1) {
+        if (merge) {
+          this.cart[existingIndex].qty += qty
+        } else {
+          this.cart.push({ id: productId, qty, variantSku, key })
+        }
+      } else {
+        this.cart.push({ id: productId, qty, variantSku, key })
+      }
+
+      this.saveCartToStorage()
+      await this.setCartItems()
+
+      useNuxtApp().$bus.$emit("toast", {
+        severity: "success",
+        summary: useNuxtApp().$utils.t("Cart"),
+        detail: useNuxtApp().$utils.t("Successfully added item to cart."),
+      })
+    },
+    async removeFromCart(key) {
+      this.cart = this.cart.filter((i) => i.key !== key)
+
+      this.saveCartToStorage()
+      await this.setCartItems()
+
+      useNuxtApp().$bus.$emit("toast", {
+        severity: "success",
+        summary: useNuxtApp().$utils.t("Cart"),
+        detail: useNuxtApp().$utils.t("Successfully removed item from cart."),
+      })
+    },
+    async updateQuantity(key, qty) {
+      const index = this.cart.findIndex((i) => i.key === key)
+
+      if (index > -1) {
+        if (qty <= 0) {
+          this.removeFromCart(key)
+        } else {
+          this.cart[index].qty = qty
+        }
+      }
+
+      this.saveCartToStorage()
+      await this.setCartItems()
+    },
+    async clearCart() {
+      this.cart = []
+      this.saveCartToStorage()
+      await this.setCartItems()
+    },
+
+    // Orders
+    async setOrderNumber() {
+      const storeId = theme().storeId
+      if (!storeId) return
+
+      const orderNumber = await useNuxtApp().$fire.actions.read(
+        `adcommerce/stores/${storeId}/orderNumber`
+      )
+
+      this.orderNumber = orderNumber
+    },
+
+    // async setCollections() {
+    //   const appConfig = useRuntimeConfig()
+
+    //   if (!appConfig.public.integrations.shopify) {
+    //     return
+    //   }
+
+    //   const nuxtApp = useNuxtApp()
+
+    //   const allCollections = await nuxtApp.$shopify.collections({
+    //     limit: 150,
+    //   })
+
+    //   // Collections Count
+    //   const collectionsCount = await nuxtApp.$shopify.collectionsCount()
+    //   if (collectionsCount) {
+    //     this.collectionsCount = collectionsCount
+    //   }
+
+    //   // Products Count
+    //   const productsCount = await nuxtApp.$shopify.productsCount()
+
+    //   if (productsCount) {
+    //     this.productsCount = productsCount
+    //   }
+
+    //   if (allCollections && allCollections.items) {
+    //     let allStoreCollections = allCollections.items.map((i) => {
+    //       let newCollection = i
+
+    //       // Advanced Collections
+    //       if (newCollection.title.includes("|")) {
+    //         this.advancedCollections = true
+    //         let titleItems = newCollection.title.split("|")
+
+    //         newCollection.level = {
+    //           id: titleItems[0].trim().toLowerCase(),
+    //           code: titleItems[1].trim(),
+    //           title: titleItems[2].trim(),
+    //         }
+    //         newCollection.title = titleItems[2].trim()
+    //       }
+    //       return newCollection
+    //     })
+
+    //     if (this.advancedCollections) {
+    //       // Sort by Code
+    //       allStoreCollections = allStoreCollections.sort((a, b) => {
+    //         return parseInt(a.level.code) - parseInt(b.level.code)
+    //       })
+
+    //       // Move all other collections to the end
+    //       let allOtherCollections = allStoreCollections.filter((i) => {
+    //         if (parseInt(i.level.code) < 1000) {
+    //           return i
+    //         }
+    //       })
+    //       if (allOtherCollections.length > 0) {
+    //         let mainCollections = allStoreCollections.filter((i) => {
+    //           if (parseInt(i.level.code) > 999) {
+    //             return i
+    //           }
+    //         })
+    //         allStoreCollections = [...mainCollections, ...allOtherCollections]
+    //       }
+    //     }
+
+    //     this.collections = allStoreCollections
+    //   } else {
+    //     console.log("[Store] ::: Locations :: Error getting collections!")
+    //   }
+    // },
+
     // Saved Items
+
     setSavedItems(savedItems) {
       if (savedItems) {
         this.savedItems = savedItems
@@ -226,8 +443,6 @@ export const useCommerceStore = defineStore("commerce", {
       } else {
         this.savedItems = []
       }
-
-      // console.log("[Store] ::: Saved Items :: ", this.savedItems)
     },
   },
 })

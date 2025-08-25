@@ -58,9 +58,9 @@ export default {
     },
     productCategoryHandle() {
       if (this.item) {
-        if (this.item.category) {
-          if (this.item.category.handle) {
-            return this.item.category.handle
+        if (this.item.collections && this.item.collections.length) {
+          if (this.item.collections[0].collection_id.handle) {
+            return this.item.collections[0].collection_id.handle
           }
         }
       }
@@ -70,23 +70,48 @@ export default {
       return `/products/${this.productCategoryHandle}/${this.item.id}_${this.item.handle}`
     },
     itemImages() {
-      return this.item.images.map((image) => {
-        let newItem = image
-        let pathUrl = this.productUrl
+      const images = this.item.images.map((image) => {
+        let newItem = {
+          id: image.files_id.id,
+          file_id: image.files_id.file_id,
+          url: image.files_id.url,
+          pathUrl: this.productUrl,
+        }
 
-        if (this.item.variants) {
-          let variants = this.item.variants.filter(
-            (variant) => variant.image.id === image.uid
-          )
+        if (this.item.variants && this.item.variants.length) {
+          let variants = this.item.variants.filter((variant) => {
+            if (variant.image) {
+              if (variant.image.id === image.id) {
+                return variant
+              }
+            }
+          })
           if (variants && variants.length > 0) {
-            pathUrl += `?variant=${variants[0].id}`
+            newItem.pathUrl += `?variant=${variants[0].sku}`
           }
         }
 
-        newItem.pathUrl = pathUrl
-
         return newItem
       })
+
+      if (this.item.variants && this.item.variants.length) {
+        for (let i = 0; i < this.item.variants.length; i++) {
+          const variant = this.item.variants[i]
+
+          if (variant.image) {
+            if (!images.find((j) => j.id === variant.image.id)) {
+              images.push({
+                file_id: variant.image.file_id,
+                id: variant.image.id,
+                url: variant.image.url,
+                pathUrl: `${this.productUrl}?variant=${variant.sku}`,
+              })
+            }
+          }
+        }
+      }
+
+      return images
     },
   },
 

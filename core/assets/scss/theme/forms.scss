@@ -101,6 +101,12 @@
   }
 }
 
+.p-component {
+  &::placeholder {
+    font-size: 12px;
+  }
+}
+
 /*
 * Select
 */
@@ -311,12 +317,19 @@ div.p-inputgroup {
     background: rgba(0, 0, 0, 0.08);
     padding: 10px;
     min-width: auto;
-    border-radius: 10px;
+    border-radius: 8px;
     border-block-end: none;
     border-block-start: none;
     border: 1px solid transparent;
     color: $black;
     opacity: 0.6;
+
+    .addonShortcut {
+      height: 10px;
+      display: flex;
+      align-items: center;
+      font-size: 12px;
+    }
   }
 }
 .my-app-dark {
@@ -336,6 +349,16 @@ div.p-inputgroup {
     }
     &.p-invalid {
       border: 1px solid $red-600;
+    }
+    &.inlineEdit {
+      background: transparent;
+      border: 0;
+      border-radius: 0;
+      padding: 0;
+
+      &:enabled:focus {
+        border: 0;
+      }
     }
   }
   div.p-inputgroup {

@@ -102,7 +102,11 @@ export default {
     return {
       loading: true,
       moreLoading: false,
-      pageInfo: null,
+      page: 0,
+      pageInfo: {
+        hasNextPage: false,
+        total: 0,
+      },
       products: null,
     }
   },
@@ -118,17 +122,23 @@ export default {
 
       return grid
     },
+    collections() {
+      return useCommerceStore().collections
+    },
+    tenantId() {
+      return useRuntimeConfig().public.features.multitenancy.tenantId
+    },
   },
 
   watch: {
     products() {
       let productCount = this.products !== null ? this.products.length : 0
-      this.$emit("updateProducts", productCount)
+      this.$emit("updateProducts", `${productCount} - ${this.pageInfo.total}`)
     },
   },
 
-  async created() {
-    if (useRuntimeConfig().public.integrations.shopify) {
+  async mounted() {
+    if (useRuntimeConfig().public.integrations.algolia) {
       await this.getProducts()
     } else {
       this.loading = false
@@ -142,53 +152,58 @@ export default {
       } else {
         this.loading = true
       }
-      let cursor = null
 
-      // Pagination
-      if (this.pageInfo) {
-        if (this.pageInfo.hasNextPage) {
-          if (this.pageInfo.endCursor) {
-            cursor = this.pageInfo.endCursor
+      let options = {
+        limit: this.limit,
+        page: this.page,
+        options: {
+          tenant_id: this.tenantId,
+          status: "published",
+        },
+      }
+
+      // Collection Filter
+      if (this.category && this.collections) {
+        const collection = this.collections.find(
+          (i) => i.handle === this.category
+        )
+        if (collection) {
+          options.options["collections.collection_id.id"] = collection.id
+        }
+      }
+
+      const products = await this.$algolia.search(options)
+
+      if (products?.hits?.length > 0) {
+        if (isViewMore) {
+          this.products = this.products.concat(products.hits)
+        } else {
+          this.products = products.hits
+        }
+      }
+      if (products) {
+        if (products.page + 1 < products.nbPages) {
+          this.pageInfo = {
+            hasNextPage: true,
+            total: products.nbHits,
+          }
+          this.page += 1
+        } else {
+          this.pageInfo = {
+            hasNextPage: false,
+            total: products.nbHits,
           }
         }
       }
 
-      // Options
-      let options = {
-        limit: this.limit,
-        cursor: cursor,
-        category: this.category ? this.category : "all",
-        sort: "CREATED_AT",
-      }
+      console.log(
+        "Products ::: ",
+        this.filters,
+        this.category,
+        options,
+        products
+      )
 
-      // Filters
-      if (this.filters) {
-        if (this.filters.query) {
-          options.query = this.filters.query
-        }
-        if (this.filters.ids) {
-          options.ids = this.filters.ids
-        }
-        if (this.filters.sort) {
-          options.sort = this.filters.sort
-        }
-      }
-
-      const products = await this.$shopify.productsV2(options)
-
-      this.pageInfo = products.meta
-
-      if (this.products === null) {
-        if (this.exclude) {
-          this.products = products.items.filter(
-            (item) => item.id !== this.exclude
-          )
-        } else {
-          this.products = products.items
-        }
-      } else {
-        this.products = this.products.concat(products.items)
-      }
       if (isViewMore) {
         this.moreLoading = false
       } else {

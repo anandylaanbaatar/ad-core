@@ -67,10 +67,7 @@
           <!--Contents-->
           <div class="row">
             <!--Images Slider-->
-            <div
-              v-if="product.images.length > 1"
-              class="col-xs-12 col-md-4 mb-4"
-            >
+            <div v-if="productImages" class="col-xs-12 col-md-4 mb-4">
               <div class="c-product-images relative">
                 <SlidersProduct
                   class="c-product-detailed-slider"
@@ -84,7 +81,12 @@
                       v-tooltip.left="`Image Preview`"
                       icon="pi pi-external-link"
                       class="sm imagePreviewBtn"
-                      @click="$bus.$emit('imagePreviewGlobal', product.images)"
+                      @click="
+                        $bus.$emit('imagePreviewGlobal', {
+                          images: productImages,
+                          index: 0,
+                        })
+                      "
                     ></Button>
                   </div>
                 </div>
@@ -93,13 +95,13 @@
 
             <!--Single Image-->
             <div
-              v-else-if="product.featuredImage"
+              v-else-if="product.featured_image"
               class="col-xs-12 col-md-8 mb-4"
             >
               <div class="c-product-images">
                 <div
                   class="c-block c-image size-xl"
-                  :style="$utils.setBackImage(product.featuredImage.url)"
+                  :style="$utils.setBackImage(product.featured_image.url)"
                 ></div>
               </div>
             </div>
@@ -132,11 +134,24 @@
                 <!--Tags, Title & Description-->
                 <div class="mb-3">
                   <div class="mb-2 flex align-items-center">
-                    <Tag
-                      class="mr-2 c-link capitalize"
-                      @click="$bus.$emit('goTo', `/products/${category}/`)"
-                      >{{ $utils.t(category) }}</Tag
+                    <template
+                      v-if="product.collections && product.collections.length"
                     >
+                      <Tag
+                        v-for="collection in product.collections"
+                        severity="success"
+                        class="mr-2 c-link capitalize"
+                        @click="
+                          $bus.$emit(
+                            'goTo',
+                            `/products/${collection.collection_id.handle}/`
+                          )
+                        "
+                        >{{
+                          $utils.t(collection.collection_id.title.toLowerCase())
+                        }}</Tag
+                      >
+                    </template>
 
                     <template
                       v-for="tag in product.tags"
@@ -145,16 +160,16 @@
                       <Tag
                         v-if="tag === 'Available'"
                         severity="success"
-                        class="mr-2"
+                        class="mr-2 capitalize"
                         >{{ $utils.t(tag) }}</Tag
                       >
                       <Tag
                         v-else-if="tag === 'Sale'"
                         severity="danger"
-                        class="mr-2"
+                        class="mr-2 capitalize"
                         >{{ $utils.t(tag) }}</Tag
                       >
-                      <Tag v-else severity="info" class="mr-2">{{
+                      <Tag v-else severity="info" class="mr-2 capitalize">{{
                         $utils.t(tag)
                       }}</Tag>
 
@@ -175,18 +190,17 @@
 
                   <h1 class="mb-2">{{ product.title }}</h1>
 
-                  <p
+                  <div
                     class="font1 text-surface-500 dark:text-surface-400 text-sm mb-3"
-                  >
-                    {{ product.description }}
-                  </p>
+                    v-html="product.description"
+                  ></div>
 
                   <h3 class="font3 ml-auto">
                     {{ productPrice.priceFormatted }}
 
                     <span
                       v-if="productPrice.compare"
-                      class="text-black-alpha-40 line-through ml-2"
+                      class="ml-2 line-through opacity-60"
                       >{{ productPrice.compareFormatted }}</span
                     >
                   </h3>
@@ -201,20 +215,23 @@
                       :key="`product_item_variant_${variant.id}`"
                       class="c-size"
                       :class="{
-                        active: select.variantId === variant.uid,
-                        notAvailable: variant.quantityAvailable === 0,
+                        active: select.variantSku === variant.sku,
+                        notAvailable: variant.inventory_available === 0,
                       }"
                       @click="selectVariant(variant)"
                     >
-                      {{ variant.title.toUpperCase() }}
+                      {{ variant.sku.toUpperCase() }}
                     </li>
                   </ul>
                 </div>
 
                 <!--Availability-->
-                <div v-if="select.variant" class="row w-full mt-2 mb-4">
+                <div
+                  v-if="select && select.variant"
+                  class="row w-full mt-2 mb-4"
+                >
                   <Message
-                    v-if="select.variant.quantityAvailable > 0"
+                    v-if="select.variant.inventory_available > 0"
                     severity="success"
                     class="c-message w-full"
                     :closable="false"
@@ -223,12 +240,12 @@
                       <i class="pi pi-exclamation-triangle"></i>
                     </template>
                     <span class="w-full"
-                      >{{ select.variant.quantityAvailable }}
+                      >{{ select.variant.inventory_available }}
                       {{ $utils.t("Available In Stock") }}</span
                     >
                   </Message>
                   <Message
-                    v-else-if="select.variant.quantityAvailable === 0"
+                    v-else-if="select.variant.inventory_available === 0"
                     severity="error"
                     class="c-message w-full"
                     :closable="false"
@@ -242,13 +259,25 @@
 
                 <!--Add to Cart-->
                 <Button
-                  v-if="select.variant.quantityAvailable > 0"
+                  v-if="
+                    select &&
+                    select.variant &&
+                    select.variant.inventory_available > 0
+                  "
                   :label="$utils.t('Add To Cart')"
                   icon="pi pi-shopping-cart"
                   iconPos="right"
                   class="w-full"
                   @click="addToCart"
                 ></Button>
+                <!-- <Button
+                  v-else
+                  :label="$utils.t('Add To Cart')"
+                  icon="pi pi-shopping-cart"
+                  iconPos="right"
+                  class="w-full"
+                  @click="addToCart('single')"
+                ></Button> -->
 
                 <div class="c-divider md"></div>
 
@@ -277,23 +306,13 @@
 
         <!--Similar Products-->
         <div v-if="category" class="mt-6">
-          <!-- <h3 class="mb-5 text-center">{{ $utils.t("Similar Products") }}</h3>
-        <ProductsGrid
-          :key="`products_grid_0`"
-          layout="grid"
-          :category="category"
-          :viewMore="true"
-          :limit="5"
-          :exclude="id"
-        ></ProductsGrid> -->
-
           <ScrollSimilarProducts
             :key="`products_grid_0`"
             layout="grid"
             :hasPadding="true"
             :category="category"
             :viewMore="true"
-            :limit="25"
+            :limit="15"
             :exclude="id"
           ></ScrollSimilarProducts>
         </div>
@@ -316,7 +335,7 @@ export default {
 
       select: {
         amount: 1,
-        variantId: null,
+        variantSku: null,
         variant: null,
       },
 
@@ -336,13 +355,12 @@ export default {
       return false
     },
     featuredImage() {
-      if (this.product.images.length > 1) {
-        if (this.product.variants.length === 1) {
-          return this.product.images[1].url
-        } else {
-          return this.select.variant.image.url
+      if (this.product) {
+        if (this.product.featured_image) {
+          return this.product.featured_image.url
         }
       }
+      return
     },
     productPrice() {
       let prices = {
@@ -357,16 +375,29 @@ export default {
           prices.price = this.product.price
           prices.priceFormatted = this.$currency.format(this.product.price)
 
-          if (this.select.variantId && this.product.variants.length > 0) {
+          if (this.product.compare_price) {
+            prices.compare = this.product.compare_price
+            prices.compareFormatted = this.$currency.format(
+              this.product.compare_price
+            )
+          }
+
+          if (this.select.variantSku && this.product.variants.length > 0) {
             let variant = this.product.variants.find(
-              (i) => i.uid === this.select.variantId
+              (i) => i.sku === this.select.variantSku
             )
 
-            if (variant && variant.compareAtPrice) {
-              prices.compare = variant.compareAtPrice.amount
-              prices.compareFormatted = this.$currency.format(
-                variant.compareAtPrice.amount
-              )
+            if (variant) {
+              if (variant.price) {
+                prices.price = variant.price
+                prices.priceFormatted = this.$currency.format(variant.price)
+              }
+              if (variant.compare_price) {
+                prices.compare = variant.compare_price
+                prices.compareFormatted = this.$currency.format(
+                  variant.compare_price
+                )
+              }
             }
           }
         }
@@ -374,9 +405,17 @@ export default {
 
       return prices
     },
+    productImages() {
+      if (this.product && this.product.images) {
+        if (this.product.images.length) {
+          return this.product.images.map((i) => i.files_id)
+        }
+      }
+      return
+    },
   },
 
-  async created() {
+  async mounted() {
     this.loading = true
 
     const id = useRoute().params.id
@@ -385,9 +424,9 @@ export default {
     this.id = id
     this.category = category
 
-    const productData = await this.$shopify.product({
-      productId: id,
-    })
+    const productData = await this.$algolia.getSingle(id)
+
+    console.log("Product ::: ", productData)
 
     if (productData) {
       this.product = productData
@@ -397,7 +436,7 @@ export default {
         if (this.$route.query.variant) {
           this.selectVariant(
             this.product.variants.find(
-              (variant) => variant.id === this.$route.query.variant
+              (variant) => variant.sku === this.$route.query.variant
             )
           )
         } else {
@@ -416,22 +455,30 @@ export default {
   methods: {
     async selectVariant(variant, isDefault) {
       this.select.variant = variant
-      this.select.variantId = variant.uid
+      this.select.variantSku = variant.sku
 
       if (!isDefault) {
         this.$router.push({
           path: this.$route.path,
           query: {
-            variant: variant.id,
+            variant: variant.sku,
           },
         })
       }
     },
-    async addToCart() {
-      useAddToCart({
-        variantId: this.select.variantId,
-        amount: this.select.amount,
-      })
+    addToCart(type) {
+      let options = {
+        id: this.product.id,
+        variantSku: null,
+        qty: 1,
+        merge: true,
+      }
+      if (type !== "single") {
+        options.variantSku = this.select.variantSku
+        options.qty = this.select.amount
+      }
+
+      useCommerceStore().addToCart(options)
     },
   },
 }

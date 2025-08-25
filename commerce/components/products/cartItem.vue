@@ -1,40 +1,46 @@
 <template>
-  <div v-if="item" class="col-xs-12">
+  <div v-if="cartItem" class="col-xs-12">
     <div
       class="product cartItem"
       :class="{ preview: preview }"
       @click="
         $bus.$emit(
           'goTo',
-          `/products/${this.productCategoryHandle}/${this.item.id}_${this.item.handle}`
+          `/products/${this.productCollectionHandle}/${this.cartItem.product.id}_${this.cartItem.product.handle}`
         )
       "
     >
       <div class="imageArea">
         <div
           class="image block relative"
-          :class="{ emptyImage: !itemImage }"
-          :style="`background-image:url(${itemImage});`"
+          :class="{ emptyImage: !productImage }"
+          :style="`background-image:url(${productImage});`"
         >
           <div class="c-block-top-right">
             <Badge
-              :value="`${quantity}`"
+              :value="`${cartItem.qty}`"
               severity="contrast"
               class="mt-1 mr-1"
             ></Badge>
           </div>
 
-          <h5 v-if="!itemImage">{{ useAppConfig().theme.name_short }}</h5>
+          <h5 v-if="!productImage">{{ useAppConfig().theme.name_short }}</h5>
 
           <div class="p5">
             <Tag
-              v-if="item.tags && item.tags.includes('эрэлттэй')"
+              v-if="
+                cartItem.product.tags &&
+                cartItem.product.tags.includes('эрэлттэй')
+              "
               value="Эрэлттэй"
               severity="success"
               class="mr10"
             ></Tag>
             <Tag
-              v-if="item.tags && item.tags.includes('онцлох')"
+              v-if="
+                cartItem.product.tags &&
+                cartItem.product.tags.includes('онцлох')
+              "
               value="Онцлох"
               severity="info"
               class="mr10"
@@ -46,22 +52,22 @@
       <div class="content">
         <div>
           <p class="title">
-            {{ item.product.title }}
+            {{ cartItem.product.title }}
           </p>
 
           <span class="price">
-            {{ $currency.format(item.price.amount) }}
+            <template v-if="cartItem.variant && cartItem.variant.price">{{
+              $currency.format(cartItem.variant.price)
+            }}</template>
+            <template v-else>{{
+              $currency.format(cartItem.product.price)
+            }}</template>
           </span>
 
-          <span
-            v-if="
-              item.title !== 'Default Title' &&
-              item.title !== 'Default' &&
-              item.title !== 'default'
-            "
-            class="description font3 ml-3 uppercase"
-          >
-            {{ this.$utils.addDots(item.title, 23) }}
+          <span class="description font3 ml-3 uppercase">
+            <template v-if="cartItem.variant && cartItem.variant.sku">
+              {{ this.$utils.addDots(cartItem.variant.sku, 23) }}
+            </template>
           </span>
 
           <div v-if="!preview" class="buttonsArea">
@@ -69,31 +75,32 @@
               <div
                 class="c-inputIncrement"
                 v-tooltip.top="
-                  `${item.quantityAvailable - currentAmount} ${$utils.t('more available')}`
+                  `${productVariantAmountLeft} ${$utils.t('more available')}`
                 "
               >
                 <Button
                   :disabled="updating"
                   icon="pi pi-minus"
                   class="sm"
-                  @click.stop="amountSubtract"
+                  @click.stop="amountSubtract(cartItem.key)"
                 ></Button>
-                <InputNumber
+                <!-- <InputNumber
                   :disabled="true"
                   v-model="currentAmount"
-                ></InputNumber>
+                ></InputNumber> -->
+                <span class="mx-2">{{ currentAmount }}</span>
                 <Button
-                  :disabled="updating"
+                  :disabled="updating || productVariantAmountLeft === 0"
                   icon="pi pi-plus"
                   class="sm"
-                  @click.stop="amountAdd"
+                  @click.stop="amountAdd(cartItem.key)"
                 ></Button>
               </div>
 
               <Button
                 icon="pi pi-trash"
                 class="iconBtn sm ml-2 mb-1"
-                @click.stop="deleteItem"
+                @click.stop="removeFromCart(cartItem.key)"
                 v-tooltip.top="`${$utils.t('Delete')}`"
               ></Button>
             </div>
@@ -107,42 +114,13 @@
 <script>
 export default {
   props: {
-    product: {
+    cartItem: {
       type: Object,
-      default: null,
-    },
-    cartLineId: {
-      type: String,
-      default: null,
-    },
-    item: {
-      type: Object,
-      default: null,
-    },
-    quantity: {
-      type: Number,
       default: null,
     },
     preview: {
       type: Boolean,
       default: false,
-    },
-  },
-
-  computed: {
-    productCategoryHandle() {
-      if (this.item) {
-        if (this.item.category) {
-          return this.item.category.handle
-        }
-      }
-      return "all"
-    },
-    itemImage() {
-      if (this.item && this.item.image) {
-        return this.item.image.url
-      }
-      return false
     },
   },
 
@@ -154,23 +132,54 @@ export default {
     }
   },
 
+  computed: {
+    productCollectionHandle() {
+      if (this.cartItem && this.cartItem.product) {
+        if (
+          this.cartItem.product.collections &&
+          this.cartItem.product.collections.length > 0
+        ) {
+          return this.cartItem.product.collections[0].collection_id.handle
+        }
+      }
+      return "all"
+    },
+    productImage() {
+      if (
+        this.cartItem &&
+        this.cartItem.variant &&
+        this.cartItem.variant.image
+      ) {
+        return this.cartItem.variant.image.url
+      } else if (
+        this.cartItem &&
+        this.cartItem.product &&
+        this.cartItem.product.featured_image &&
+        this.cartItem.product.featured_image.url
+      ) {
+        return this.cartItem.product.featured_image.url
+      }
+      return false
+    },
+    productVariantAmountLeft() {
+      return this.cartItem.variant.inventory_available - this.currentAmount
+    },
+  },
+
   mounted() {
-    if (this.item && this.quantity) {
-      this.currentAmount = this.quantity
+    // console.log("Cart Item ::: ", this.cartItem)
+
+    if (this.cartItem && this.cartItem.qty) {
+      this.currentAmount = this.cartItem.qty
     } else {
       this.currentAmount = 1
     }
 
-    console.log("Current Amount ::: ", this.currentAmount)
+    // console.log("Current Amount ::: ", this.currentAmount)
   },
 
   methods: {
-    async removeFromCart(cartLineId) {
-      await useRemoveFromCart({
-        cartLineId: cartLineId,
-      })
-    },
-    deleteItem() {
+    removeFromCart(itemKey) {
       this.$confirm.require({
         group: "global",
         message: this.$utils.t("Remove From Cart"),
@@ -178,31 +187,29 @@ export default {
         rejectLabel: this.$utils.t("Cancel"),
         acceptLabel: this.$utils.t("Confirm"),
         accept: async () => {
-          await useRemoveFromCart({
-            cartLineId: this.cartLineId,
-          })
+          await useCommerceStore().removeFromCart(itemKey)
+          this.$bus.$emit("updateCart")
         },
       })
     },
-
-    async amountSubtract() {
+    amountSubtract(itemKey) {
       if (this.updating) return
       this.currentAmount -= 1
 
       if (this.currentAmount < 1) {
         this.currentAmount = 1
-        await this.deleteItem()
+        this.removeFromCart(itemKey)
       } else {
-        await this.amountChange(this.currentAmount)
+        this.amountChange(itemKey, this.currentAmount)
       }
     },
-    async amountAdd() {
+    amountAdd(itemKey) {
       if (this.updating) return
       this.prevAmount = this.currentAmount
       this.currentAmount += 1
 
-      if (this.item.quantityAvailable !== null) {
-        const maxAmount = this.item.quantityAvailable
+      if (this.cartItem.variant.inventory_available !== null) {
+        const maxAmount = this.cartItem.variant.inventory_available
 
         if (this.currentAmount > maxAmount) {
           this.currentAmount = this.prevAmount
@@ -217,20 +224,17 @@ export default {
         }
       }
 
-      await this.amountChange(this.currentAmount)
+      this.amountChange(itemKey, this.currentAmount)
     },
-    async amountChange(amount) {
+    async amountChange(itemKey, amount) {
       if (this.updating) return
       this.updating = true
 
-      await useUpdateItem({
-        variantId: this.item.id,
-        amount: amount,
-        itemId: this.cartLineId,
-      })
+      await useCommerceStore().updateQuantity(itemKey, amount)
 
       this.prevAmount = amount
       this.updating = false
+      this.$bus.$emit("updateCart")
     },
   },
 }

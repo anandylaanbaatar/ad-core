@@ -261,6 +261,7 @@ export default defineNuxtPlugin((app) => {
       const apiKey = UPLOADER_KEY.value
       let storageUrl = "https://storage.bunnycdn.com/melodu"
       let cdnUrl = "https://melodu.b-cdn.net"
+      let siteUrl = "https://melodu.b-cdn.net"
 
       if (features().fileSystem.bunny.storageUrl) {
         storageUrl = features().fileSystem.bunny.storageUrl
@@ -268,12 +269,19 @@ export default defineNuxtPlugin((app) => {
       if (features().fileSystem.bunny.cdnUrl) {
         cdnUrl = features().fileSystem.bunny.cdnUrl
       }
+      if (features().fileSystem.bunny.siteUrl) {
+        siteUrl = features().fileSystem.bunny.siteUrl
+      }
 
       try {
         const filename = app.$utils.processFileName(file.name)
-        const filesPath = `${features().fileSystem.bunny.filesPath}/${filePath}`
+        let filesPath = `${features().fileSystem.bunny.filesPath}`
+        if (filePath) {
+          filesPath = `${features().fileSystem.bunny.filesPath}/${filePath}`
+        }
         const requestUrl = `${storageUrl}/${filesPath}/${filename}`
-        const downloadUrl = `${cdnUrl}/${filesPath}/${filename}`
+        const downloadUrl = `${siteUrl}/${filesPath}/${filename}`
+        const downloadOriginUrl = `${cdnUrl}/${filesPath}/${filename}`
 
         const res = await $fetch(requestUrl, {
           method: "PUT",
@@ -285,7 +293,11 @@ export default defineNuxtPlugin((app) => {
         })
 
         if (res && res.Message === "File uploaded.") {
-          resolve(downloadUrl)
+          resolve({
+            url: downloadUrl,
+            originUrl: downloadOriginUrl,
+            fileId: filename,
+          })
         } else {
           resolve(null)
         }
@@ -304,10 +316,10 @@ export default defineNuxtPlugin((app) => {
     let results = []
 
     for (let i = 0; i < files.length; i++) {
-      const downloadUrl = await uploader(files[i], filePath)
+      const downloaded = await uploader(files[i], filePath)
 
-      if (downloadUrl) {
-        results.push(downloadUrl)
+      if (downloaded) {
+        results.push(downloaded)
       }
     }
 

@@ -1,5 +1,13 @@
 @use "../basics/variables" as *;
 
+// No Select
+.no-select {
+  user-select: none; /* Standard */
+  -webkit-user-select: none; /* Safari */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* IE/Edge */
+}
+
 // Border
 .border-t {
   border-top: 1px solid var(--ad-background08);
@@ -56,6 +64,15 @@
     min-height: 0;
 
     svg {
+      margin: 0;
+    }
+  }
+  &.tiny {
+    min-height: 0;
+
+    svg {
+      width: 35px;
+      height: 35px;
       margin: 0;
     }
   }

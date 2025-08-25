@@ -83,6 +83,7 @@
               >
                 <div class="dimmer p-4 text-center">
                   <h3>{{ getTitle(collection.title) }}</h3>
+                  <!-- <p>{{ collection.handle }}</p> -->
                 </div>
               </div>
             </div>
@@ -212,14 +213,7 @@ export default {
       return useAppConfig().theme
     },
     cartBadge() {
-      const store = useCommerceStore()
-      let amount = "0"
-
-      if (store.cartBadge && store.cartBadge !== "0") {
-        amount = store.cartBadge
-      }
-
-      return amount
+      return useCommerceStore().cartTotalItems
     },
     isAdvanced() {
       return useCommerceStore().advancedCollections

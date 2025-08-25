@@ -53,16 +53,10 @@
           <!--Meta Info-->
           <div class="col-xs-6 md:p-0">
             <div class="flex justify-content-end align-items-center flex-wrap">
-              <h4 v-if="productCounts !== 0" class="mt-3 opacity-30">
-                {{ productCounts }} - {{ totalProductsCount }}
+              <h4 v-if="productCounts" class="mt-3 opacity-30">
+                {{ productCounts }}
                 {{ $utils.t("products") }}
               </h4>
-
-              <!-- <Button
-              icon="pi pi-arrow-left"
-              @click="$bus.$emit('goTo', `/`)"
-              class="smallBtn mr-3"
-            ></Button> -->
             </div>
           </div>
         </div>
@@ -107,7 +101,7 @@ export default {
       },
       showFilters: false,
 
-      productCounts: 0,
+      productCounts: null,
     }
   },
 
@@ -149,9 +143,6 @@ export default {
         }
       }
       return
-    },
-    totalProductsCount() {
-      return useCommerceStore().productsCount
     },
   },
 

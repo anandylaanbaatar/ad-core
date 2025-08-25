@@ -8,7 +8,7 @@
           <div class="col-xs-12">
             <section class="c-block text-center p-8">
               <i class="pi pi-check"></i>
-              <h3 class="my-3">{{ $utils.t("Order Successfull.") }}</h3>
+              <h3 class="my-3">{{ $utils.t("Order Successful.") }}</h3>
               <p class="mb-4">
                 Таны захиалгыг бид хүлээн авлаа. <br />Та миний захиалга хэсгээс
                 бараа хүргэлт болон захиалгын <br />дэлгэрэнгүй мэдээллийг авна
@@ -59,8 +59,7 @@ export default {
       localStorage.removeItem("draftOrderId")
       localStorage.removeItem("qpay_token")
 
-      await useEmptyCart()
-      await useUpdateCart()
+      await useCommerceStore().clearCart()
     },
   },
 }

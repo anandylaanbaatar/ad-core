@@ -2,6 +2,7 @@
   <div v-if="item && isActive" class="c-header-product">
     <Logo></Logo>
 
+    <!--Desktop Menu-->
     <ul class="c-list-nav desktopOnly">
       <li v-for="link in links" :key="`list_item_${link.key}`">
         <div
@@ -14,8 +15,7 @@
         </div>
       </li>
     </ul>
-
-    <div v-if="item.cta_button" class="ctaBtns">
+    <div v-if="item.cta_button" class="ctaBtns desktopOnly">
       <template v-for="btn in item.cta_button">
         <Button
           v-if="
@@ -44,6 +44,70 @@
       ></Button>
     </div>
   </div>
+
+  <!--Mobile Menu-->
+  <div v-if="item && isActive" class="c-header-product-menu mobileOnly">
+    <div class="menuBtn">
+      <Button
+        v-if="showMenu === false"
+        rounded
+        icon="pi pi-bars"
+        @click="showMobileMenu"
+      ></Button>
+      <Button
+        v-else
+        rounded
+        icon="pi pi-times"
+        @click="hideMobileMenu"
+      ></Button>
+    </div>
+    <div
+      class="menuArea"
+      :class="{ active: showMenu, hide: showMenu === 'hide' }"
+    >
+      <ul class="c-list">
+        <li v-for="link in links" :key="`list_item_${link.key}`">
+          <div
+            class="c-list-item font3"
+            :class="{ active: isNavItem(link.url) }"
+            @click="goTo(link.url)"
+          >
+            {{ $utils.t(link.text) }}
+            <span class="c-list-item-span"></span>
+          </div>
+        </li>
+      </ul>
+
+      <div v-if="item.cta_button" class="ctaBtns">
+        <template v-for="btn in item.cta_button">
+          <Button
+            v-if="
+              (!isLoggedIn && btn.variant === 'Login') ||
+              (!isLoggedIn && btn.variant === 'SignUp')
+            "
+            :key="`header_cta_${btn.key}`"
+            class="ctaButton w-full mb-3"
+            :severity="ctaBtnSeverity(btn)"
+            @click="ctaBtnClick(btn)"
+            >{{ $utils.t(btn.text) }}</Button
+          >
+        </template>
+
+        <Button
+          v-if="isLoggedIn"
+          class="desktopOnly"
+          severity="secondary"
+          icon="pi pi-user"
+          rounded
+          @click="
+            $bus.$emit('sidebarGlobal', {
+              id: 'account',
+            })
+          "
+        ></Button>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script>
@@ -53,6 +117,12 @@ export default {
       type: Object,
       default: null,
     },
+  },
+
+  data() {
+    return {
+      showMenu: false,
+    }
   },
 
   computed: {
@@ -93,7 +163,7 @@ export default {
     goTo(link) {
       if (!link) return
 
-      this.menu = false
+      this.hideMobileMenu(true)
 
       if (link.includes("#")) {
         location.href = link
@@ -132,6 +202,17 @@ export default {
       } else {
         return btn.variant
       }
+    },
+
+    showMobileMenu() {
+      this.showMenu = true
+    },
+    hideMobileMenu(force) {
+      this.showMenu = "hide"
+
+      setTimeout(() => {
+        this.showMenu = false
+      }, 400)
     },
   },
 }

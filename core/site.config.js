@@ -1,16 +1,152 @@
 import path from "node:path"
 import * as prismic from "@prismicio/client"
+import { createDirectus, rest, readItems, authentication } from "@directus/sdk"
 
 /**
  * Base Config
  */
 
 let config = await import(path.resolve("config/site.config.json"))
-let prismicConfig = null
+let mainConfig = null
+
+/**
+ * AD Commerce Config
+ */
+
+const getCommerceConfig = async (storeId) => {
+  const url = config.features.directus.apiUrl
+  const $directus = createDirectus(url)
+    .with(rest())
+    .with(
+      authentication("static", {
+        token: process.env.NUXT_DIRECTUS_ADMIN_TOKEN,
+      })
+    )
+
+  const result = await $directus.request(
+    readItems("global_settings", {
+      filter: {
+        store_id: { _eq: storeId },
+      },
+    })
+  )
+
+  if (result && result.length) {
+    return result[0]
+  }
+
+  return
+}
+if (
+  config.integrations.directus &&
+  config.features.directus &&
+  process.env.NUXT_STORE_ID &&
+  process.env.NUXT_DIRECTUS_ADMIN_TOKEN
+) {
+  mainConfig = await getCommerceConfig(process.env.NUXT_STORE_ID)
+
+  if (mainConfig) {
+    // Required Fields
+    if (mainConfig.store_id) {
+      config.theme.storeId = mainConfig.store_id
+    }
+    if (mainConfig.tenant_id) {
+      config.features.multitenancy.tenantId = mainConfig.tenant_id
+    }
+
+    // Settings
+    if (mainConfig.store_name) {
+      config.defaults.name = mainConfig.store_name
+    }
+    if (mainConfig.store_theme) {
+      config.theme.type = mainConfig.store_theme
+    }
+    if (mainConfig.store_url) {
+      config.defaults.storeUrl = mainConfig.store_url
+    }
+    if (mainConfig.store_timezone) {
+      config.theme.timezone = mainConfig.store_timezone
+    }
+    if (mainConfig.store_country) {
+      config.theme.country = mainConfig.store_country
+    }
+    if (mainConfig.store_currency) {
+      config.theme.currency = mainConfig.store_currency
+    }
+    if (mainConfig.store_language) {
+      config.theme.language = mainConfig.store_language
+    }
+
+    // Theme
+    if (mainConfig.store_logo) {
+      config.logo.desktop = mainConfig.store_logo
+    }
+    if (mainConfig.store_logo_dark) {
+      config.logo.desktop_dark = mainConfig.store_logo_dark
+    }
+    if (mainConfig.store_mobile_logo) {
+      config.logo.mobile = mainConfig.store_mobile_logo
+    }
+    if (mainConfig.store_mobile_logo_dark) {
+      config.logo.mobile_dark = mainConfig.store_mobile_logo_dark
+    }
+    if (mainConfig.store_splash) {
+      config.theme.splash = mainConfig.store_splash
+    }
+    if (mainConfig.store_light_dark_mode) {
+      if (mainConfig.store_light_dark_mode === "both") {
+        config.theme.darkLightMode = null
+      } else if (mainConfig.store_light_dark_mode === "light") {
+        config.theme.darkLightMode = "light"
+      } else if (mainConfig.store_light_dark_mode === "dark") {
+        config.theme.darkLightMode = "dark"
+      }
+    }
+
+    // Optional Fields
+    if (mainConfig.store_name_short) {
+      config.defaults.name_short = mainConfig.store_name_short
+    }
+    if (mainConfig.store_slogan) {
+      config.defaults.slogan = mainConfig.store_slogan
+    }
+    if (mainConfig.store_description) {
+      config.defaults.description = mainConfig.store_description
+    }
+
+    // Contact
+    if (mainConfig.contact_email) {
+      config.contact.email = mainConfig.contact_email
+    }
+    if (mainConfig.contact_phone) {
+      config.contact.phone = mainConfig.contact_phone
+    }
+
+    // Commerce
+    if (mainConfig.store_theme === "commerce") {
+      if (!config.commerce) {
+        config.commerce = {
+          allowTax: false,
+          location: null,
+          shippingLines: null,
+        }
+      }
+      if (mainConfig.commerce_allow_tax) {
+        config.commerce.allowTax = mainConfig.commerce_allow_tax
+      }
+    }
+
+    console.log(
+      `✅ [Site Config] Store Directus Settings Set!`,
+      mainConfig.tenant_id
+    )
+  }
+}
 
 /**
  * Prismic Config
  */
+let prismicConfig = null
 
 const getSitePrismicConfig = async (repoId) => {
   const endpoint = prismic.getRepositoryEndpoint(repoId)
@@ -29,7 +165,7 @@ const getSitePrismicConfig = async (repoId) => {
 
   return null
 }
-if (config.features.prismic) {
+if (config.features.prismic && !mainConfig) {
   prismicConfig = await getSitePrismicConfig(config.features.prismic)
 
   if (prismicConfig) {

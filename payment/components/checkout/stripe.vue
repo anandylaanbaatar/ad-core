@@ -8,7 +8,7 @@
 
     <section class="mb-5">
       <p v-if="cart" class="mb-5 font2 w-full text-center">
-        {{ $utils.t("Total") }}: {{ $currency.format(totalAmount.total) }}
+        {{ $utils.t("Total") }}: {{ $currency.format(cartTotals.total) }}
       </p>
 
       <div class="paymentArea">
@@ -43,7 +43,7 @@ export default {
       type: Object,
       default: null,
     },
-    totalAmount: {
+    cartTotals: {
       type: Object,
       default: null,
     },
@@ -61,10 +61,6 @@ export default {
     },
     shippingAddress: {
       type: Object,
-      default: null,
-    },
-    discountCode: {
-      type: Array,
       default: null,
     },
   },
@@ -212,7 +208,7 @@ export default {
       this.init = true
     },
     async setPlan() {
-      console.log("[Stripe] ::: Total Amount ::: ", this.totalAmount)
+      console.log("[Stripe] ::: Total Amount ::: ", this.cartTotals)
     },
     async setCustomer() {
       const user = this.account
@@ -222,7 +218,7 @@ export default {
     async setPaymentIntent() {
       let paymentIntentOptions = {
         currency: this.currency,
-        amount: parseFloat(this.totalAmount.total) * 100,
+        amount: parseFloat(this.cartTotals.total) * 100,
         customerId: this.customerId,
       }
 

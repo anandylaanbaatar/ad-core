@@ -221,14 +221,42 @@ button.p-button-contrast {
   }
 }
 
+// Split Buttons
+div.p-splitbutton {
+  button.p-splitbutton-button {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+  button.p-splitbutton-dropdown {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+  }
+
+  &.sm {
+    button.p-splitbutton-button {
+      width: auto;
+      height: 30px;
+      min-height: 30px;
+      min-width: 30px;
+    }
+    button.p-splitbutton-dropdown {
+      width: 30px;
+      height: 30px;
+      min-height: 30px;
+      min-width: 30px;
+    }
+  }
+}
+
 // Glass Button
-button.p-glass-button {
-  background: rgba(0, 0, 0, 0.3);
+button.p-glass-button,
+button.glassBtn {
+  background: rgba(0, 0, 0, 0.2) !important;
   -webkit-backdrop-filter: saturate(180%) blur(20px);
   backdrop-filter: saturate(180%) blur(20px);
 
   &:hover {
-    background: rgba(0, 0, 0, 0.1);
+    background: rgba(0, 0, 0, 0.3);
   }
 }
 

@@ -109,7 +109,7 @@ const getProductsQuery = (type, options) => {
   }
 
   if (options.query) {
-    queryFilter = `, query: "${options.query}"`
+    queryFilter = `, query:*${options.query}*`
   }
   if (options.ids) {
     let queryList = ""
@@ -117,6 +117,16 @@ const getProductsQuery = (type, options) => {
     for (let i = 0; i < options.ids.length; i++) {
       if (queryList !== "") queryList += ` OR `
       queryList += `(id:${options.ids[i]})`
+    }
+
+    queryFilter = `, query: "${queryList}"`
+  }
+  if (options.handles) {
+    let queryList = ""
+
+    for (let i = 0; i < options.handles.length; i++) {
+      if (queryList !== "") queryList += " OR "
+      queryList += `(handle:${options.handles[i]})`
     }
 
     queryFilter = `, query: "${queryList}"`
@@ -130,6 +140,11 @@ const getProductsQuery = (type, options) => {
   let reverseKey = `, reverse: true`
   let sortKey = `, sortKey: ${options.sort}`
 
+  if (options.direction) {
+    if (options.direction === "asc") {
+      reverseKey = `, reverse: false`
+    }
+  }
   if (options.category !== "all") {
     if (options.sort === "CREATED_AT") {
       sortKey = `, sortKey: CREATED`
@@ -186,6 +201,490 @@ const getProductsQuery = (type, options) => {
 
   return query
 }
+const getCollectionsQuery = (type, options) => {
+  let query = ""
+
+  let collectionNode = `
+    id
+    handle
+    title
+    descriptionHtml
+    image {
+      id
+      url
+      width
+      height
+    }
+    seo {
+      title
+      description
+    }
+  `
+  let collectionEdges = `
+    edges {
+      cursor
+      node {
+        ${collectionNode}
+      }
+    }
+  `
+  let pageInfo = `
+    pageInfo {
+      endCursor
+      hasNextPage
+      hasPreviousPage
+      startCursor
+    }
+  `
+
+  // Filters
+  let queryFilter = ``
+  if (typeof options.limit === "undefined") {
+    options.limit = 150
+  }
+  if (typeof options.sort === "undefined") {
+    options.sort = "TITLE"
+  }
+
+  if (options.query) {
+    queryFilter = `, query:*${options.query}*`
+  }
+  if (options.ids) {
+    let queryList = ""
+
+    for (let i = 0; i < options.ids.length; i++) {
+      if (queryList !== "") queryList += ` OR `
+      queryList += `(id:${options.ids[i]})`
+    }
+
+    queryFilter = `, query: "${queryList}"`
+  }
+  if (options.handles) {
+    let queryList = ""
+
+    for (let i = 0; i < options.handles.length; i++) {
+      if (queryList !== "") queryList += " OR "
+      queryList += `(handle:${options.handles[i]})`
+    }
+
+    queryFilter = `, query: "${queryList}"`
+  }
+
+  let pagination = ``
+  if (options.cursor) {
+    pagination = `, after: "${options.cursor}"`
+  }
+
+  let reverseKey = `, reverse: true`
+  let sortKey = `, sortKey: ${options.sort}`
+
+  if (options.direction) {
+    if (options.direction === "asc") {
+      reverseKey = `, reverse: false`
+    }
+  }
+  if (options.sort === "UPDATED_AT") {
+    sortKey = `, sortKey: UPDATED_AT`
+  }
+
+  query = `
+    query {
+      collections(first: ${options.limit}${queryFilter}${sortKey}${reverseKey}${pagination}) {
+        ${collectionEdges}
+        ${pageInfo}
+      }
+    }
+  `
+
+  return query
+}
+const getOrdersQuery = (type, options) => {
+  let query = ""
+
+  let node = `
+    billingAddressMatchesShippingAddress
+    canMarkAsPaid
+    canNotifyCustomer
+    cancelReason
+    cancelledAt
+    capturable
+    cartDiscountAmount
+    clientIp
+    closed
+    closedAt
+    confirmationNumber
+    confirmed
+    createdAt
+    currencyCode
+    currentSubtotalLineItemsQuantity
+    currentTotalWeight
+    customerAcceptsMarketing
+    customerLocale
+    discountCode
+    discountCodes
+    displayFinancialStatus
+    displayFulfillmentStatus
+    edited
+    email
+    estimatedTaxes
+    fulfillable
+    fullyPaid
+    hasTimelineComment
+    id
+    landingPageDisplayText
+    landingPageUrl
+    legacyResourceId
+    merchantEditable
+    merchantEditableErrors
+    name
+    netPayment
+    note
+    paymentGatewayNames
+    phone
+    poNumber
+    presentmentCurrencyCode
+    processedAt
+    purchasingEntity
+    referralCode
+    referrerDisplayText
+    referrerUrl
+    refundable
+    registeredSourceUrl
+    requiresShipping
+    restockable
+    returnStatus
+    riskLevel
+    sourceIdentifier
+    subtotalLineItemsQuantity
+    subtotalPrice
+    tags
+    taxExempt
+    taxesIncluded
+    test
+    totalCapturable
+    totalDiscounts
+    totalPrice
+    totalReceived
+    totalRefunded
+    totalShippingPrice
+    totalTax
+    totalWeight
+    unpaid
+    updatedAt
+    lineItems(first: 100) {
+      nodes {
+        id
+        image {
+            url
+            id
+        }
+        name
+        quantity
+        title
+        variantTitle
+        originalTotal
+        originalUnitPrice
+      }
+    }
+  `
+  let edges = `
+    edges {
+      cursor
+      node {
+        ${node}
+      }
+    }
+  `
+  let pageInfo = `
+    pageInfo {
+      endCursor
+      hasNextPage
+      hasPreviousPage
+      startCursor
+    }
+  `
+
+  // Filters
+  let queryFilter = ``
+  if (typeof options.limit === "undefined") {
+    options.limit = 150
+  }
+  if (typeof options.sort === "undefined") {
+    options.sort = "CREATED_AT"
+  }
+
+  if (options.query) {
+    queryFilter = `, query:*${options.query}*`
+  }
+  if (options.ids) {
+    let queryList = ""
+
+    for (let i = 0; i < options.ids.length; i++) {
+      if (queryList !== "") queryList += ` OR `
+      queryList += `(id:${options.ids[i]})`
+    }
+
+    queryFilter = `, query: "${queryList}"`
+  }
+  if (options.handles) {
+    let queryList = ""
+
+    for (let i = 0; i < options.handles.length; i++) {
+      if (queryList !== "") queryList += " OR "
+      queryList += `(handle:${options.handles[i]})`
+    }
+
+    queryFilter = `, query: "${queryList}"`
+  }
+
+  let pagination = ``
+  if (options.cursor) {
+    pagination = `, after: "${options.cursor}"`
+  }
+
+  let reverseKey = `, reverse: true`
+  let sortKey = `, sortKey: ${options.sort}`
+
+  if (options.direction) {
+    if (options.direction === "asc") {
+      reverseKey = `, reverse: false`
+    }
+  }
+  if (options.sort) {
+    sortKey = `, sortKey: ${options.sort}`
+  }
+
+  query = `
+    query {
+      orders(first: ${options.limit}${queryFilter}${sortKey}${reverseKey}${pagination}) {
+        ${edges}
+        ${pageInfo}
+      }
+    }
+  `
+
+  return query
+}
+const getCustomersQuery = (type, options) => {
+  let query = ""
+
+  let node = `
+    createdAt
+    displayName
+    email
+    firstName
+    id
+    lastName
+    numberOfOrders
+    phone
+    tags
+    updatedAt
+  `
+  let edges = `
+    edges {
+      cursor
+      node {
+        ${node}
+      }
+    }
+  `
+  let pageInfo = `
+    pageInfo {
+      endCursor
+      hasNextPage
+      hasPreviousPage
+      startCursor
+    }
+  `
+
+  // Filters
+  let queryFilter = ``
+  if (typeof options.limit === "undefined") {
+    options.limit = 150
+  }
+  if (typeof options.sort === "undefined") {
+    options.sort = "CREATED_AT"
+  }
+
+  if (options.query) {
+    queryFilter = `, query:*${options.query}*`
+  }
+  if (options.ids) {
+    let queryList = ""
+
+    for (let i = 0; i < options.ids.length; i++) {
+      if (queryList !== "") queryList += ` OR `
+      queryList += `(id:${options.ids[i]})`
+    }
+
+    queryFilter = `, query: "${queryList}"`
+  }
+  if (options.handles) {
+    let queryList = ""
+
+    for (let i = 0; i < options.handles.length; i++) {
+      if (queryList !== "") queryList += " OR "
+      queryList += `(handle:${options.handles[i]})`
+    }
+
+    queryFilter = `, query: "${queryList}"`
+  }
+
+  let pagination = ``
+  if (options.cursor) {
+    pagination = `, after: "${options.cursor}"`
+  }
+
+  let reverseKey = `, reverse: true`
+  let sortKey = `, sortKey: ${options.sort}`
+
+  if (options.direction) {
+    if (options.direction === "asc") {
+      reverseKey = `, reverse: false`
+    }
+  }
+  if (options.sort) {
+    sortKey = `, sortKey: ${options.sort}`
+  }
+
+  query = `
+    query {
+      customers(first: ${options.limit}${queryFilter}${sortKey}${reverseKey}${pagination}) {
+        ${edges}
+        ${pageInfo}
+      }
+    }
+  `
+
+  return query
+}
+const getFilesQuery = (type, options) => {
+  let query = ""
+
+  let fileNode = `
+    createdAt
+    updatedAt
+    alt
+    ... on GenericFile {
+      id
+      url
+    }
+    ... on MediaImage {
+      id
+      image {
+        id
+        url
+        width
+        height
+      }
+    }
+    ... on Video {
+      id
+      duration
+      preview {
+        status
+        image {
+          id
+          width
+          height
+          url
+        }
+      }
+      originalSource {
+        url
+        width
+        height
+        format
+        mimeType
+      }
+      sources {
+        url
+        width
+        height
+        format
+        mimeType
+      }
+    }
+  `
+  let fileEdges = `
+    edges {
+      cursor
+      node {
+        ${fileNode}
+      }
+    }
+  `
+  let pageInfo = `
+    pageInfo {
+      endCursor
+      hasNextPage
+      hasPreviousPage
+      startCursor
+    }
+  `
+
+  // Filters
+  let queryFilter = ``
+  if (typeof options.limit === "undefined") {
+    options.limit = 150
+  }
+  if (typeof options.sort === "undefined") {
+    options.sort = "UPDATED_AT"
+  }
+
+  if (options.query) {
+    queryFilter = `, query:*${options.query}*`
+  }
+  if (options.ids) {
+    let queryList = ""
+
+    for (let i = 0; i < options.ids.length; i++) {
+      if (queryList !== "") queryList += ` OR `
+      queryList += `(id:${options.ids[i]})`
+    }
+
+    queryFilter = `, query: "${queryList}"`
+  }
+  if (options.handles) {
+    let queryList = ""
+
+    for (let i = 0; i < options.handles.length; i++) {
+      if (queryList !== "") queryList += " OR "
+      queryList += `(handle:${options.handles[i]})`
+    }
+
+    queryFilter = `, query: "${queryList}"`
+  }
+
+  let pagination = ``
+  if (options.cursor) {
+    pagination = `, after: "${options.cursor}"`
+  }
+
+  let reverseKey = `, reverse: true`
+  let sortKey = `, sortKey: ${options.sort}`
+
+  if (options.direction) {
+    if (options.direction === "asc") {
+      reverseKey = `, reverse: false`
+    }
+  }
+  if (options.sort === "CREATED_AT") {
+    sortKey = `, sortKey: CREATED_AT`
+  }
+
+  query = `
+    query {
+      files(first: ${options.limit}${queryFilter}${sortKey}${reverseKey}${pagination}) {
+        ${fileEdges}
+        ${pageInfo}
+      }
+    }
+  `
+
+  return query
+}
+
 const getQuery = (type, body) => {
   let query = ``
 
@@ -548,107 +1047,7 @@ const getQuery = (type, body) => {
 
   // Orders
   if (type === "orders") {
-    query = `
-      query {
-        orders(first: 50) {
-          edges {
-            cursor
-            node {
-              billingAddressMatchesShippingAddress
-              canMarkAsPaid
-              canNotifyCustomer
-              cancelReason
-              cancelledAt
-              capturable
-              cartDiscountAmount
-              clientIp
-              closed
-              closedAt
-              confirmationNumber
-              confirmed
-              createdAt
-              currencyCode
-              currentSubtotalLineItemsQuantity
-              currentTotalWeight
-              customerAcceptsMarketing
-              customerLocale
-              discountCode
-              discountCodes
-              displayFinancialStatus
-              displayFulfillmentStatus
-              edited
-              email
-              estimatedTaxes
-              fulfillable
-              fullyPaid
-              hasTimelineComment
-              id
-              landingPageDisplayText
-              landingPageUrl
-              legacyResourceId
-              merchantEditable
-              merchantEditableErrors
-              name
-              netPayment
-              note
-              paymentGatewayNames
-              phone
-              poNumber
-              presentmentCurrencyCode
-              processedAt
-              purchasingEntity
-              referralCode
-              referrerDisplayText
-              referrerUrl
-              refundable
-              registeredSourceUrl
-              requiresShipping
-              restockable
-              returnStatus
-              riskLevel
-              sourceIdentifier
-              subtotalLineItemsQuantity
-              subtotalPrice
-              tags
-              taxExempt
-              taxesIncluded
-              test
-              totalCapturable
-              totalDiscounts
-              totalPrice
-              totalReceived
-              totalRefunded
-              totalShippingPrice
-              totalTax
-              totalWeight
-              unpaid
-              updatedAt
-              lineItems(first: 100) {
-                nodes {
-                  id
-                  image {
-                      url
-                      id
-                  }
-                  name
-                  quantity
-                  title
-                  variantTitle
-                  originalTotal
-                  originalUnitPrice
-                }
-              }
-            }
-          }
-          pageInfo {
-            hasNextPage
-            hasPreviousPage
-            startCursor
-            endCursor
-          }
-        }
-      }
-    `
+    query = getOrdersQuery(type, body)
   } else if (type === "draftOrders") {
     query = `
       query DraftOrders {
@@ -898,6 +1297,16 @@ const getQuery = (type, body) => {
             }
         }
     }
+    `
+  } else if (type === "customers") {
+    query = getCustomersQuery(type, body)
+  } else if (type === "customersCount") {
+    query = `
+      query CustomerCount {
+        customersCount {
+          count
+        }
+      }
     `
   } else if (type === "customer") {
     query = `
@@ -1396,33 +1805,7 @@ const getQuery = (type, body) => {
 
   // Collections
   if (type === "collections") {
-    let filters = {
-      limit: body && body.limit ? body.limit : 150,
-    }
-
-    query = `
-      query {
-        collections(first: ${filters.limit}) {
-          edges {
-            cursor
-            node {
-              id
-              handle
-              title
-              image {
-                id
-                url
-                width
-                height  
-              }
-              seo {
-                title
-              }
-            }
-          }
-        }
-      }
-    `
+    query = getCollectionsQuery(type, body)
   } else if (type === "collection") {
     query = `
       query {
@@ -1431,15 +1814,38 @@ const getQuery = (type, body) => {
             id
             handle
             title
+            descriptionHtml
             image {
               id
               url
               width
-              height  
+              height
             }
             seo {
               title
+              description
             }
+          }
+        }
+      }
+    `
+  } else if (type === "collectionById") {
+    query = `
+      query {
+        collection(id: "gid://shopify/Collection/${body.id}") {
+          id
+          handle
+          title
+          descriptionHtml
+          image {
+            id
+            url
+            width
+            height
+          }
+          seo {
+            title
+            description
           }
         }
       }
@@ -1449,6 +1855,79 @@ const getQuery = (type, body) => {
       query CollectionsCount {
         collectionsCount {
           count
+        }
+      }
+    `
+  } else if (type === "collectionDelete") {
+    query = `
+      mutation collectionDelete($input: CollectionDeleteInput!) {
+        collectionDelete(input: $input) {
+          deletedCollectionId
+          shop {
+            id
+            name
+          }
+          userErrors {
+            field
+            message
+          }
+        }
+      }
+    `
+  } else if (type === "collectionCreate") {
+    query = `
+      mutation CollectionCreate($input: CollectionInput!) {
+        collectionCreate(input: $input) {
+          collection {
+            id
+            title
+            handle
+            image {
+              id
+              height
+              width
+              url
+            }
+            seo {
+              title
+            }
+          }
+          userErrors {
+            field
+            message
+          }
+        }
+      }
+    `
+  } else if (type === "collectionUpdate") {
+    query = `
+      mutation CollectionUpdate($input: CollectionInput!) {
+        collectionUpdate(input: $input) {
+          collection {
+            id
+            title
+            description
+            handle
+          }
+          userErrors {
+            field
+            message
+          }
+        }
+      }
+    `
+  } else if (type === "collectionPublish") {
+    query = `
+      mutation collectionPublish($input: CollectionPublishInput!) {
+        collectionPublish(input: $input) {
+          collection {
+            id
+            title
+          }
+          userErrors {
+            field
+            message
+          }
         }
       }
     `
@@ -1523,6 +2002,53 @@ const getQuery = (type, body) => {
     `
   }
 
+  // Files
+  if (type === "files") {
+    query = getFilesQuery(type, body)
+  } else if (type === "fileCreate") {
+    query = `
+      mutation fileCreate($files: [FileCreateInput!]!) {
+        fileCreate(files: $files) {
+          files {
+            id
+            fileStatus
+            alt
+            createdAt
+            ... on MediaImage {
+              image {
+                width
+                height
+              }
+            }
+          }
+          userErrors {
+            field
+            message
+          }
+        }
+      }
+    `
+  } else if (type === "fileUpload") {
+    query = `
+      mutation stagedUploadsCreate($input: [StagedUploadInput!]!) {
+        stagedUploadsCreate(input: $input) {
+          stagedTargets {
+            url
+            resourceUrl
+            parameters {
+              name
+              value
+            }
+          }
+          userErrors {
+            field
+            message
+          }
+        }
+      }
+    `
+  }
+
   return query
 }
 
@@ -1541,6 +2067,12 @@ export default defineEventHandler(async (event) => {
     if (body.params.customKeys) {
       keys = body.params.customKeys
       delete body.params.customKeys
+    }
+  }
+  if (body.dataInput) {
+    if (body.dataInput.customKeys) {
+      keys = body.dataInput.customKeys
+      delete body.dataInput.customKeys
     }
   }
   if (!keys) return
@@ -1575,6 +2107,14 @@ export default defineEventHandler(async (event) => {
     } else if (body.dataInput) {
       if (body.type === "createProductVariant") {
         input = body.dataInput
+      } else if (body.type === "fileUpload") {
+        input = {
+          input: body.dataInput.files,
+        }
+      } else if (body.type === "fileCreate") {
+        input = {
+          files: body.dataInput.files,
+        }
       } else {
         input = {
           input: body.dataInput,
