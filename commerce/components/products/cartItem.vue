@@ -64,11 +64,12 @@
             }}</template>
           </span>
 
-          <span class="description font3 ml-3 uppercase">
-            <template v-if="cartItem.variant && cartItem.variant.sku">
-              {{ this.$utils.addDots(cartItem.variant.sku, 23) }}
-            </template>
-          </span>
+          <Tag
+            v-if="cartItem.variant.sku && cartItem.variant.sku !== 'DEFAULT'"
+            severity="warn"
+            class="ml-2"
+            >{{ cartItem.variant.sku }}</Tag
+          >
 
           <div v-if="!preview" class="buttonsArea">
             <div>

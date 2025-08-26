@@ -36,6 +36,28 @@
       <!--Overlay Items-->
       <div class="c-product-images-overlay">
         <div v-if="item.tags" class="c-block-top-left p-2">
+          <!--Inventory-->
+          <template v-if="inventoryTotal !== null">
+            <Tag
+              v-if="inventoryTotal < 5"
+              :value="`${$utils.t('Low in Stock')} (${inventoryTotal})`"
+              severity="warn"
+              class="mr-2"
+            ></Tag>
+            <Tag
+              v-else-if="inventoryTotal === 0"
+              :value="`${$utils.t('Out of Stock')}`"
+              severity="danger"
+              class="mr-2"
+            ></Tag>
+            <Tag
+              v-else-if="inventoryTotal >= 5"
+              :value="`${$utils.t('Available')} (${inventoryTotal})`"
+              severity="success"
+              class="mr-2"
+            ></Tag>
+          </template>
+
           <!--Tags-->
           <template v-for="tag in item.tags" :key="`product_tag_${tag}`">
             <Tag v-if="tag === 'Available'" severity="success" class="mr-2">{{
@@ -44,29 +66,9 @@
             <Tag v-else-if="tag === 'Sale'" severity="danger" class="mr-2">{{
               $utils.t(tag)
             }}</Tag>
-            <Tag v-else severity="info" class="mr-2">{{ $utils.t(tag) }}</Tag>
-          </template>
-
-          <!--Inventory-->
-          <template v-if="inventoryTotal !== null">
-            <Tag
-              v-if="inventoryTotal < 5"
-              :value="`${$utils.t('Low in Stock')} (${inventoryTotal})`"
-              severity="warn"
-              class="mr10"
-            ></Tag>
-            <Tag
-              v-else-if="inventoryTotal === 0"
-              :value="`${$utils.t('Out of Stock')}`"
-              severity="danger"
-              class="mr-10"
-            ></Tag>
-            <Tag
-              v-else-if="inventoryTotal >= 5"
-              :value="`${$utils.t('Available In Stock')} (${inventoryTotal})`"
-              severity="success"
-              class="mr-10"
-            ></Tag>
+            <Tag v-else severity="info" class="mr-2 capitalize">{{
+              $utils.t(tag)
+            }}</Tag>
           </template>
         </div>
 
@@ -97,15 +99,20 @@
       <div class="flex flex-col">
         <div>
           <p class="block font-bold mb-1">{{ item.title }}</p>
-          <p class="font-bold">
-            {{ $currency.format(item.price) }}
+          <div class="flex align-items-center w-full">
+            <p class="font-bold">
+              {{ $currency.format(item.price) }}
+              <span
+                v-if="item.compare_price"
+                class="ml-2 line-through opacity-60"
+                >{{ $currency.format(item.compare_price) }}</span
+              >
+            </p>
 
-            <span
-              v-if="item.compare_price"
-              class="ml-2 line-through opacity-60"
-              >{{ $currency.format(item.compare_price) }}</span
-            >
-          </p>
+            <Tag v-if="item.compare_price" severity="danger" class="ml-3">{{
+              $utils.t("Sale")
+            }}</Tag>
+          </div>
 
           <!-- <Button
             label="View Product"

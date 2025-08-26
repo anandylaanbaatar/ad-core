@@ -96,17 +96,17 @@ export const useCommerceStore = defineStore("commerce", {
         if (shopifyUser && !shopifyUser.error) {
           this.shopifyUser = shopifyUser
 
-          console.log(
-            "[Store] ::: [Commerce] ::: Shopify User Set!",
-            shopifyUser
-          )
+          // console.log(
+          //   "[Store] ::: [Commerce] ::: Shopify User Set!",
+          //   shopifyUser
+          // )
         }
         return
       }
 
       const userData = useAuthStore().user
 
-      console.log("[Store] ::: [Commerce] ::: Fire User ::", userData, user)
+      // console.log("[Store] ::: [Commerce] ::: Fire User ::", userData, user)
 
       if (userData && userData.connect && userData.connect.shopify) {
         const accessToken = userData.connect.shopify.accessToken
@@ -114,15 +114,15 @@ export const useCommerceStore = defineStore("commerce", {
           access_token: accessToken,
         })
 
-        console.log("[Store] ::: [Commerce] ::: Shopify User ::", shopifyUser)
+        // console.log("[Store] ::: [Commerce] ::: Shopify User ::", shopifyUser)
 
         if (shopifyUser && !shopifyUser.error) {
           this.shopifyUser = shopifyUser
 
-          console.log(
-            "[Store] ::: [Commerce] ::: Shopify User Set!",
-            shopifyUser
-          )
+          // console.log(
+          //   "[Store] ::: [Commerce] ::: Shopify User Set!",
+          //   shopifyUser
+          // )
         }
       }
     },
@@ -155,17 +155,28 @@ export const useCommerceStore = defineStore("commerce", {
     async setLocations() {
       const appConfig = useRuntimeConfig()
 
-      if (!appConfig.public.integrations.shopify) {
+      if (!appConfig.public.features.multitenancy.tenantId) {
         return
       }
 
       const nuxtApp = useNuxtApp()
-      const allLocationsData = await nuxtApp.$shopify.locations()
 
-      if (allLocationsData) {
-        this.locations = allLocationsData.locations
-      } else {
-        console.log("[Store] ::: Locations :: Error getting locations!")
+      const locationsRes = await nuxtApp.$directus.location.list({
+        tenantId: appConfig.public.features.multitenancy.tenantId,
+      })
+
+      console.log("Locations ::: ", locationsRes)
+
+      if (locationsRes?.success && locationsRes?.data) {
+        const allLocations = locationsRes.data
+
+        if (allLocations.length) {
+          this.locations = allLocations
+
+          if (!this.selectedLocation) {
+            this.setLocation(allLocations[0])
+          }
+        }
       }
     },
     async setLocation(location) {

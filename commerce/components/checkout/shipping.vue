@@ -179,35 +179,36 @@
       <ul v-if="locations" class="c-radio mt-3">
         <li
           v-for="location in locations"
-          :key="`address_loc_${location.code}`"
-          @click="selectItem('location', location.name)"
+          :key="`address_loc_${location.id}`"
+          @click="selectItem('location', location)"
         >
           <i
             class="pi"
             :class="{
-              'pi-circle-fill': options.location === location.name,
-              'pi-circle': options.location !== location.name,
+              'pi-circle-fill': options.location?.id === location.id,
+              'pi-circle': options.location?.id !== location.id,
             }"
           ></i>
           <div
             class="d-block"
-            :class="{ active: options.location === location.name }"
+            :class="{ active: options.location?.id === location.id }"
           >
             <div class="row px-3 relative mb-0">
               <div>
                 <p class="font2">
-                  {{ location.name }}
-                  <Tag
+                  {{ location.title }}
+
+                  <!-- <Tag
                     v-if="location.name === 'Улаанбаатар'"
                     severity="success"
                     class="ml-1"
                     :style="`position:relative;top:-4px;`"
                     >{{ $utils.t("Main Location") }}</Tag
-                  >
+                  > -->
                 </p>
-                <!-- <p>
-                  {{ getFormattedAddress(location) }}
-                </p> -->
+                <p v-if="location.address?.full_address" class="opacity-50">
+                  {{ location.address?.full_address }}
+                </p>
               </div>
             </div>
           </div>
@@ -369,7 +370,7 @@ export default {
         this.options.distance = null
 
         if (value === "pickup") {
-          this.options.location = this.locations.find((i) => i.name === value)
+          this.options.location = this.locations.find((i) => i.id === value)
         }
       }
       if (type === "address") {
@@ -390,13 +391,15 @@ export default {
       console.log("Select Item ::: ", this.options)
     },
     async calculateAddresses() {
-      let location = this.locations.find(
-        (i) => i.name === useCommerceStore().selectedLocation
+      if (!useCommerceStore().selectedLocation) return
+
+      const location = this.locations.find(
+        (i) => i.id === useCommerceStore().selectedLocation?.id
       )
 
       // Mongolia
       if (this.shippingAddress.country === "Mongolia") {
-        let address1 = this.getFormattedAddress(location)
+        let address1 = this.getFormattedAddress(location.address)
         let address2 = this.getFormattedAddress(this.shippingAddress)
 
         const res = await this.$address.getDirections(address1, address2)
