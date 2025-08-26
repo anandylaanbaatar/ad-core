@@ -1,6 +1,7 @@
 <template>
   <section v-if="description" class="c-description">
-    <PrismicRichText :field="description"></PrismicRichText>
+    <!-- <PrismicRichText :field="description"></PrismicRichText> -->
+    <p v-if="description.length">{{ description[0]?.text }}</p>
   </section>
 </template>
 

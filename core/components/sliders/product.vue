@@ -25,6 +25,10 @@ export default {
       type: String,
       default: "productItemSlider",
     },
+    index: {
+      type: Number,
+      default: 0,
+    },
   },
 
   data() {
@@ -41,7 +45,8 @@ export default {
         snap: true,
         perPage: 1,
         gap: "0px",
-        index: 2,
+        // index: 2,
+        start: this.index || 0,
       }
 
       if (this.type && this.type === "productDetailedSlider") {
@@ -51,6 +56,7 @@ export default {
           snap: true,
           perPage: 1,
           gap: "0px",
+          start: this.index || 0,
         }
       }
 

@@ -9,10 +9,14 @@
           <p v-if="item.sub_title" class="mb-4">{{ item.sub_title }}</p>
 
           <div v-if="item.title" class="mb-4">
-            <PrismicRichText :field="item.title" />
+            <!-- <PrismicRichText :field="item.title" /> -->
+            <h1 v-if="item.title.length">{{ item.title[0]?.text }}</h1>
           </div>
           <div v-if="item.description" class="mb-4">
-            <PrismicRichText :field="item.description" />
+            <!-- <PrismicRichText :field="item.description" /> -->
+            <p v-if="item.description.length">
+              {{ item.description[0]?.text }}
+            </p>
           </div>
 
           <Button

@@ -23,10 +23,16 @@
                 {{ $utils.t(item[`sub_title_1`]) }}
               </p>
               <div v-if="item[`title_1`]" class="mb-1">
-                <PrismicRichText :field="item[`title_1`]" />
+                <!-- <PrismicRichText :field="item[`title_1`]" /> -->
+                <h1 v-if="item[`title_1`].length">
+                  {{ item[`title_1`][0]?.text }}
+                </h1>
               </div>
               <div v-if="item[`description_1`]" class="mb-1">
-                <PrismicRichText :field="item[`description_1`]" />
+                <!-- <PrismicRichText :field="item[`description_1`]" /> -->
+                <p v-if="item[`description_1`].length">
+                  {{ item[`description_1`][0]?.text }}
+                </p>
               </div>
 
               <Button
@@ -66,10 +72,16 @@
                 {{ $utils.t(item[`sub_title_2`]) }}
               </p>
               <div v-if="item[`title_2`]" class="mb-1">
-                <PrismicRichText :field="item[`title_2`]" />
+                <!-- <PrismicRichText :field="item[`title_2`]" /> -->
+                <h1 v-if="item[`title_2`].length">
+                  {{ item[`title_2`][0]?.text }}
+                </h1>
               </div>
               <div v-if="item[`description_2`]" class="mb-1">
-                <PrismicRichText :field="item[`description_2`]" />
+                <!-- <PrismicRichText :field="item[`description_2`]" /> -->
+                <p v-if="item[`description_2`].length">
+                  {{ item[`description_2`][0]?.text }}
+                </p>
               </div>
 
               <Button
@@ -107,10 +119,16 @@
                 {{ $utils.t(item[`sub_title_3`]) }}
               </p>
               <div v-if="item[`title_3`]" class="mb-1">
-                <PrismicRichText :field="item[`title_3`]" />
+                <!-- <PrismicRichText :field="item[`title_3`]" /> -->
+                <h1 v-if="item[`title_3`].length">
+                  {{ item[`title_3`][0]?.text }}
+                </h1>
               </div>
               <div v-if="item[`description_3`]" class="mb-1">
-                <PrismicRichText :field="item[`description_3`]" />
+                <!-- <PrismicRichText :field="item[`description_3`]" /> -->
+                <p v-if="item[`description_3`].length">
+                  {{ item[`description_3`][0]?.text }}
+                </p>
               </div>
 
               <Button

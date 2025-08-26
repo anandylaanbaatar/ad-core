@@ -28,10 +28,16 @@
                 {{ $utils.t(item[`sub_title_${i}`]) }}
               </p>
               <div v-if="item[`title_${i}`]" class="mb-1">
-                <PrismicRichText :field="item[`title_${i}`]" />
+                <!-- <PrismicRichText :field="item[`title_${i}`]" /> -->
+                <h1 v-if="item[`title_${i}`].length">
+                  {{ item[`title_${i}`][0]?.text }}
+                </h1>
               </div>
               <div v-if="item[`description_${i}`]" class="mb-1">
-                <PrismicRichText :field="item[`description_${i}`]" />
+                <!-- <PrismicRichText :field="item[`description_${i}`]" /> -->
+                <p v-if="item[`description_${i}`].length">
+                  {{ item[`description_${i}`][0]?.text }}
+                </p>
               </div>
 
               <Button

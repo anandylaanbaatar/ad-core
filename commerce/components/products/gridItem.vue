@@ -36,28 +36,6 @@
       <!--Overlay Items-->
       <div class="c-product-images-overlay">
         <div v-if="item.tags" class="c-block-top-left p-2">
-          <!--Inventory-->
-          <template v-if="inventoryTotal !== null">
-            <Tag
-              v-if="inventoryTotal < 5"
-              :value="`${$utils.t('Low in Stock')} (${inventoryTotal})`"
-              severity="warn"
-              class="mr-2"
-            ></Tag>
-            <Tag
-              v-else-if="inventoryTotal === 0"
-              :value="`${$utils.t('Out of Stock')}`"
-              severity="danger"
-              class="mr-2"
-            ></Tag>
-            <Tag
-              v-else-if="inventoryTotal >= 5"
-              :value="`${$utils.t('Available')} (${inventoryTotal})`"
-              severity="success"
-              class="mr-2"
-            ></Tag>
-          </template>
-
           <!--Tags-->
           <template v-for="tag in item.tags" :key="`product_tag_${tag}`">
             <Tag v-if="tag === 'Available'" severity="success" class="mr-2">{{
@@ -87,6 +65,30 @@
             @click.stop="useRemoveProduct(item)"
             aria-label="Remove Button"
           ></Button>
+        </div>
+
+        <div class="c-block-bottom-right p-2">
+          <!--Inventory-->
+          <template v-if="inventoryTotal !== null">
+            <Tag
+              v-if="inventoryTotal < 5 && inventoryTotal > 1"
+              :value="`${$utils.t('Low')} ${inventoryTotal}`"
+              severity="warn"
+              class="ml-2"
+            ></Tag>
+            <Tag
+              v-else-if="inventoryTotal === 0"
+              :value="`${$utils.t('Out of Stock')}`"
+              severity="danger"
+              class="ml-2"
+            ></Tag>
+            <Tag
+              v-else-if="inventoryTotal >= 5"
+              :value="`${$utils.t('Available')} ${inventoryTotal}`"
+              severity="success"
+              class="ml-2"
+            ></Tag>
+          </template>
         </div>
       </div>
     </div>

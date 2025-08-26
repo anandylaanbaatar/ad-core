@@ -72,6 +72,7 @@
                 <SlidersProduct
                   class="c-product-detailed-slider"
                   :item="product"
+                  :index="1"
                   type="productDetailedSlider"
                 ></SlidersProduct>
 
@@ -270,14 +271,6 @@
                   class="w-full"
                   @click="addToCart"
                 ></Button>
-                <!-- <Button
-                  v-else
-                  :label="$utils.t('Add To Cart')"
-                  icon="pi pi-shopping-cart"
-                  iconPos="right"
-                  class="w-full"
-                  @click="addToCart('single')"
-                ></Button> -->
 
                 <div class="c-divider md"></div>
 
