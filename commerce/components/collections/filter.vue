@@ -49,7 +49,7 @@ export default {
     getClass(collection) {
       let classItem = ""
 
-      if (collection === "all") {
+      if (collection === "all" && this.collectionHandle === "all") {
         return ` active`
       }
 

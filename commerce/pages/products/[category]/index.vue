@@ -4,7 +4,7 @@
       <Loader v-if="loading"></Loader>
 
       <div v-else class="container py-4">
-        <div class="row pb-5 px-4 md:px-0">
+        <div class="row pb-5 px-0 md:px-4">
           <!--Collections Block-->
           <div class="col-xs-12 md:p-0">
             <CollectionsBlock></CollectionsBlock>
@@ -63,7 +63,7 @@
 
         <div class="row no-margin">
           <!--Collections List-->
-          <div v-if="showFilters" class="col-xs-12 col-md-2 md:p-0">
+          <div v-if="showFilters" class="col-xs-12 col-md-2 pl-3 md:pl-4">
             <CollectionsFilter></CollectionsFilter>
           </div>
 

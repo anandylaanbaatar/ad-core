@@ -76,7 +76,7 @@
         <Message
           v-if="errors['system']"
           severity="error"
-          icon="pi pi-times"
+          icon="pi pi-info-circle"
           closable
           class="mt-3 c-message"
         >
@@ -375,6 +375,10 @@ export default {
       } else {
         this.errors["system"] = this.$utils.t("Error occurred during login.")
       }
+
+      setTimeout(() => {
+        this.errors = {}
+      }, 5000)
     },
     afterLogin() {
       // Success Message

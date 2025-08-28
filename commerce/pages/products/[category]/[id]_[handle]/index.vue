@@ -208,7 +208,7 @@
                 </div>
 
                 <!--Variants-->
-                <div v-if="product.variants.length > 1" class="row">
+                <div v-if="product.variants.length" class="row">
                   <p>{{ $utils.t("Color") }} / {{ $utils.t("Size") }}:</p>
                   <ul class="c-sizes w-full">
                     <li
