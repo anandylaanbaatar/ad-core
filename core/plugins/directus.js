@@ -210,6 +210,7 @@ export default defineNuxtPlugin((nuxtApp) => {
           line_items.product.*,
           line_items.product.featured_image.*,
           line_items.product_variant.*,
+          customer.*,
           shipping_address.*,
           billing_address.*
         `,

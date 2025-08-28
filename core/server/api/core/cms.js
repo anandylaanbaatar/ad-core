@@ -35,7 +35,7 @@ const getQuery = (params) => {
     }
     // User Tenants
     if (params.tenantIds) {
-      query += `${getQueryKey()}filter[tenants][_in]=${params.tenants}`
+      query += `${getQueryKey()}filter[tenants][_contains]=${params.tenantIds}`
     }
 
     // Pagination
