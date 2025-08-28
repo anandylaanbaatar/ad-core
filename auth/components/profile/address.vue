@@ -4,7 +4,6 @@
     <h3 class="mb-3">{{ $utils.t("My Addresses") }}</h3>
     <Button
       icon="pi pi-plus"
-      rounded
       severity="secondary"
       class="c-block-top-right mt-3 mr-3 sm"
       v-tooltip.left="$utils.t('New Address')"
@@ -18,17 +17,18 @@
         :key="`address_item_${address.id}`"
         class="d-block c-addressBlock"
       >
-        <template v-if="isDefaultAddress(address)">
+        <template v-if="address.isDefault">
           <Tag severity="success" class="mb-1">{{
             $utils.t("Default Address")
           }}</Tag>
           <br />
         </template>
-        <p class="font3 line-height-2">{{ address.fullAddress }}</p>
+        <p class="font3 line-height-2">
+          {{ address.shipping_address.full_address }}
+        </p>
 
         <Button
           icon="pi pi-pencil"
-          rounded
           severity="secondary"
           class="c-block-top-right mt-3 mr-3 sm"
           @click="editAddress(address)"
@@ -59,35 +59,25 @@
 
 <script>
 export default {
-  props: {
-    account: {
-      type: Object,
-      default: null,
-    },
-  },
-
   computed: {
+    customer() {
+      return useCommerceStore().customer
+    },
     allAddresses() {
-      if (this.account && this.account.addresses) {
-        if (
-          this.account.addresses.edges &&
-          this.account.addresses.edges.length > 0
-        ) {
-          let addressItems = this.account.addresses.edges.map((i) => {
-            let item = i.node
-
-            if (item.address2) {
-              if (item.address2 === "undefined") {
-                item.address2 = null
-              }
-            }
-
-            item.fullAddress = this.$address.formatAddress(item)
-            return item
-          })
-
-          return addressItems
-        }
+      if (
+        this.customer &&
+        this.customer.addresses &&
+        this.customer.addresses.length
+      ) {
+        return this.customer.addresses.map((i) => {
+          return {
+            ...i,
+            isDefault:
+              this.customer.default_address === i.shipping_address.id
+                ? true
+                : false,
+          }
+        })
       }
       return
     },
@@ -108,10 +98,7 @@ export default {
       })
     },
     isDefaultAddress(address) {
-      if (
-        this.account.defaultAddress.formatted.join(", ") ===
-        address.formatted.join(", ")
-      ) {
+      if (address && address.isDefaultAddress) {
         return true
       }
       return false

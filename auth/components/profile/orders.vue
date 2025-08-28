@@ -49,20 +49,17 @@
 
 <script>
 export default {
-  props: {
-    account: {
-      type: Object,
-      default: null,
-    },
-  },
-
   computed: {
+    customer() {
+      return useCommerceStore().customer
+    },
     allOrders() {
-      if (this.account && this.account.orders) {
-        if (this.account.orders.edges && this.account.orders.edges.length > 0) {
-          let orderItems = this.account.orders.edges.map((i) => i.node)
-          return orderItems
-        }
+      if (
+        this.customer &&
+        this.customer.orders &&
+        this.customer.orders.length
+      ) {
+        return this.customer.orders
       }
       return
     },

@@ -167,11 +167,11 @@
             v-for="error in errors['system']"
             :key="`error_${error}`"
             severity="error"
-            icon="pi"
+            icon="pi pi-info-circle"
             closable
             class="mt-3 c-message"
           >
-            {{ error.message }}
+            {{ $utils.t(error.message) }}
           </Message>
         </template>
       </div>
@@ -266,21 +266,9 @@ export default {
     allCountries() {
       return this.$forms.phoneCountries()
     },
-    isShopifyConnect() {
-      if (features().auth.connect) {
-        if (features().auth.connect.shopify) {
-          return true
-        }
-      }
-      return false
-    },
     showSocialLogins() {
       if (features().auth.socialLogins === true) {
-        if (this.isShopifyConnect) {
-          return false
-        } else {
-          return true
-        }
+        return true
       }
       return false
     },
@@ -379,52 +367,12 @@ export default {
         this.loading = true
 
         // Commerce
-        if (this.isShopifyConnect) {
-          await this.signUpWithShopify()
-        } else {
-          await this.signUpWithEmail()
-        }
+        await this.signUpWithEmail()
 
         this.loading = false
       }
     },
-    async connectShopify(formData) {
-      return new Promise(async (resolve) => {
-        const signUpData = await this.$shopify.signUp(formData)
 
-        // Error Occurred
-        if (signUpData.error) {
-          for (let i = 0; i < signUpData.error.length; i++) {
-            let error = signUpData.error[i]
-            this.errors[error.field] = error.message
-          }
-          this.isValid = false
-
-          console.log("Shopify connect error :::", signUpData.error)
-
-          resolve(null)
-        }
-
-        // Signed Up
-        if (signUpData) {
-          let loginForm = {
-            email: formData.email,
-            password: formData.password,
-          }
-          const accessToken = await this.$shopify.login(loginForm)
-
-          if (accessToken) {
-            resolve(accessToken)
-          } else {
-            resolve(null)
-          }
-        } else {
-          resolve(null)
-        }
-      })
-    },
-
-    // Signup Methods
     async signUpWithEmail() {
       const formData = this.getFormData()
 
@@ -449,37 +397,12 @@ export default {
         if (!newUser.phoneNumber) {
           newUser.phoneNumber = formData.phone
         }
-        // Connect
-        if (this.isShopifyConnect) {
-          let connectOptions = {
-            email: formData.email,
-            password: `${emailId}_${user.uid}`,
-            acceptsMarketing: formData.acceptsMarketing,
-            firstName: formData.firstName,
-            lastName: formData.lastName,
-            phone: newUser.phone,
-          }
-
-          console.log("[Shopify] ::: Connect options ::: ", connectOptions)
-
-          const connectData = await this.connectShopify(connectOptions)
-
-          if (!connectData) {
-            console.log("[Login] ::: Shopify Connect Error ::: ", connectData)
-          } else {
-            console.log("[Login] ::: Shopify Connect Success ::: ", connectData)
-
-            newUser.connect = {
-              shopify: connectData,
-            }
-          }
-        }
 
         await this.$fire.actions.resendEmailVerification()
         await useAuthStore().saveUserFirebase(newUser)
 
-        // Connect
-        if (this.isShopifyConnect) {
+        // Commerce User
+        if (theme().type === "commerce") {
           await useCommerceStore().setUser()
         }
 
@@ -487,8 +410,22 @@ export default {
       } catch (err) {
         console.log("SignUp ::: Error :: ", err)
 
-        this.errors["system"] = err.msg
+        let msg = err.code
+
+        if (msg === "auth/email-already-in-use") {
+          msg = `Email already in use`
+        }
+
+        this.errors["system"] = [
+          {
+            message: msg,
+          },
+        ]
         this.isValid = false
+
+        setTimeout(() => {
+          this.errors = {}
+        }, 5000)
       }
     },
     async signUpWithProvider(id) {
@@ -505,32 +442,6 @@ export default {
         this.errors["system"] = err.msg
         this.isValid = false
       }
-    },
-    async signUpWithShopify() {
-      const formData = this.getFormData()
-      let options = {
-        email: formData.email,
-        password: formData.password,
-        acceptsMarketing: formData.acceptsMarketing,
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        phone: `${this.formOptional.phoneCode}${formData.phone}`,
-      }
-
-      // 1. Signup and get user access token
-      const customer = await this.$shopify.signUp(options)
-
-      // Error Occurred
-      if (customer.error) {
-        for (let i = 0; i < customer.error.length; i++) {
-          let error = customer.error[i]
-          this.error(error.message)
-        }
-        this.isValid = false
-        return
-      }
-
-      this.afterSignUp()
     },
 
     error(msg) {

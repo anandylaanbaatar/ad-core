@@ -196,21 +196,9 @@ export default {
   },
 
   computed: {
-    isShopifyConnect() {
-      if (features().auth.connect) {
-        if (features().auth.connect.shopify) {
-          return true
-        }
-      }
-      return false
-    },
     showSocialLogins() {
       if (features().auth.socialLogins === true) {
-        if (this.isShopifyConnect) {
-          return false
-        } else {
-          return true
-        }
+        return true
       }
       return false
     },
@@ -252,12 +240,7 @@ export default {
       if (this.isValid) {
         this.loading = true
 
-        // Commerce
-        if (this.isShopifyConnect) {
-          await this.loginWithShopify()
-        } else {
-          await this.loginWithEmail()
-        }
+        await this.loginWithEmail()
 
         this.loading = false
       }
@@ -285,6 +268,12 @@ export default {
         }
 
         await useAuthStore().setUser(newUserData)
+
+        // Commerce User
+        if (theme().type === "commerce") {
+          await useCommerceStore().setUser()
+        }
+
         this.afterLogin()
       } catch (err) {
         console.log("Login ::: Error ::", err)
@@ -322,51 +311,6 @@ export default {
         console.log("Login ::: Error :: ", err)
         this.error(err.msg)
       }
-    },
-    async loginWithShopify() {
-      const formData = this.form
-      const loginData = {
-        email: formData.email,
-        password: formData.password,
-      }
-
-      // 1. Login and get user access token
-      const accessToken = await this.$shopify.login(loginData)
-      if (accessToken.error) return this.error(accessToken.error)
-
-      // 2. Get shopify user data
-      const customer = await useCommerceStore().getUserByEmail(this.form.email)
-      if (!customer) return this.error()
-
-      // 3. Shopify customer id
-      const sid = customer.id.replace("gid://shopify/Customer/", "")
-
-      // 4. Get Firebase user token
-      const { userToken } = await useCommerceStore().getUserByToken(sid)
-      if (!userToken) return this.error()
-
-      // 5. Login with user token
-      const user = await this.$fire.actions.loginWithToken(userToken)
-
-      if (!user) return this.error()
-
-      // 6. Update Firebase data and serve
-      let updates = user
-      updates.email = customer.email
-      updates.displayName = customer.displayName
-      updates.firstName = customer.firstName
-      updates.lastName = customer.lastName
-      updates.phone = customer.phone
-      updates.emailVerified = true
-      updates.connect = {
-        shopify: accessToken,
-      }
-      updates.connect.shopify.sid = sid
-      updates.connect.shopify.id = customer.id
-
-      await useAuthStore().saveUserFirebase(updates)
-      await useCommerceStore().setUser()
-      this.afterLogin()
     },
 
     error(msg) {

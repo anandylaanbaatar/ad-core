@@ -21,18 +21,18 @@
             <div class="d-block text-center p-6 mb-3">
               <i class="pi pi-box text-xl mb-2"></i>
 
-              <h1 v-if="order.name" class="w-full mb-2">
-                {{ $utils.t("Order") }}: {{ order.name }}
+              <h1 v-if="order.order_number" class="w-full mb-2">
+                {{ $utils.t("Order") }}: {{ order.order_number }}
               </h1>
 
-              <p v-if="order.confirmationNumber" class="font3">
+              <p v-if="order.id" class="font3">
                 {{ $utils.t("Confirmation Number") }}:
-                {{ order.confirmationNumber }}
+                {{ order.id }}
               </p>
 
-              <p v-if="order.processedAt" class="font3">
+              <p v-if="order.date_created" class="font3">
                 {{ $utils.t("Ordered Date") }}:
-                {{ $utils.formatDateTime(order.processedAt) }}
+                {{ $utils.formatDateTime(order.date_created) }}
               </p>
 
               <p v-if="order.updatedAt" class="font3">
@@ -60,12 +60,14 @@
 
                 <h3 class="mb-2">{{ $utils.t("Account") }}</h3>
 
-                <p v-if="order.email" class="font3">
-                  {{ order.email }}
-                </p>
-                <p v-if="order.phone" class="font3">
-                  {{ $utils.formatPhone(order.phone) }}
-                </p>
+                <template v-if="customer.id === order.customer">
+                  <p v-if="customer.email" class="font3">
+                    {{ customer.email }}
+                  </p>
+                  <p v-if="customer.phone" class="font3">
+                    {{ $utils.formatPhone(customer.phone) }}
+                  </p>
+                </template>
               </div>
             </div>
           </div>
@@ -79,26 +81,26 @@
                 <h3 class="mb-3">{{ $utils.t("Payment Information") }}</h3>
 
                 <p class="font3">
-                  {{ $utils.t("Tax") }}: {{ $currency.format(order.totalTax) }}
+                  {{ $utils.t("Tax") }}: {{ $currency.format(order.tax_total) }}
                 </p>
 
                 <p class="font3">
                   {{ $utils.t("Shipping") }}:
-                  {{ $currency.format(order.totalShippingPrice) }}
+                  {{ $currency.format(order.shipping_total) }}
                 </p>
 
                 <p class="font3">
                   {{ $utils.t("Discount") }}:
-                  {{ $currency.format(order.totalDiscounts) }}
+                  {{ $currency.format(order.discount_total) }}
                 </p>
 
                 <p class="font3">
                   {{ $utils.t("Total") }}:
-                  {{ $currency.format(order.totalPrice) }}
+                  {{ $currency.format(order.total) }}
                 </p>
 
                 <Tag
-                  v-if="order.displayFinancialStatus === 'PAID'"
+                  v-if="order.payment_status === 'paid'"
                   severity="success"
                   class="mt-2"
                 >
@@ -126,22 +128,40 @@
 
                 <h3 class="mb-2">{{ $utils.t("Shipping Information") }}</h3>
 
+                <div v-if="order.shipping" class="c-list-items mb-2">
+                  {{ order.shipping }}
+                </div>
+
                 <Tag v-if="order.cancelReason" severity="danger" class="mb-1">
                   {{ $utils.t("Cancelled") }}
                 </Tag>
                 <Tag
-                  v-else-if="order.displayFulfillmentStatus === 'UNFULFILLED'"
+                  v-else-if="order.fulfillment_status === 'open'"
                   severity="warn"
                   class="mb-1"
                 >
                   {{ $utils.t("Not Delivered") }}
                 </Tag>
                 <Tag
-                  v-else-if="order.displayFulfillmentStatus === 'FULFILLED'"
+                  v-else-if="order.fulfillment_status === 'in_progress'"
+                  severity="warn"
+                  class="mb-1"
+                >
+                  {{ $utils.t("In Progress") }}
+                </Tag>
+                <Tag
+                  v-else-if="order.fulfillment_status === 'fulfilled'"
                   severity="success"
                   class="mb-1"
                 >
                   {{ $utils.t("Delivered") }}
+                </Tag>
+                <Tag
+                  v-else-if="order.fulfillment_status === 'on_hold'"
+                  severity="warn"
+                  class="mb-1"
+                >
+                  {{ $utils.t("On Hold") }}
                 </Tag>
               </div>
             </div>
@@ -157,16 +177,13 @@
               <p class="font3">
                 {{ $utils.t("Total Products") }}:
 
-                <Badge
-                  :value="`${order.subtotalLineItemsQuantity}`"
-                  severity="contrast"
-                ></Badge>
+                <Badge :value="`${lineItemsCount}`" severity="contrast"></Badge>
               </p>
             </div>
 
-            <div v-if="items" class="productsGrid row mb-2">
+            <div v-if="lineItems" class="productsGrid row mb-2">
               <ProductsLineItem
-                v-for="(item, index) in items"
+                v-for="(item, index) in lineItems"
                 :item="item"
                 :key="`product_line_item_${index}`"
               ></ProductsLineItem>
@@ -189,30 +206,43 @@ export default {
   },
 
   computed: {
-    items() {
+    customer() {
+      return useCommerceStore().customer
+    },
+    lineItems() {
       if (this.order) {
-        if (this.order.lineItems) {
-          return this.order.lineItems.nodes
+        if (this.order.line_items) {
+          return this.order.line_items
         }
       }
       return []
     },
+    lineItemsCount() {
+      if (this.lineItems) {
+        let count = 0
+
+        for (let i = 0; i < this.lineItems.length; i++) {
+          count += this.lineItems[i].quantity
+        }
+
+        return count
+      }
+      return 0
+    },
   },
 
-  async created() {
+  async mounted() {
     const id = useRoute().params.id
     this.orderId = id
 
-    // console.log("Order ID ::: ", this.orderId)
-
-    const res = await this.$shopify.order({
-      orderId: this.orderId,
+    const res = await this.$directus.order.item({
+      id: id,
     })
 
-    // console.log("Orders ::: ", res)
+    console.log("Orders ::: ", res)
 
-    if (res && res.order) {
-      this.order = res.order
+    if (res.success && res.data) {
+      this.order = res.data
     }
 
     setTimeout(() => {

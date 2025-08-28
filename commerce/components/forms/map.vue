@@ -99,10 +99,10 @@ export default {
         this.geoCoderByLatLng(position.lat, position.lng)
       }
     },
-    async geoCoderByAddress(address) {
-      if (!address) return
+    async geoCoderByAddress(full_address) {
+      if (!full_address) return
 
-      const res = await this.$address.addressToLatLng(address)
+      const res = await this.$address.addressToLatLng(full_address)
 
       console.log("Address ::: Geocode from address to lat lng: ", res)
 
@@ -144,7 +144,14 @@ export default {
     },
     async checkDefaultAddress() {
       if (this.address) {
-        await this.geoCoderByAddress(this.address)
+        if (this.address.lat && this.address.lng) {
+          this.mapPosition = {
+            lat: parseFloat(this.address.lat),
+            lng: parseFloat(this.address.lng),
+          }
+        } else if (this.address.full_address) {
+          await this.geoCoderByAddress(this.address.full_address)
+        }
       }
     },
 

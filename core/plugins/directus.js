@@ -178,6 +178,26 @@ export default defineNuxtPlugin((nuxtApp) => {
    * Orders
    */
 
+  const orderItem = async (params) => {
+    const res = await fetchData({
+      method: "GET",
+      path: `items/orders/${params.id}`,
+      params: {
+        ...params,
+        fields: `
+          *,
+          line_items.*,
+          line_items.product.*,
+          line_items.product.featured_image.*,
+          line_items.product_variant.*,
+          shipping_address.*,
+          billing_address.*
+        `,
+      },
+    })
+
+    return res
+  }
   const orderList = async (params) => {
     const res = await fetchData({
       method: "GET",
@@ -237,6 +257,23 @@ export default defineNuxtPlugin((nuxtApp) => {
    * Customers
    */
 
+  const customerItem = async (params) => {
+    const res = await fetchData({
+      method: "GET",
+      path: `items/customers`,
+      params: {
+        ...params,
+        fields: `
+          *,
+          addresses.*,
+          addresses.shipping_address.*,
+          orders.*
+        `,
+      },
+    })
+
+    return res
+  }
   const customerList = async (params) => {
     const res = await fetchData({
       method: "GET",
@@ -274,6 +311,20 @@ export default defineNuxtPlugin((nuxtApp) => {
       method: "DELETE",
       path: `items/customers/${params.id}`,
     })
+
+    return res
+  }
+  const customerAddressDelete = async (params) => {
+    const res = await fetchData({
+      method: "DELETE",
+      path: `items/addresses/${params.id}`,
+    })
+    if (params.cid) {
+      await fetchData({
+        method: "DELETE",
+        path: `items/customer_addresses/${params.cid}`,
+      })
+    }
 
     return res
   }
@@ -548,16 +599,21 @@ export default defineNuxtPlugin((nuxtApp) => {
           delete: fileDelete,
         },
         order: {
+          item: orderItem,
           list: orderList,
           create: orderCreate,
           update: orderUpdate,
           delete: orderDelete,
         },
         customer: {
+          item: customerItem,
           list: customerList,
           create: customerCreate,
           update: customerUpdate,
           delete: customerDelete,
+          address: {
+            delete: customerAddressDelete,
+          },
         },
         location: {
           list: locationList,

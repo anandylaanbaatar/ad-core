@@ -44,7 +44,7 @@ export default {
     }
   },
 
-  async created() {
+  async mounted() {
     await useCommerceStore().setUser()
     await this.cleanUpCart()
 

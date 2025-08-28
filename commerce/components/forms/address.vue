@@ -205,16 +205,41 @@ export default {
     account() {
       return useAuthStore().user
     },
+    customer() {
+      return useCommerceStore().customer
+    },
     defaultAddress() {
-      if (this.account) {
-        if (this.account.defaultAddress) {
-          console.log("Default Address ::: ", this.account)
-          return this.account.defaultAddress
-        }
-      }
+      // if (this.account) {
+      //   if (this.account.defaultAddress) {
+      //     console.log("Default Address ::: ", this.account)
+      //     return this.account.defaultAddress
+      //   }
+      // }
       return null
     },
-
+    isDefaultAddress() {
+      // if (this.defaultAddress && this.isEditMode) {
+      //   if (
+      //     this.defaultAddress.formatted.join(", ") ===
+      //     this.address.formatted.join(", ")
+      //   ) {
+      //     return true
+      //   }
+      // } else if (!this.isEditMode) {
+      //   if (this.account) {
+      //     if (this.account.defaultAddress !== null) {
+      //       return true
+      //     }
+      //   }
+      // }
+      return false
+    },
+    addressItem() {
+      if (this.address) {
+        return this.address.shipping_address
+      }
+      return
+    },
     isFormValid() {
       if (Object.keys(this.errors).length > 0) {
         return false
@@ -230,23 +255,6 @@ export default {
       }
       return false
     },
-    isDefaultAddress() {
-      if (this.defaultAddress && this.isEditMode) {
-        if (
-          this.defaultAddress.formatted.join(", ") ===
-          this.address.formatted.join(", ")
-        ) {
-          return true
-        }
-      } else if (!this.isEditMode) {
-        if (this.account) {
-          if (this.account.defaultAddress !== null) {
-            return true
-          }
-        }
-      }
-      return false
-    },
     saveBtnLabel() {
       if (this.isEditMode) {
         return this.$utils.t("Update")
@@ -256,10 +264,6 @@ export default {
   },
 
   async created() {
-    // this.customerData = await this.$shopify.customer({
-    //   access_token: this.$shopify.getUserToken(),
-    // })
-
     this.fillForm()
     this.validation()
 
@@ -275,6 +279,9 @@ export default {
     this.form = {
       address: null,
     }
+    this.fullAddress = null
+    this.editAddress = null
+
     this.loading = false
     this.searching = false
     this.addresses = null
@@ -282,7 +289,6 @@ export default {
 
     this.showMap = false
     this.customerData = null
-    this.editAddress = null
   },
 
   methods: {
@@ -291,22 +297,22 @@ export default {
     },
     fillForm() {
       if (this.isEditMode) {
-        this.selectedAddress = this.address
+        this.selectedAddress = this.addressItem
 
         this.form.address = {
-          id: this.address.id,
-          address1: this.address.address1,
-          address2: this.address.address2,
-          city: this.address.city,
-          country: this.address.country,
-          province: this.address.province,
-          state: this.address.address1,
-          zip: this.address.zip,
-          isDefaultAddress: this.address.isDefaultAddress,
-          fullAddress: this.address.fullAddress,
+          id: this.addressItem.id,
+          address1: this.addressItem.address1,
+          address2: this.addressItem.address2,
+          city: this.addressItem.city,
+          country: this.addressItem.country,
+          province: this.addressItem.province,
+          state: this.addressItem.address1,
+          zip: this.addressItem.zip,
+          isDefaultAddress: this.addressItem.isDefaultAddress,
+          fullAddress: this.addressItem.full_address,
         }
 
-        this.editAddress = this.address.fullAddress
+        this.editAddress = this.addressItem
       } else {
         this.form.address = {
           id: null,
@@ -324,6 +330,8 @@ export default {
           this.form.address.isDefaultAddress = true
         }
       }
+
+      console.log("address ::: ", this.address)
     },
 
     // Search
@@ -336,7 +344,8 @@ export default {
       this.form.address.city = address.city ? address.city : null
       this.form.address.country = address.country ? address.country : null
       this.form.address.zip = address.zip ? address.zip : null
-
+      this.form.address.lat = address.location?.lat || null
+      this.form.address.lng = address.location?.lng || null
       this.form.address.search = null
       this.addresses = null
 
@@ -424,66 +433,98 @@ export default {
       }
 
       let formData = {
-        firstName: this.account.firstName,
-        lastName: this.account.lastName,
-        phone: this.account.phone,
-        ...this.form.address,
+        title: null,
+        status: "published",
+        first_name: this.customer.first_name,
+        last_name: this.customer.last_name,
+        phone: this.customer.phone,
+        address1: this.form.address.address1,
+        address2: this.form.address.address2,
+        city: this.form.address.city,
+        province: this.form.address.province,
+        country: this.form.address.country,
+        zip: this.form.address.zip,
+        full_address: this.form.address.fullAddress,
+        lat: this.form.address.lat,
+        lng: this.form.address.lng,
       }
-      delete formData.search
-      delete formData.id
-
-      console.log("Submit ::: Form ::: ", formData)
 
       // Update
       if (this.isEditMode) {
         formData.id = this.address.id
 
-        // const res = await this.$shopify.updateCustomerAddress(formData)
+        const customerUpdate = await this.$directus.customer.update({
+          id: this.customer.id,
+          addresses: {
+            update: [
+              {
+                id: this.addressItem.id,
+                shipping_address: formData,
+              },
+            ],
+          },
+        })
 
-        // console.log("Update Address :: ", res)
+        console.log("Address ::: Updated ::: ", customerUpdate)
 
-        // if (this.form.address.isDefaultAddress) {
-        //   if (
-        //     res &&
-        //     res.customerAddressUpdate &&
-        //     res.customerAddressUpdate.customerAddress
-        //   ) {
-        //     let addressId = res.customerAddressUpdate.customerAddress.id
+        if (customerUpdate.success && customerUpdate.data) {
+          // // Set Default Address
+          // if (
+          //   !customerUpdate.default_address &&
+          //   this.form.address.isDefaultAddress
+          // ) {
+          //   await this.saveDefaultAddress(
+          //     customerUpdate.data.addresses[
+          //       customerUpdate.data.addresses.length - 1
+          //     ]
+          //   )
+          // }
 
-        //     await this.saveDefaultAddress(addressId)
-        //   }
-        // }
-
-        this.$bus.$emit("updateAccount")
-        await useCommerceStore().setUser()
+          this.$bus.$emit("updateAccount")
+          await useCommerceStore().setUser()
+        }
         // Create
       } else {
-        // const res = await this.$shopify.createCustomerAddress(formData)
+        const customerUpdate = await this.$directus.customer.update({
+          id: this.customer.id,
+          addresses: {
+            create: [
+              {
+                shipping_address: formData,
+              },
+            ],
+          },
+        })
 
-        // if (this.form.address.isDefaultAddress) {
-        //   if (
-        //     res &&
-        //     res.customerAddressCreate &&
-        //     res.customerAddressCreate.customerAddress
-        //   ) {
-        //     let addressId = res.customerAddressCreate.customerAddress.id
+        console.log("Address ::: Create ::: ", customerUpdate)
 
-        //     await this.saveDefaultAddress(addressId)
-        //   }
-        // }
+        if (customerUpdate.success && customerUpdate.data) {
+          // // Set Default Address
+          // if (
+          //   !customerUpdate.default_address &&
+          //   this.form.address.isDefaultAddress
+          // ) {
+          //   await this.saveDefaultAddress(
+          //     customerUpdate.data.addresses[
+          //       customerUpdate.data.addresses.length - 1
+          //     ]
+          //   )
+          // }
 
-        this.$bus.$emit("updateAccount")
-        await useCommerceStore().setUser()
+          this.$bus.$emit("updateAccount")
+          await useCommerceStore().setUser()
+        }
       }
 
       this.loading = false
     },
     async saveDefaultAddress(id) {
-      // const res = await this.$shopify.updateCustomerDefaultAddress({
-      //   access_token: this.$shopify.getUserToken(),
-      //   id: id,
-      // })
-      // console.log("Update Default Address :: ", res)
+      const customerUpdate = await this.$directus.customer.update({
+        id: this.customer.id,
+        default_address: id,
+      })
+
+      console.log("Address Default ::: Updated ::: ", customerUpdate)
     },
     async deleteAddress() {
       this.loading = true
@@ -499,21 +540,24 @@ export default {
         rejectLabel: this.$utils.t("Cancel"),
         acceptLabel: this.$utils.t("Confirm"),
         accept: async () => {
-          // const res = await this.$shopify.deleteCustomerAddress({
-          //   id: this.address.id,
-          //   access_token: this.$shopify.getUserToken(),
-          // })
+          const customerAddressDelete =
+            await this.$directus.customer.address.delete({
+              id: this.addressItem.id,
+              cid: this.address.id,
+            })
 
-          // if (res) {
-          //   await useCommerceStore().setUser()
+          console.log("Delete Customer Address ::: ", customerAddressDelete)
 
-          //   this.$bus.$emit("updateAccount")
-          //   this.$bus.$emit("toast", {
-          //     severity: "success",
-          //     summary: "Address",
-          //     detail: "Succesfully deleted address.",
-          //   })
-          // }
+          if (customerAddressDelete.success) {
+            await useCommerceStore().setUser()
+
+            this.$bus.$emit("updateAccount")
+            this.$bus.$emit("toast", {
+              severity: "success",
+              summary: "Address",
+              detail: "Succesfully deleted address.",
+            })
+          }
 
           this.loading = false
         },

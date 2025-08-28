@@ -202,13 +202,13 @@ export default {
         }
       }
 
-      console.log(
-        "Products ::: ",
-        this.filters,
-        this.category,
-        options,
-        products
-      )
+      // console.log(
+      //   "Products ::: ",
+      //   this.filters,
+      //   this.category,
+      //   options,
+      //   products
+      // )
 
       if (isViewMore) {
         this.moreLoading = false

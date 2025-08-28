@@ -17,23 +17,14 @@
       <div class="content">
         <div>
           <p class="font2 title">
-            {{ $utils.addDots(item.title, 23) }}
+            {{ $utils.addDots(item.product.title, 23) }}
           </p>
           <p class="font2 price">
-            {{ $currency.format(item.originalTotal) }}
-          </p>
-
-          <p
-            v-if="
-              item.variantTitle !== 'Default Title' &&
-              item.variantTitle !== 'Default' &&
-              item.variantTitle !== 'default'
-            "
-            class="description"
-          >
-            {{ item.variantTitle }}
+            {{ $currency.format(item.price) }}
           </p>
         </div>
+
+        <Tag severity="warn" class="ml-3">{{ item.product_variant.sku }}</Tag>
       </div>
     </div>
   </div>
@@ -54,8 +45,12 @@ export default {
 
   computed: {
     itemImage() {
-      if (this.item && this.item.image) {
-        return this.item.image.url
+      if (this.item) {
+        if (this.item.product_variant?.image) {
+          return this.item.product_variant.image.url
+        } else if (this.item.product.featured_image?.url) {
+          return this.item.product.featured_image?.url
+        }
       }
       return false
     },

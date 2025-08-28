@@ -18,20 +18,18 @@ export const useAuthStore = defineStore("auth", {
       const config = useRuntimeConfig()
       const nuxtApp = useNuxtApp()
 
-      if (config.public.features.auth.type === "shopify") {
-        await nuxtApp.$shopify.logout()
-      } else if (config.public.features.auth.type === "firebase") {
+      if (config.public.features.auth.type === "firebase") {
         await nuxtApp.$fire.actions.logout()
+      }
+
+      // Commerce User
+      if (theme().type === "commerce") {
+        await useCommerceStore().resetCart()
+        await useCommerceStore().set("customer", null)
       }
 
       this.set("user", null)
       this.set("userLoggedIn", false)
-
-      if (theme().type === "commerce") {
-        if (useCommerceStore().shopifyUser) {
-          useCommerceStore().set("shopifyUser", null)
-        }
-      }
 
       nuxtApp.$bus.$emit("sidebarGlobalClose")
       nuxtApp.$bus.$emit("toast", {
@@ -68,11 +66,6 @@ export const useAuthStore = defineStore("auth", {
 
       if (features().auth.type === "firebase") {
         await this.setUserFirebase(user)
-      }
-      if (features().auth.connect && features().auth.connect.shopify) {
-        if (useCommerceStore()) {
-          await useCommerceStore().setUser(user)
-        }
       }
     },
 
@@ -154,13 +147,6 @@ export const useAuthStore = defineStore("auth", {
       }
       if (user.roles) {
         updates.roles = user.roles
-      }
-      if (user.connect) {
-        if (user.connect.shopify) {
-          updates.connect = {
-            shopify: user.connect.shopify,
-          }
-        }
       }
 
       console.log("Save User Firebase ::: ", user)
@@ -244,10 +230,6 @@ export const useAuthStore = defineStore("auth", {
        * Commerce & Payment
        */
 
-      // Check if Shopify Customer Set
-      if (features().auth.connect && features().auth.connect.shopify) {
-        await useCommerceStore().setUser(userData)
-      }
       // Check if Stripe Customer Id Set
       if (integrations().stripe && userData.email) {
         const customerId = await usePaymentStore().setStripeCustomerId(userData)

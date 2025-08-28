@@ -8,7 +8,7 @@ export const useCommerceStore = defineStore("commerce", {
     clientInit: false,
 
     // User
-    shopifyUser: null,
+    customer: null,
 
     // Cart
     initCart: null,
@@ -33,16 +33,14 @@ export const useCommerceStore = defineStore("commerce", {
 
     // Location
     locations: null,
-    selectedLocation:
-      theme().type === "commerce"
-        ? useAppConfig().theme.commerce?.location
-        : null,
+    selectedLocation: null,
 
     // Shipping
     shippingLines:
       theme().type === "commerce"
         ? useAppConfig().theme.commerce?.shippingLines
         : null,
+    shippingAmount: null,
   }),
 
   getters: {
@@ -57,11 +55,12 @@ export const useCommerceStore = defineStore("commerce", {
         itemsTotal: state.cartTotalItems,
         taxAmount: 0,
         discountAmount: 0,
-        shippingAmount: 0,
+        shippingAmount: this.shippingAmount || 0,
         subtotalAmount: 0,
         totalAmount: 0,
       }
 
+      // Cart Items
       if (state.cartItems.length) {
         for (let i = 0; i < state.cartItems.length; i++) {
           const cartItem = state.cartItems[i]
@@ -74,8 +73,9 @@ export const useCommerceStore = defineStore("commerce", {
           }
         }
       }
+      // Shipping
 
-      totals.totalAmount = totals.subtotalAmount
+      totals.totalAmount = totals.subtotalAmount + totals.shippingAmount
 
       return totals
     },
@@ -88,43 +88,94 @@ export const useCommerceStore = defineStore("commerce", {
 
     // User
     async setUser(user) {
-      if (user && user.connect && user.connect.shopify) {
-        const accessToken = user.connect.shopify.accessToken
-        const shopifyUser = await useNuxtApp().$shopify.customer({
-          access_token: accessToken,
-        })
-        if (shopifyUser && !shopifyUser.error) {
-          this.shopifyUser = shopifyUser
-
-          // console.log(
-          //   "[Store] ::: [Commerce] ::: Shopify User Set!",
-          //   shopifyUser
-          // )
-        }
-        return
-      }
-
       const userData = useAuthStore().user
+      const nuxtApp = useNuxtApp()
+      let customer = null
 
-      // console.log("[Store] ::: [Commerce] ::: Fire User ::", userData, user)
+      const isArraysEqual = (a, b) => {
+        return a.length === b.length && a.every((val, i) => val === b[i])
+      }
 
-      if (userData && userData.connect && userData.connect.shopify) {
-        const accessToken = userData.connect.shopify.accessToken
-        const shopifyUser = await useNuxtApp().$shopify.customer({
-          access_token: accessToken,
+      // const tenantId =
+      //   useRuntimeConfig().public.features?.multitenancy?.tenantId
+
+      console.log("[Commerce] ::: UserData ::: ", user, userData)
+
+      // 1. Check Customer Exists
+      const customerData = await nuxtApp.$directus.customer.item({
+        uid: userData.uid,
+      })
+
+      console.log("[Commerce] ::: Customer Exists ::: ", customerData)
+
+      // Check Customer
+      if (
+        customerData.success &&
+        customerData.data &&
+        customerData.data.length
+      ) {
+        customer = customerData.data[0]
+
+        // Update and Set
+        let updates = {}
+        if (customer.first_name !== userData.firstName) {
+          updates.first_name = userData.firstName
+          customer.first_name = userData.firstName
+        }
+        if (customer.last_name !== userData.lastName) {
+          updates.last_name = userData.lastName
+          customer.last_name = userData.lastName
+        }
+        if (customer.email !== userData.email) {
+          updates.email = userData.email
+          customer.email = userData.email
+        }
+        if (customer.phone !== userData.phone) {
+          updates.phone = userData.phone
+          customer.phone = userData.phone
+        }
+        if (customer.is_email_subscribed !== userData.acceptsMarketing) {
+          customer.is_email_subscribed = userData.acceptsMarketing
+          updates.is_email_subscribed = userData.acceptsMarketing
+        }
+        if (!isArraysEqual(customer.tenants, userData.tenants)) {
+          customer.tenants = userData.tenants
+          updates.tenants = userData.tenants
+        }
+        if (Object.keys(updates).length > 0) {
+          const customerUpdate = await nuxtApp.$directus.customer.update({
+            id: customer.id,
+            ...updates,
+          })
+
+          console.log("[Commerce] ::: Customer Updated ::: ", customerUpdate)
+
+          if (customerUpdate.success && customerUpdate.data) {
+            customer = customerUpdate.data
+          }
+        }
+      } else {
+        // Create and Set
+        const customerCreate = await nuxtApp.$directus.customer.create({
+          uid: userData.uid,
+          tenants: userData.tenants,
+          first_name: userData.firstName || null,
+          last_name: userData.lastName || null,
+          email: userData.email || null,
+          phone: userData.phone || null,
+          is_email_subscribed: userData.acceptsMarketing,
+          is_sms_subscribed: userData.phone ? true : false,
         })
 
-        // console.log("[Store] ::: [Commerce] ::: Shopify User ::", shopifyUser)
+        console.log("[Commerce] ::: Customer Created ::: ", customerCreate)
 
-        if (shopifyUser && !shopifyUser.error) {
-          this.shopifyUser = shopifyUser
-
-          // console.log(
-          //   "[Store] ::: [Commerce] ::: Shopify User Set!",
-          //   shopifyUser
-          // )
+        if (customerCreate.success && customerCreate.data) {
+          customer = customerCreate.data
         }
       }
+
+      this.customer = customer
+      console.log("[Commerce] ::: Customer Set ::: ", this.customer)
     },
     async getUserByEmail(email) {
       const user = await useNuxtApp().$shopify.customerByEmail({
@@ -174,7 +225,7 @@ export const useCommerceStore = defineStore("commerce", {
           this.locations = allLocations
 
           if (!this.selectedLocation) {
-            this.setLocation(allLocations[0])
+            this.selectedLocation = allLocations[0]
           }
         }
       }
@@ -221,6 +272,10 @@ export const useCommerceStore = defineStore("commerce", {
     },
 
     // Cart
+    async resetCart() {
+      this.shippingAmount = null
+      await this.setOrderNumber()
+    },
     loadCartFromStorage() {
       if (import.meta.client) {
         const tenantId =
@@ -350,6 +405,7 @@ export const useCommerceStore = defineStore("commerce", {
     },
     async clearCart() {
       this.cart = []
+      this.resetCart()
       this.saveCartToStorage()
       await this.setCartItems()
     },

@@ -7,12 +7,9 @@
       <ProfileInfo :account="account" @updated="updated"></ProfileInfo>
 
       <!--Shopify Only-->
-      <template v-if="isShopify">
-        <ProfileOrders :account="shopifyAccount"></ProfileOrders>
-        <ProfileAddress
-          ref="profileAddress"
-          :account="shopifyAccount"
-        ></ProfileAddress>
+      <template v-if="isCommerce">
+        <ProfileOrders></ProfileOrders>
+        <ProfileAddress ref="profileAddress"></ProfileAddress>
       </template>
 
       <!--Stripe Only-->
@@ -49,24 +46,25 @@ export default {
     theme() {
       return useAppConfig().theme
     },
-    shopifyAccount() {
-      const commerceStore = useCommerceStore()
-
-      if (commerceStore) {
-        if (commerceStore.shopifyUser) {
-          return commerceStore.shopifyUser
-        }
-      }
-
-      return
-    },
     account() {
       const store = useAuthStore()
       return store.user
     },
-    isShopify() {
-      return features().auth.connect && features().auth.connect.shopify
+
+    // Commerce
+    isCommerce() {
+      if (this.theme.type === "commerce") {
+        return true
+      }
+      return false
     },
+    customer() {
+      if (this.isCommerce) {
+        return useCommerceStore().customer
+      }
+      return
+    },
+
     isFirebase() {
       return useRuntimeConfig().public.features.auth.type === "firebase"
     },
@@ -127,7 +125,7 @@ export default {
 
       await useAuthStore().setUser()
 
-      if (this.isShopify) {
+      if (this.isCommerce) {
         await useCommerceStore().setUser()
       }
     },

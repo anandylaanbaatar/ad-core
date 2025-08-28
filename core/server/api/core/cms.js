@@ -29,6 +29,14 @@ const getQuery = (params) => {
     if (params.sourceIds) {
       query += `${getQueryKey()}filter[source_id][_in]=${params.sourceIds}`
     }
+    // User Uid
+    if (params.uid) {
+      query += `${getQueryKey()}filter[uid][_eq]=${params.uid}`
+    }
+    // User Tenants
+    if (params.tenantIds) {
+      query += `${getQueryKey()}filter[tenants][_in]=${params.tenants}`
+    }
 
     // Pagination
     if (params.page) {

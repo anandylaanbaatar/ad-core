@@ -342,6 +342,9 @@ export default {
         shipping_total: this.cart.totals.shippingAmount,
         total: this.cart.totals.totalAmount,
       }
+      if (useCommerceStore() && useCommerceStore().customer) {
+        formData.customer = useCommerceStore().customer.id
+      }
 
       console.log("Order Form ::: ", formData)
 

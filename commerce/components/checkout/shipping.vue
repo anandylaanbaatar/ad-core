@@ -118,7 +118,7 @@
             :class="{ active: options.address === address.id }"
           >
             <div class="row px-3 relative mb-2">
-              <p class="font2">{{ address.fullAddress }}</p>
+              <p class="font2">{{ address.full_address }}</p>
               <Tag
                 v-if="checkAddress(address)"
                 severity="success"
@@ -234,35 +234,35 @@ export default {
   },
 
   computed: {
+    cart() {
+      return useCommerceStore().cart
+    },
     user() {
       return useAuthStore().user
     },
+    customer() {
+      return useCommerceStore().customer
+    },
     allAddresses() {
-      if (this.user && this.user.addresses) {
-        if (this.user.addresses.edges && this.user.addresses.edges.length > 0) {
-          let addressItems = this.user.addresses.edges.map((i) => {
-            let item = i.node
-
-            if (item.address2) {
-              if (item.address2 === "undefined") {
-                item.address2 = null
-              }
-            }
-
-            item.fullAddress = this.$address.formatAddress(item)
-            return item
-          })
-
-          return addressItems
-        }
+      if (
+        this.customer &&
+        this.customer.addresses &&
+        this.customer.addresses.length
+      ) {
+        return this.customer.addresses.map((i) => {
+          return {
+            ...i.shipping_address,
+            isDefault:
+              this.customer.default_address === i.shipping_address.id
+                ? true
+                : false,
+          }
+        })
       }
       return
     },
     locations() {
       let allLocations = useCommerceStore().locations
-
-      // console.log("All Locations ::: ", allLocations)
-
       return allLocations
     },
     shippingLines() {
@@ -386,6 +386,7 @@ export default {
       if (type === "address") {
         this.options.distance = null
         await this.calculateAddresses()
+        useCommerceStore().set("shippingAmount", this.shippingLine.price)
       }
 
       console.log("Select Item ::: ", this.options)
@@ -394,11 +395,12 @@ export default {
       if (!useCommerceStore().selectedLocation) return
 
       const location = this.locations.find(
-        (i) => i.id === useCommerceStore().selectedLocation?.id
+        (i) =>
+          i.address?.id === useCommerceStore().selectedLocation?.address?.id
       )
 
       // Mongolia
-      if (this.shippingAddress.country === "Mongolia") {
+      if (location && this.shippingAddress.country === "Mongolia") {
         let address1 = this.getFormattedAddress(location.address)
         let address2 = this.getFormattedAddress(this.shippingAddress)
 
