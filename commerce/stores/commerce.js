@@ -138,7 +138,12 @@ export const useCommerceStore = defineStore("commerce", {
           customer.is_email_subscribed = userData.acceptsMarketing
           updates.is_email_subscribed = userData.acceptsMarketing
         }
-        if (!isArraysEqual(customer.tenants, userData.tenants)) {
+        if (customer.tenants && userData.tenants) {
+          if (!isArraysEqual(customer.tenants, userData.tenants)) {
+            customer.tenants = userData.tenants
+            updates.tenants = userData.tenants
+          }
+        } else {
           customer.tenants = userData.tenants
           updates.tenants = userData.tenants
         }
