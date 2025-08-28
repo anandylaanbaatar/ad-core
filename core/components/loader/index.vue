@@ -43,6 +43,10 @@ export default {
       type: String,
       default: null,
     },
+    classes: {
+      type: String,
+      default: null,
+    },
   },
 
   computed: {
@@ -60,6 +64,10 @@ export default {
       if (this.size) {
         if (classItems) classItems += " "
         classItems += this.size
+      }
+      if (this.classes) {
+        if (classItems) classItems += " "
+        classItems += this.classes
       }
 
       return classItems

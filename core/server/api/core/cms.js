@@ -37,6 +37,13 @@ const getQuery = (params) => {
     if (params.tenantIds) {
       query += `${getQueryKey()}filter[tenants][_contains]=${params.tenantIds}`
     }
+    // Query
+    if (params.query) {
+      query += `${getQueryKey()}filter[title][_icontains]=${params.query}`
+    }
+    if (params.customer_query) {
+      query += `${getQueryKey()}filter[_or][0][first_name][_icontains]=${params.customer_query}&filter[_or][1][last_name][_icontains]=${params.customer_query}`
+    }
 
     // Pagination
     if (params.page) {
