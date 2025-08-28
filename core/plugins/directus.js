@@ -282,7 +282,10 @@ export default defineNuxtPlugin((nuxtApp) => {
       params: {
         ...params,
         fields: `
-          *
+          *,
+          addresses.*,
+          addresses.shipping_address.*,
+          orders.*
         `,
       },
     })
