@@ -39,29 +39,30 @@
           <!--Tags-->
           <template v-for="tag in item.tags" :key="`product_tag_${tag}`">
             <Tag v-if="tag === 'Available'" severity="success" class="mr-2">{{
-              $utils.t(tag)
+              $utils.t(tag.toLowerCase())
             }}</Tag>
             <Tag v-else-if="tag === 'Sale'" severity="danger" class="mr-2">{{
-              $utils.t(tag)
+              $utils.t(tag.toLowerCase())
             }}</Tag>
             <Tag v-else severity="info" class="mr-2 capitalize">{{
-              $utils.t(tag)
+              $utils.t(tag.toLowerCase())
             }}</Tag>
           </template>
         </div>
 
+        <!--Save Btn-->
         <div class="c-block-top-right p-2">
           <Button
             v-if="!isSavedItem"
             icon="pi pi-heart"
-            class="sm p-glass-button color-white"
+            class="sm p-glass-button text-white"
             @click.stop="useSaveProduct(item)"
             aria-label="Save Button"
           ></Button>
           <Button
             v-else
             icon="pi pi-heart-fill"
-            class="sm p-glass-button color-white"
+            class="sm p-glass-button text-white"
             @click.stop="useRemoveProduct(item)"
             aria-label="Remove Button"
           ></Button>

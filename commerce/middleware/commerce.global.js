@@ -58,50 +58,52 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
    * Dynamic Pages
    */
 
-  if (to.name === `products-category-id_handle`) {
-    if (to.params && to.params.id) {
-      const res = await nuxtApp.$algolia.getSingle(to.params.id)
+  if (import.meta.client) {
+    if (to.name === `products-category-id_handle`) {
+      if (to.params && to.params.id) {
+        const res = await useNuxtApp().$algolia.getSingle(to.params.id)
 
-      if (res) {
-        meta.url = `${siteUrl}${to.path}`
-        meta.title = `${res.title} | ${siteName}`
-        meta.description = res.description
-        meta.image = res.image
+        if (res) {
+          meta.url = `${siteUrl}${to.path}`
+          meta.title = `${res.title} | ${siteName}`
+          meta.description = res.description
+          meta.image = res.featured_image?.url
 
-        if (to.query && to.query.variant) {
-          meta.image = res.variants.find(
-            (i) => i.id === to.query.variant
-          ).image.url
-        }
-      }
-    }
-  }
-  if (to.name === `products-category`) {
-    if (to.params && to.params.category) {
-      meta.url = `${siteUrl}${to.path}`
-      let isCollectionSet = false
-
-      // Get Collection Title from Store
-      if (to.params.category !== "all") {
-        isCollectionSet = collections !== null ? true : false
-
-        if (isCollectionSet) {
-          const collection = collections.find(
-            (i) => i.handle === to.params.category
-          )
-          if (collection) {
-            meta.title = `${collection.title} | ${nuxtApp.$utils.t("Collections")} | ${siteName}`
-
-            if (collection.image && collection.image.url) {
-              meta.image = collection.image.url
-            }
+          if (to.query && to.query.variant) {
+            meta.image = res.variants.find(
+              (i) => i.id === to.query.variant
+            )?.image?.url
           }
         }
       }
+    }
+    if (to.name === `products-category`) {
+      if (to.params && to.params.category) {
+        meta.url = `${siteUrl}${to.path}`
+        let isCollectionSet = false
 
-      // Set Collection Title as All
-      if (!isCollectionSet) {
-        meta.title = `${nuxtApp.$utils.t("All")} | ${nuxtApp.$utils.t("Collections")} | ${siteName}`
+        // Get Collection Title from Store
+        if (to.params.category !== "all") {
+          isCollectionSet = collections !== null ? true : false
+
+          if (isCollectionSet) {
+            const collection = collections.find(
+              (i) => i.handle === to.params.category
+            )
+            if (collection) {
+              meta.title = `${collection.title} | ${nuxtApp.$utils.t("Collections")} | ${siteName}`
+
+              if (collection.image && collection.image.url) {
+                meta.image = collection.image.url
+              }
+            }
+          }
+        }
+
+        // Set Collection Title as All
+        if (!isCollectionSet) {
+          meta.title = `${nuxtApp.$utils.t("All")} | ${nuxtApp.$utils.t("Collections")} | ${siteName}`
+        }
       }
     }
   }

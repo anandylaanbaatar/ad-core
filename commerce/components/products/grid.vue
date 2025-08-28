@@ -171,6 +171,12 @@ export default {
           options.options["collections.collection_id.id"] = collection.id
         }
       }
+      // Query Filter
+      if (this.filters) {
+        if (this.filters.query) {
+          options.query = this.filters.query
+        }
+      }
 
       const products = await this.$algolia.search(options)
 

@@ -81,7 +81,7 @@
                     <Button
                       v-tooltip.left="`Image Preview`"
                       icon="pi pi-external-link"
-                      class="sm imagePreviewBtn"
+                      class="sm p-glass-button text-white"
                       @click="
                         $bus.$emit('imagePreviewGlobal', {
                           images: productImages,
