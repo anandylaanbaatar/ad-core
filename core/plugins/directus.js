@@ -45,6 +45,7 @@ export default defineNuxtPlugin((nuxtApp) => {
         ...params,
         fields: `
           *,
+          sales_channels.channels_id.*,
           collections.id,
           collections.sort,
           collections.collection_id.*,
@@ -77,6 +78,7 @@ export default defineNuxtPlugin((nuxtApp) => {
         ...params,
         fields: `
           *,
+          sales_channels.channels_id.*,
           collections.id,
           collections.sort,
           collections.collection_id.*,
@@ -276,18 +278,22 @@ export default defineNuxtPlugin((nuxtApp) => {
     return res
   }
   const customerList = async (params) => {
+    let options = {
+      ...params,
+    }
+    if (!params.fields) {
+      options.fields = `
+        *,
+        addresses.*,
+        addresses.shipping_address.*,
+        orders.*
+      `
+    }
+
     const res = await fetchData({
       method: "GET",
       path: `items/customers`,
-      params: {
-        ...params,
-        fields: `
-          *,
-          addresses.*,
-          addresses.shipping_address.*,
-          orders.*
-        `,
-      },
+      params: options,
     })
 
     return res
