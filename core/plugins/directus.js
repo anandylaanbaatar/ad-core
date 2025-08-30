@@ -494,7 +494,9 @@ export default defineNuxtPlugin((nuxtApp) => {
       params: {
         tenantId: params.tenantId,
         fields: `
-          *
+          *,
+          store_sales_channels.id,
+          store_sales_channels.channels_id.*
         `,
       },
     })
@@ -523,6 +525,26 @@ export default defineNuxtPlugin((nuxtApp) => {
     const res = await fetchData({
       method: "DELETE",
       path: `items/global_settings/${params.tenant_id}`,
+    })
+
+    return res
+  }
+
+  /**
+   * Channels
+   */
+
+  const channelList = async (params) => {
+    const res = await fetchData({
+      method: "GET",
+      path: `items/channels`,
+      params: {
+        ...params,
+        fields: `
+          *.
+          channels_id.*
+        `,
+      },
     })
 
     return res
@@ -581,6 +603,9 @@ export default defineNuxtPlugin((nuxtApp) => {
           create: tenantCreate,
           update: tenantUpdate,
           delete: tenantDelete,
+        },
+        channel: {
+          list: channelList,
         },
         product: {
           item: productItem,

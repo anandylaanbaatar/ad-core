@@ -1,33 +1,19 @@
 <template>
   <div class="c-logo xl" @click="$bus.$emit('goTo', '/')">
     <img
-      v-if="theme.logo.desktop"
-      :src="theme.logo.desktop"
+      v-if="logo.mobileUrl"
+      :src="logo.mobileUrl"
       :alt="theme.name_short"
-      class="desktopLogo"
-      :class="{ lightOnly: theme.logo.desktop_dark }"
+      class="mobileOnly"
     />
     <img
-      v-else-if="theme.logo.desktop_dark"
-      :src="theme.logo.desktop_dark"
+      v-if="logo.url"
+      :src="logo.url"
       :alt="theme.name_short"
-      class="desktopLogo darkOnly"
+      class="desktopOnly"
     />
 
-    <img
-      v-else-if="theme.logo.mobile_dark && darkMode"
-      :src="theme.logo.mobile_dark"
-      :alt="theme.name_short"
-      class="mobileLogo"
-    />
-    <img
-      v-else-if="theme.logo.mobile"
-      :src="theme.logo.mobile"
-      :alt="theme.name_short"
-      class="mobileLogo"
-    />
-
-    <h2 v-else class="mt-2">{{ theme.name }}</h2>
+    <h2 v-if="!logo.mobileUrl && !logo.url" class="mt-2">{{ theme.name }}</h2>
   </div>
 </template>
 
@@ -39,6 +25,32 @@ export default {
     },
     darkMode() {
       return useCoreStore().darkMode
+    },
+    isMobileScreen() {
+      return window.matchMedia("(max-width: 768px)").matches
+    },
+    logo() {
+      let logo = {
+        url: null,
+        mobileUrl: null,
+        classes: null,
+      }
+
+      // Desktop
+      if (this.darkMode && this.theme.logo?.desktop_dark) {
+        logo.url = this.theme.logo.desktop_dark
+      } else if (this.theme.logo?.desktop) {
+        logo.url = this.theme.logo.desktop
+      }
+
+      // Mobile
+      if (this.darkMode && this.theme.logo?.mobile_dark) {
+        logo.mobileUrl = this.theme.logo.mobile_dark
+      } else if (this.theme.logo?.mobile) {
+        logo.mobileUrl = this.theme.logo.mobile
+      }
+
+      return logo
     },
   },
 }
