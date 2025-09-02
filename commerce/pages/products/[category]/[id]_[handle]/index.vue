@@ -94,21 +94,22 @@
               </div>
             </div>
 
-            <!--Single Image-->
+            <!--Single Image
             <div
-              v-else-if="product.featured_image"
+              v-else-if="productImages?.length === 1"
               class="col-xs-12 col-md-8 mb-4"
             >
               <div class="c-product-images">
                 <div
                   class="c-block c-image size-xl"
-                  :style="$utils.setBackImage(product.featured_image.url)"
+                  :style="$utils.setBackImage(productImages[0].files_id.url)"
                 ></div>
               </div>
             </div>
+            -->
 
             <!--No Image-->
-            <div v-else class="col-xs-12 col-md-8 mb-4">
+            <div v-else-if="!featuredImage" class="col-xs-12 col-md-8 mb-4">
               <div class="c-product-images">
                 <div class="c-block c-no-image size-xl">
                   <h5>{{ useAppConfig().theme.name_short }}</h5>
