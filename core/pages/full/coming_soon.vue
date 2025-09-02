@@ -3,7 +3,7 @@
     <div class="c-page fullPage comingSoonPage">
       <div class="fullPageContent">
         <div class="logo">
-          <Logo></Logo>
+          <Logo :noLink="true"></Logo>
         </div>
 
         <div class="text-center text-white">

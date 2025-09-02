@@ -15,7 +15,7 @@
 
       <!--Page-->
       <div
-        v-show="!siteLoading()"
+        v-if="!siteLoading()"
         :class="{
           'c-page': layoutType === 'regular',
           'c-app-layout': layoutType === 'app',
@@ -55,10 +55,11 @@ export default {
       return useCoreStore().globalItemsInit
     },
     layoutType() {
-      if (this.type) {
-        return this.type
-      }
-      return layout()
+      let layout = this.type || layout()
+
+      // console.log("Layout Type ::: ", layout)
+
+      return layout
     },
     sidebars() {
       let sidebarCore = [

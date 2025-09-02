@@ -86,6 +86,26 @@ export const useCommerceStore = defineStore("commerce", {
       this[key] = data
     },
 
+    // Store Expired
+    async isStoreExpired() {
+      const storeId = theme().storeId
+      if (!storeId) return false
+      const nuxtApp = useNuxtApp()
+
+      const plan = await nuxtApp.$fire.actions.read(
+        `adcommerce/stores/${storeId}/plan`
+      )
+
+      // console.log("Check Store Plan ::: ", plan)
+
+      if (plan && plan.endDate) {
+        return nuxtApp.$utils.isExpired(plan.endDate)
+        // return true
+      }
+
+      return false
+    },
+
     // User
     async setUser(user) {
       const userData = useAuthStore().user
@@ -426,81 +446,6 @@ export const useCommerceStore = defineStore("commerce", {
 
       this.orderNumber = orderNumber
     },
-
-    // async setCollections() {
-    //   const appConfig = useRuntimeConfig()
-
-    //   if (!appConfig.public.integrations.shopify) {
-    //     return
-    //   }
-
-    //   const nuxtApp = useNuxtApp()
-
-    //   const allCollections = await nuxtApp.$shopify.collections({
-    //     limit: 150,
-    //   })
-
-    //   // Collections Count
-    //   const collectionsCount = await nuxtApp.$shopify.collectionsCount()
-    //   if (collectionsCount) {
-    //     this.collectionsCount = collectionsCount
-    //   }
-
-    //   // Products Count
-    //   const productsCount = await nuxtApp.$shopify.productsCount()
-
-    //   if (productsCount) {
-    //     this.productsCount = productsCount
-    //   }
-
-    //   if (allCollections && allCollections.items) {
-    //     let allStoreCollections = allCollections.items.map((i) => {
-    //       let newCollection = i
-
-    //       // Advanced Collections
-    //       if (newCollection.title.includes("|")) {
-    //         this.advancedCollections = true
-    //         let titleItems = newCollection.title.split("|")
-
-    //         newCollection.level = {
-    //           id: titleItems[0].trim().toLowerCase(),
-    //           code: titleItems[1].trim(),
-    //           title: titleItems[2].trim(),
-    //         }
-    //         newCollection.title = titleItems[2].trim()
-    //       }
-    //       return newCollection
-    //     })
-
-    //     if (this.advancedCollections) {
-    //       // Sort by Code
-    //       allStoreCollections = allStoreCollections.sort((a, b) => {
-    //         return parseInt(a.level.code) - parseInt(b.level.code)
-    //       })
-
-    //       // Move all other collections to the end
-    //       let allOtherCollections = allStoreCollections.filter((i) => {
-    //         if (parseInt(i.level.code) < 1000) {
-    //           return i
-    //         }
-    //       })
-    //       if (allOtherCollections.length > 0) {
-    //         let mainCollections = allStoreCollections.filter((i) => {
-    //           if (parseInt(i.level.code) > 999) {
-    //             return i
-    //           }
-    //         })
-    //         allStoreCollections = [...mainCollections, ...allOtherCollections]
-    //       }
-    //     }
-
-    //     this.collections = allStoreCollections
-    //   } else {
-    //     console.log("[Store] ::: Locations :: Error getting collections!")
-    //   }
-    // },
-
-    // Saved Items
 
     setSavedItems(savedItems) {
       if (savedItems) {
