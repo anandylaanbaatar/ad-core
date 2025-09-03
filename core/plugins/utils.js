@@ -109,6 +109,15 @@ export default defineNuxtPlugin((nuxtApp) => {
 
           return status
         },
+        isExpired(date) {
+          const today = moment()
+          const endDate = moment(date)
+
+          if (today.isAfter(endDate)) {
+            return true
+          }
+          return false
+        },
         utcToTime(time) {
           let dateTime = moment.utc(time)
           return dateTime.format("MMM DD, YYYY - h:mm a")

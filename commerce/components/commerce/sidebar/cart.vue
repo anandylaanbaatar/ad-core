@@ -8,17 +8,20 @@
       <div>
         <i class="pi pi-shopping-cart"></i>
         <h4>{{ $utils.t("Cart is Empty") }}</h4>
-        <p>
+        <!-- <p>
           {{
             $utils.t(
               "You can add any product to your cart and get delivered to your home. In stock products will be delivered in 1-2 business days in your local country."
             )
           }}
-        </p>
+        </p> -->
 
         <Button
           :label="$utils.t('Shop All Products')"
           severity="secondary"
+          class="sm"
+          icon="pi pi-arrow-right"
+          iconPos="right"
           @click="$bus.$emit('goTo', '/products/all')"
         ></Button>
       </div>

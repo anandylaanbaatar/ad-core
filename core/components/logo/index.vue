@@ -1,5 +1,5 @@
 <template>
-  <div class="c-logo xl" @click="$bus.$emit('goTo', '/')">
+  <div class="c-logo xl" @click="goTo">
     <img
       v-if="logo.mobileUrl"
       :src="logo.mobileUrl"
@@ -19,6 +19,13 @@
 
 <script>
 export default {
+  props: {
+    noLink: {
+      type: Boolean,
+      default: false,
+    },
+  },
+
   computed: {
     theme() {
       return useAppConfig().theme
@@ -51,6 +58,14 @@ export default {
       }
 
       return logo
+    },
+  },
+
+  methods: {
+    goTo() {
+      if (!this.noLink) {
+        this.$bus.$emit("goTo", "/")
+      }
     },
   },
 }

@@ -67,7 +67,11 @@
           <!--Contents-->
           <div class="row">
             <!--Images Slider-->
-            <div v-if="productImages" class="col-xs-12 col-md-4 mb-4">
+            <div
+              v-if="productImages"
+              class="col-xs-12 mb-4"
+              :class="{ 'col-md-4': featuredImage, 'col-md-8': !featuredImage }"
+            >
               <div class="c-product-images relative">
                 <SlidersProduct
                   class="c-product-detailed-slider"
@@ -94,21 +98,22 @@
               </div>
             </div>
 
-            <!--Single Image-->
+            <!--Single Image
             <div
-              v-else-if="product.featured_image"
+              v-else-if="productImages?.length === 1"
               class="col-xs-12 col-md-8 mb-4"
             >
               <div class="c-product-images">
                 <div
                   class="c-block c-image size-xl"
-                  :style="$utils.setBackImage(product.featured_image.url)"
+                  :style="$utils.setBackImage(productImages[0].files_id.url)"
                 ></div>
               </div>
             </div>
+            -->
 
             <!--No Image-->
-            <div v-else class="col-xs-12 col-md-8 mb-4">
+            <div v-else-if="!featuredImage" class="col-xs-12 col-md-8 mb-4">
               <div class="c-product-images">
                 <div class="c-block c-no-image size-xl">
                   <h5>{{ useAppConfig().theme.name_short }}</h5>
@@ -119,13 +124,23 @@
             <!--Featured Image-->
             <div
               v-if="featuredImage"
-              class="col-xs-12 col-md-4 mb-4 desktopOnly inline"
+              class="col-xs-12 mb-4 desktopOnly inline"
+              :class="{ 'col-md-4': productImages, 'col-md-8': !productImages }"
             >
               <div class="c-product-images">
                 <div
                   class="c-block c-image size-2xl"
                   :style="$utils.setBackImage(featuredImage)"
-                ></div>
+                >
+                  <div class="c-block-top-right p-2">
+                    <Button
+                      v-tooltip.left="`Image Preview`"
+                      icon="pi pi-external-link"
+                      class="sm p-glass-button text-white"
+                      @click="$bus.$emit('imagePreviewGlobal', featuredImage)"
+                    ></Button>
+                  </div>
+                </div>
               </div>
             </div>
 

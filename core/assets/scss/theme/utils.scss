@@ -186,6 +186,9 @@
   margin: 50px 0;
   position: relative;
 
+  &.white {
+    background-color: rgba(255, 255, 255, 0.08);
+  }
   &.sm {
     margin: 15px 0;
   }

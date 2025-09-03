@@ -1,10 +1,10 @@
 <template>
   <AppLayout type="app">
-    <div class="c-page fullPage maintenancePage">
+    <div class="c-page fullPage comingSoonPage">
       <div class="fullPageContent">
         <!--Logo-->
         <div class="logo">
-          <Logo></Logo>
+          <Logo :noLink="true"></Logo>
         </div>
 
         <!--Content-->
@@ -12,7 +12,11 @@
           <i class="pi pi-wrench text-2xl mb-4"></i>
           <h1 class="mb-2">{{ $utils.t("Maintenance") }}</h1>
           <p class="mb-3">
-            {{ $utils.t("Be part of something truly extraordinary.") }}
+            {{
+              $utils.t(
+                "Our website is under maintenance. Please check again soon..."
+              )
+            }}
           </p>
         </div>
 

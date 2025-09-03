@@ -30,6 +30,16 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
   }
   // Client Init
   if (import.meta.client && !commerceStore.clientInit) {
+    // Check Store Plan
+    if (to.path !== "/expired") {
+      if (await commerceStore.isStoreExpired()) {
+        useCoreStore().set("layout", "app")
+        return navigateTo({
+          path: "/expired",
+        })
+      }
+    }
+
     await commerceStore.setOrderNumber()
     await commerceStore.setLocations()
     commerceStore.setSavedItems()

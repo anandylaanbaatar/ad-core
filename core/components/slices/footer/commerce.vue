@@ -7,7 +7,7 @@
           <div class="col-xs-12 col-md-6 col-lg-4">
             <Logo v-if="item.logo" class="mb-3"></Logo>
 
-            <template v-if="item.show_version">
+            <!-- <template v-if="item.show_version">
               <Tag
                 class="cursor-pointer mb-3"
                 rounded
@@ -19,7 +19,7 @@
                 </div>
               </Tag>
               <br />
-            </template>
+            </template> -->
 
             <div v-if="item.show_language_currency" class="mb-3">
               <p class="mb-1 mt-3">
@@ -192,7 +192,7 @@
           </div>
 
           <!--Bottom-->
-          <div class="col-xs-12 col-md-6 col-lg-4 c-footer-bottom left">
+          <div class="col-xs-12 col-md-6 c-footer-bottom left">
             <img
               height="25"
               src="/images/theme/credit_card_icons.png"
@@ -200,11 +200,8 @@
               class="mt-2"
             />
           </div>
-          <div class="col-xs-12 col-md-6 col-lg-4 c-footer-bottom center">
-            <p>© {{ currentYear }} {{ copyright }} - {{ siteName }}</p>
-          </div>
-          <div class="col-xs-12 col-md-6 col-lg-4 c-footer-bottom right">
-            <p>
+          <div class="col-xs-12 col-md-6 c-footer-bottom right">
+            <p class="flex align-items-center w-full justify-content-end">
               <span
                 class="c-link mr-4"
                 @click="$bus.$emit('goTo', '/terms_of_service')"
@@ -216,6 +213,32 @@
                 >{{ $utils.t("Privacy Policy") }}</span
               >
             </p>
+          </div>
+
+          <!--Trademark-->
+          <div class="c-divider my-4"></div>
+
+          <div class="col-xs-12 col-md-6">
+            <p>© {{ currentYear }} {{ copyright }} - {{ siteName }}</p>
+          </div>
+          <div class="col-xs-12 col-md-6">
+            <div class="flex align-items-center w-full justify-content-end">
+              <a href="https://www.adcommerce.mn" target="_blank">
+                <p class="mr-2">{{ $utils.t("E-Commerce Platform by") }}</p>
+                <img
+                  v-if="darkMode"
+                  src="https://images.prismic.io/ad-commerce/aFTfLnfc4bHWijyh_ad_commerce_logo.png?auto=format,compress"
+                  height="20"
+                  alt="adcommerce.mn"
+                />
+                <img
+                  v-else
+                  src="https://images.prismic.io/ad-commerce/aFTfJHfc4bHWijyd_ad_commerce_logo_black.png?auto=format,compress"
+                  height="20"
+                  alt="adcommerce.mn"
+                />
+              </a>
+            </div>
           </div>
         </div>
       </div>
@@ -236,6 +259,9 @@ export default {
     // Data
     theme() {
       return useAppConfig().theme
+    },
+    darkMode() {
+      return useCoreStore().darkMode
     },
     version() {
       if (this.theme) {
