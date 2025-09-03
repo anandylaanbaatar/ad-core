@@ -175,11 +175,21 @@ export default defineNuxtPlugin((nuxtApp) => {
 
         // Numbers & Prices
         formatPrice(x) {
-          x = x.toString()
-          x = x.split(".")[0]
+          // Ensure number
+          x = parseFloat(x)
+
+          if (isNaN(x)) return "0.00"
+
+          // Keep two decimals
+          let parts = x.toFixed(2).split(".")
+
+          // Add commas to integer part
           let pattern = /(-?\d+)(\d{3})/
-          while (pattern.test(x)) x = x.replace(pattern, "$1,$2")
-          return x
+          while (pattern.test(parts[0])) {
+            parts[0] = parts[0].replace(pattern, "$1,$2")
+          }
+
+          return parts.join(".")
         },
 
         // Phone Numbers

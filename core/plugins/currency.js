@@ -164,6 +164,7 @@ export default defineNuxtPlugin((nuxtApp) => {
       currency: {
         allCurrencies,
         convert,
+        formatCurrency,
         format,
       },
     },
