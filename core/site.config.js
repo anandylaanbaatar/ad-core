@@ -1,6 +1,7 @@
 import path from "node:path"
 import * as prismic from "@prismicio/client"
-import { createDirectus, rest, readItems, authentication } from "@directus/sdk"
+const fetch = (...args) =>
+  import("node-fetch").then(({ default: fetch }) => fetch(...args))
 
 /**
  * Base Config
@@ -15,24 +16,30 @@ let mainConfig = null
 
 const getCommerceConfig = async (storeId) => {
   const url = config.features.directus.apiUrl
-  const $directus = createDirectus(url)
-    .with(rest())
-    .with(
-      authentication("static", {
-        token: process.env.NUXT_DIRECTUS_ADMIN_TOKEN,
-      })
-    )
-
-  const result = await $directus.request(
-    readItems("tenants", {
-      filter: {
-        store_id: { _eq: storeId },
+  const fields = `
+    *,
+    locations.*,
+    locations.address.*,
+    tax_rates.*,
+    store_sales_channels.sales_channels_id.*
+  `
+  const res = await fetch(
+    `${url}/items/tenants?filter[store_id][_eq]=${storeId}&fields=${fields}`,
+    {
+      headers: {
+        Authorization: `Bearer ${process.env.NUXT_DIRECTUS_ADMIN_TOKEN}`,
+        "Content-Type": "application/json",
       },
-    })
+    }
   )
 
-  if (result && result.length) {
-    return result[0]
+  if (!res.ok) {
+    throw new Error("Failed to fetch tenant info ::: ", res.statusText)
+  }
+  const data = await res.json()
+
+  if (data?.data?.length) {
+    return data.data[0]
   }
 
   return
@@ -44,6 +51,8 @@ if (
   process.env.NUXT_DIRECTUS_ADMIN_TOKEN
 ) {
   mainConfig = await getCommerceConfig(process.env.NUXT_STORE_ID)
+
+  // console.log("Tenant ::: ", mainConfig)
 
   if (mainConfig) {
     // Required Fields
@@ -133,6 +142,15 @@ if (
       }
       if (mainConfig.commerce_allow_tax) {
         config.commerce.allowTax = mainConfig.commerce_allow_tax
+      }
+      if (mainConfig.commerce_weight_unit) {
+        config.commerce.weightUnit = mainConfig.commerce_weight_unit
+      }
+      // Sales Channels
+      if (mainConfig.store_sales_channels?.length) {
+        config.commerce.salesChannels = mainConfig.store_sales_channels.map(
+          (i) => i.sales_channels_id
+        )
       }
     }
 
