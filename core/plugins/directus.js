@@ -1,5 +1,3 @@
-// import moment from "moment-timezone"
-
 export default defineNuxtPlugin((nuxtApp) => {
   if (!import.meta.client) {
     if (!useRuntimeConfig().public.integrations.directus) {
@@ -33,6 +31,53 @@ export default defineNuxtPlugin((nuxtApp) => {
   }
 
   /**
+   * Tenants
+   */
+
+  const tenant = async (params) => {
+    const res = await fetchData({
+      method: "GET",
+      path: `items/tenants`,
+      params: {
+        tenantId: params.tenantId,
+        fields: `
+          *,
+          store_sales_channels.sales_channels_id.*,
+          tax_rates.tax_rates_id.*
+        `,
+      },
+    })
+
+    return res
+  }
+  const tenantCreate = async (params) => {
+    const res = await fetchData({
+      method: "POST",
+      path: "items/tenants",
+      params: params,
+    })
+
+    return res
+  }
+  const tenantUpdate = async (params) => {
+    const res = await fetchData({
+      method: "PATCH",
+      path: `items/tenants/${params.tenant_id}`,
+      params: params,
+    })
+
+    return res
+  }
+  const tenantDelete = async (params) => {
+    const res = await fetchData({
+      method: "DELETE",
+      path: `items/tenants/${params.tenant_id}`,
+    })
+
+    return res
+  }
+
+  /**
    * Products
    */
 
@@ -45,25 +90,13 @@ export default defineNuxtPlugin((nuxtApp) => {
         ...params,
         fields: `
           *,
-          sales_channels.channels_id.*,
-          collections.id,
-          collections.sort,
-          collections.collection_id.*,
-          featured_image.id,
-          featured_image.file_id,
-          featured_image.url,
-          featured_image.source_id,
-          images.id,
-          images.sort,
-          images.files_id.id,
-          images.files_id.file_id,
-          images.files_id.url,
-          images.files_id.source_id,
+          sales_channels.sales_channels_id.*,
+          collections.collections_id.*,
+          collections.collections_id.image.*,
+          featured_image.*,
+          images.files_id.*,
           variants.*,
-          variants.image.id,
-          variants.image.url,
-          variants.image.file_id,
-          variants.image.source_id
+          variants.image.*
         `,
       },
     })
@@ -78,22 +111,13 @@ export default defineNuxtPlugin((nuxtApp) => {
         ...params,
         fields: `
           *,
-          sales_channels.channels_id.*,
-          collections.id,
-          collections.sort,
-          collections.collection_id.*,
-          featured_image.id,
-          featured_image.file_id,
-          featured_image.url,
-          images.id,
-          images.sort,
-          images.files_id.id,
-          images.files_id.file_id,
-          images.files_id.url,
+          sales_channels.sales_channels_id.*,
+          collections.collections_id.*,
+          collections.collections_id.image.*,
+          featured_image.*,
+          images.files_id.*,
           variants.*,
-          variants.image.id,
-          variants.image.url,
-          variants.image.file_id
+          variants.image.*
         `,
       },
     })
@@ -134,13 +158,12 @@ export default defineNuxtPlugin((nuxtApp) => {
   const collectionList = async (params) => {
     const res = await fetchData({
       method: "GET",
-      path: `items/collection`,
+      path: `items/collections`,
       params: {
         ...params,
         fields: `
           *,
-          image.*,
-          sub_collection.*
+          image.*
         `,
       },
     })
@@ -150,7 +173,7 @@ export default defineNuxtPlugin((nuxtApp) => {
   const collectionCreate = async (params) => {
     const res = await fetchData({
       method: "POST",
-      path: "items/collection",
+      path: "items/collections",
       params: params,
     })
 
@@ -159,7 +182,7 @@ export default defineNuxtPlugin((nuxtApp) => {
   const collectionUpdate = async (params) => {
     const res = await fetchData({
       method: "PATCH",
-      path: `items/collection/${params.id}`,
+      path: `items/collections/${params.id}`,
       params: params,
     })
 
@@ -168,7 +191,7 @@ export default defineNuxtPlugin((nuxtApp) => {
   const collectionDelete = async (params) => {
     const res = await fetchData({
       method: "DELETE",
-      path: `items/collection/${params.id}`,
+      path: `items/collections/${params.id}`,
     })
 
     console.log("Delete ::: ", res)
@@ -490,65 +513,17 @@ export default defineNuxtPlugin((nuxtApp) => {
   }
 
   /**
-   * Tenants
-   */
-
-  const tenant = async (params) => {
-    const res = await fetchData({
-      method: "GET",
-      path: `items/global_settings`,
-      params: {
-        tenantId: params.tenantId,
-        fields: `
-          *,
-          store_sales_channels.id,
-          store_sales_channels.channels_id.*
-        `,
-      },
-    })
-
-    return res
-  }
-  const tenantCreate = async (params) => {
-    const res = await fetchData({
-      method: "POST",
-      path: "items/global_settings",
-      params: params,
-    })
-
-    return res
-  }
-  const tenantUpdate = async (params) => {
-    const res = await fetchData({
-      method: "PATCH",
-      path: `items/global_settings/${params.tenant_id}`,
-      params: params,
-    })
-
-    return res
-  }
-  const tenantDelete = async (params) => {
-    const res = await fetchData({
-      method: "DELETE",
-      path: `items/global_settings/${params.tenant_id}`,
-    })
-
-    return res
-  }
-
-  /**
    * Channels
    */
 
   const channelList = async (params) => {
     const res = await fetchData({
       method: "GET",
-      path: `items/channels`,
+      path: `items/sales_channels`,
       params: {
         ...params,
         fields: `
           *.
-          channels_id.*
         `,
       },
     })

@@ -106,7 +106,7 @@ export default {
         )
         if (collection) {
           options.options = {
-            "collections.collection_id.id": collection.id,
+            "collections.collections_id.id": collection.id,
           }
         }
       }

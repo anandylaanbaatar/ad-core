@@ -24,7 +24,7 @@ const getCommerceConfig = async (storeId) => {
     )
 
   const result = await $directus.request(
-    readItems("global_settings", {
+    readItems("tenants", {
       filter: {
         store_id: { _eq: storeId },
       },

@@ -160,11 +160,13 @@
                         @click="
                           $bus.$emit(
                             'goTo',
-                            `/products/${collection.collection_id.handle}/`
+                            `/products/${collection.collections_id.handle}/`
                           )
                         "
                         >{{
-                          $utils.t(collection.collection_id.title.toLowerCase())
+                          $utils.t(
+                            collection.collections_id.title.toLowerCase()
+                          )
                         }}</Tag
                       >
                     </template>

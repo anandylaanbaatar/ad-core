@@ -140,7 +140,7 @@ export default {
           this.cartItem.product.collections &&
           this.cartItem.product.collections.length > 0
         ) {
-          return this.cartItem.product.collections[0].collection_id.handle
+          return this.cartItem.product.collections[0].collections_id.handle
         }
       }
       return "all"

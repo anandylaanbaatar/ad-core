@@ -150,8 +150,8 @@ export default {
     productCategoryHandle() {
       if (this.item) {
         if (this.item.collections && this.item.collections.length) {
-          if (this.item.collections[0].collection_id.handle) {
-            return this.item.collections[0].collection_id.handle
+          if (this.item.collections[0].collections_id.handle) {
+            return this.item.collections[0].collections_id.handle
           }
         }
       }

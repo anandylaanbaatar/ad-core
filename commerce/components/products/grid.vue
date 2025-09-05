@@ -168,7 +168,7 @@ export default {
           (i) => i.handle === this.category
         )
         if (collection) {
-          options.options["collections.collection_id.id"] = collection.id
+          options.options["collections.collections_id.id"] = collection.id
         }
       }
       // Query Filter

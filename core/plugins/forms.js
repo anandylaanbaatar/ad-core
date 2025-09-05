@@ -329,6 +329,39 @@ export default defineNuxtPlugin((app) => {
 
     return null
   }
+  const uploadUrl = async (url, filePath) => {
+    if (!UPLOADER_KEY.value) return
+    if (!features().fileSystem) return
+    if (!features().fileSystem.bunny) return
+    if (!features().fileSystem.bunny.filesPath) return
+    if (!url) {
+      return {
+        success: false,
+        error: "Remote url is missing!",
+      }
+    }
+
+    // 1. Fetch Image
+    const remoteRes = await $fetch(url)
+    if (!remoteRes.ok) {
+      return {
+        success: false,
+        error: "Remote url fetch failed!",
+      }
+    }
+    const blob = await remoteRes.blob()
+    const remoteFileName = url.split("/").pop().split("?")[0].split("#")[0]
+    const file = new File([blob], remoteFileName, { type: blob.type })
+
+    // 2. Upload Image to Bunny
+    const downloaded = await uploader(file, filePath)
+
+    if (downloaded) {
+      return downloaded
+    }
+
+    return null
+  }
 
   return {
     provide: {
@@ -339,6 +372,7 @@ export default defineNuxtPlugin((app) => {
         validateFormV2,
         validateEmail,
         upload,
+        uploadUrl,
       },
     },
   }
