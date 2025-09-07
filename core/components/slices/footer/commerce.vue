@@ -40,11 +40,11 @@
           <!--Links-->
           <div class="col-xs-12 col-md-6 col-lg-8">
             <div class="row">
-              <!--Collections
+              <!--Collections-->
               <template v-if="item.collection_links">
                 <div
                   v-if="filteredFooterCollections"
-                  class="col-xs-12 col-md-6 col-lg-4 mb-3"
+                  class="col-xs-12 col-md-6 col-lg-3 mb-3"
                 >
                   <p class="label mb-2">{{ $utils.t("Collections") }}</p>
 
@@ -62,10 +62,9 @@
                   </ul>
                 </div>
               </template>
-              -->
 
               <!--Links-->
-              <div v-if="item.links" class="col-xs-12 col-md-6 col-lg-4 mb-3">
+              <div v-if="item.links" class="col-xs-12 col-md-6 col-lg-3 mb-3">
                 <p v-if="item.links_title" class="label mb-2">
                   {{ $utils.t(item.links_title) }}
                 </p>
@@ -89,7 +88,7 @@
               </div>
 
               <!--Pages-->
-              <div class="col-xs-12 col-md-6 col-lg-4 mb-3">
+              <div class="col-xs-12 col-md-6 col-lg-3 mb-3">
                 <p v-if="item.pages_title" class="label mb-2">
                   {{ $utils.t(item.pages_title) }}
                 </p>
@@ -107,7 +106,7 @@
               </div>
 
               <!--Social-->
-              <div class="col-xs-12 col-md-6 col-lg-4 mb-3">
+              <div class="col-xs-12 col-md-6 col-lg-3 mb-3">
                 <p v-if="item.social_title" class="label mb-2">
                   {{ $utils.t(item.social_title) }}
                 </p>
@@ -305,9 +304,9 @@ export default {
     },
     filteredFooterCollections() {
       if (this.footerCollections) {
-        const allCol = this.footerCollections
+        let collections = []
+        const allCol = Object.assign(this.footerCollections, collections)
         let filteredCol = null
-        const col = []
 
         if (this.isAdvanced) {
           filteredCol = allCol.filter((i) => i.level.id === "level-1")
@@ -318,14 +317,14 @@ export default {
         if (filteredCol.length > 10) {
           for (let i = 0; i < filteredCol.length; i++) {
             if (i < 10) {
-              col.push(filteredCol[i])
+              collections.push(filteredCol[i])
             }
           }
         } else {
-          col = filteredCol
+          collections = filteredCol
         }
 
-        return col
+        return collections
       }
 
       return
