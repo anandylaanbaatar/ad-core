@@ -164,6 +164,8 @@ export default {
 
       // Collection Filter
       if (this.category && this.collections) {
+        console.log("Collections ::: ", this.collections)
+
         const collection = this.collections.find(
           (i) => i.handle === this.category
         )
