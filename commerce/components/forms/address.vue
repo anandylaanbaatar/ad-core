@@ -236,7 +236,7 @@ export default {
     },
     addressItem() {
       if (this.address) {
-        return this.address.shipping_address
+        return this.address
       }
       return
     },
@@ -456,12 +456,7 @@ export default {
         const customerUpdate = await this.$directus.customer.update({
           id: this.customer.id,
           addresses: {
-            update: [
-              {
-                id: this.addressItem.id,
-                shipping_address: formData,
-              },
-            ],
+            update: [formData],
           },
         })
 
@@ -488,11 +483,7 @@ export default {
         const customerUpdate = await this.$directus.customer.update({
           id: this.customer.id,
           addresses: {
-            create: [
-              {
-                shipping_address: formData,
-              },
-            ],
+            create: [formData],
           },
         })
 

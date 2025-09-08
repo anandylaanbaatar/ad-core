@@ -70,6 +70,7 @@
       v-if="options.payment === 'qpay'"
       :shippingLine="shippingLine"
       :shippingAddress="shippingAddress"
+      @complete="complete"
     ></CheckoutQpay>
 
     <!--StorePay-->
@@ -77,6 +78,7 @@
       v-else-if="options.payment === 'storepay'"
       :shippingLine="shippingLine"
       :shippingAddress="shippingAddress"
+      @complete="complete"
     ></CheckoutStorepay>
 
     <!--Stripe-->
@@ -88,6 +90,7 @@
       :lineItems="lineItems"
       :shippingLine="shippingLine"
       :shippingAddress="shippingAddress"
+      @complete="complete"
     ></CheckoutStripe>
   </section>
 </template>
@@ -368,6 +371,9 @@ export default {
       this.options[type] = value
 
       console.log("Select Item ::: ", this.options)
+    },
+    async complete(payment) {
+      this.$emit("complete", payment)
     },
   },
 }

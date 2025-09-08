@@ -24,7 +24,7 @@
           <br />
         </template>
         <p class="font3 line-height-2">
-          {{ address.shipping_address.full_address }}
+          {{ address.full_address }}
         </p>
 
         <Button
@@ -64,20 +64,8 @@ export default {
       return useCommerceStore().customer
     },
     allAddresses() {
-      if (
-        this.customer &&
-        this.customer.addresses &&
-        this.customer.addresses.length
-      ) {
-        return this.customer.addresses.map((i) => {
-          return {
-            ...i,
-            isDefault:
-              this.customer.default_address === i.shipping_address.id
-                ? true
-                : false,
-          }
-        })
+      if (this.customer?.addresses?.length) {
+        return this.customer.addresses
       }
       return
     },

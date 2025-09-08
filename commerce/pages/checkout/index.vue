@@ -17,6 +17,7 @@
               <CheckoutPayment
                 v-if="isShippingSelected"
                 :options="options"
+                @complete="createOrder"
               ></CheckoutPayment>
             </template>
           </div>
@@ -55,6 +56,30 @@ export default {
     user() {
       return useAuthStore().user
     },
+    customer() {
+      return useCommerceStore().customer
+    },
+    orderNumber() {
+      return useCommerceStore().orderNumber
+    },
+    cart() {
+      return {
+        cart: useCommerceStore().cart,
+        items: useCommerceStore().cartItems,
+        isEmpty: useCommerceStore().cart.length === 0 ? true : false,
+        totals: useCommerceStore().cartTotals,
+        lineItems: useCommerceStore().cartItems.map((i) => {
+          return {
+            product: i.variant.product,
+            product_variant: i.variant.id,
+            quantity: i.qty,
+            price: i.variant.price,
+            subtotal: i.variant.price * i.qty,
+            total: i.variant.price * i.qty,
+          }
+        }),
+      }
+    },
     isShippingSelected() {
       if (this.options) {
         if (this.options.shipping === "address") {
@@ -78,7 +103,7 @@ export default {
   methods: {
     async init() {
       this.loading = true
-      this.options.profile = this.user
+      this.options.profile = this.customer
       this.loading = false
     },
     async reset() {
@@ -91,6 +116,64 @@ export default {
         discountCodes: null,
       }
       await this.init()
+    },
+
+    // Orders
+    async createOrder(payment) {
+      let formData = {
+        tenant_id: features().multitenancy.tenantId,
+        order_number: this.orderNumber,
+        status: "pending",
+        fulfillment_status: "open",
+        payment_status: "paid",
+        customer: null,
+        line_items: this.cart.lineItems,
+        subtotal: this.cart.totals.subtotalAmount,
+        tax_total: this.cart.totals.taxAmount,
+        discount_total: this.cart.totals.discountAmount,
+        shipping_total: this.cart.totals.shippingAmount,
+        total: this.cart.totals.totalAmount,
+        shipping_address: null,
+        shipping_method: this.options.shipping,
+        payment: {
+          id: payment.id,
+        },
+      }
+
+      // Customer
+      if (useCommerceStore()?.customer) {
+        formData.customer = useCommerceStore().customer.id
+      }
+      // Shipping and Method
+      if (this.options.shipping === "pickup") {
+        formData.shipping_address = this.options.location?.address?.id
+      } else if (this.options.shipping === "address") {
+        formData.shipping_address = this.options.address
+      }
+
+      console.log("Order Form ::: ", formData)
+
+      const order = await this.$directus.order.create(formData)
+
+      console.log("Create Order ::: ", order)
+
+      if (order?.success) {
+        // Update Order Number
+        if (theme().storeId) {
+          await this.$fire.actions.update(
+            `adcommerce/stores/${theme().storeId}`,
+            {
+              orderNumber: parseInt(this.orderNumber) + 1,
+            }
+          )
+          await useCommerceStore().setOrderNumber()
+        }
+        // Clear Cart
+        await useCommerceStore().clearCart()
+
+        // Redirect
+        this.$bus.$emit("goTo", `/checkout/success`)
+      }
     },
   },
 }

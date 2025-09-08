@@ -10,10 +10,9 @@
       <p v-if="cart" class="mb-5 font2 w-full text-center">
         {{ $utils.t("Total") }}:
         {{ $currency.format(cart.totals.totalAmount) }}
-        <!-- ({{
-          $utils.formatPrice(cart.totals.totalAmount) + "₮"
-        }}) -->
       </p>
+
+      <Message v-if="error" severity="error">{{ error }}</Message>
 
       <div class="paymentArea">
         <template v-if="payment.invoice">
@@ -107,9 +106,7 @@ export default {
 
       loading: true,
       checkoutLoading: false,
-
-      // Order
-      draftOrderId: null,
+      error: null,
 
       // Payment
       payment: {
@@ -146,9 +143,6 @@ export default {
         }),
       }
     },
-    orderNumber() {
-      return useCommerceStore().orderNumber
-    },
     paymentType() {
       return usePaymentStore().paymentOptions.find((i) => i.id === "qpay")
     },
@@ -176,7 +170,7 @@ export default {
         list: null,
         checkPaymentMsg: null,
       }
-      this.draftOrderId = null
+      this.error = null
     },
 
     // QPay Payment
@@ -251,7 +245,7 @@ export default {
         .catch((err) => {
           console.log("QPay ::: Create Invoice :: Error: ", err)
 
-          // this.payment.invoice = err
+          this.error = `QPay - Create Invoice error!`
           this.payment.loading = false
         })
     },
@@ -287,7 +281,7 @@ export default {
 
           // Test Mode
           if (this.testMode) {
-            await this.createOrder()
+            await this.paymentComplete()
           } else {
             // Payment Successfull
             if (data && data.count > 0) {
@@ -295,7 +289,7 @@ export default {
                 "Payment successfull."
               )
 
-              await this.createOrder()
+              await this.paymentComplete()
               return
 
               // Payment Not Complete Yet
@@ -324,51 +318,19 @@ export default {
           }, 3000)
         })
     },
-    // Orders
-    async createOrder() {
-      let formData = {
-        tenant_id: features().multitenancy.tenantId,
-        order_number: this.orderNumber,
-        status: "pending",
-        fulfillment_status: "open",
-        payment_status: "paid",
-        customer: null,
-        shipping_address: null,
-        billing_address: null,
-        line_items: this.cart.lineItems,
-        subtotal: this.cart.totals.subtotalAmount,
-        tax_total: this.cart.totals.taxAmount,
-        discount_total: this.cart.totals.discountAmount,
-        shipping_total: this.cart.totals.shippingAmount,
+    async createPayment() {
+      const paymentRes = await this.$directus.payment.create({
         total: this.cart.totals.totalAmount,
-      }
-      if (useCommerceStore() && useCommerceStore().customer) {
-        formData.customer = useCommerceStore().customer.id
-      }
+        method: "qpay",
+      })
 
-      console.log("Order Form ::: ", formData)
+      console.log("Create Payment ::: ", paymentRes)
 
-      const order = await this.$directus.order.create(formData)
-
-      console.log("Draft Order ::: ", order)
-
-      if (order && order.success) {
-        // Update Order Number
-        if (theme().storeId) {
-          await this.$fire.actions.update(
-            `adcommerce/stores/${theme().storeId}`,
-            {
-              orderNumber: parseInt(this.orderNumber) + 1,
-            }
-          )
-          await useCommerceStore().setOrderNumber()
-        }
-        // Clear Cart
-        await useCommerceStore().clearCart()
-
-        // Redirect
-        this.$bus.$emit("goTo", `/checkout/success`)
-      }
+      return paymentRes.data
+    },
+    async paymentComplete() {
+      const payment = await this.createPayment()
+      this.$emit("complete", payment)
     },
   },
 }

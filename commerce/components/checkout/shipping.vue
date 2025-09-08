@@ -244,20 +244,8 @@ export default {
       return useCommerceStore().customer
     },
     allAddresses() {
-      if (
-        this.customer &&
-        this.customer.addresses &&
-        this.customer.addresses.length
-      ) {
-        return this.customer.addresses.map((i) => {
-          return {
-            ...i.shipping_address,
-            isDefault:
-              this.customer.default_address === i.shipping_address.id
-                ? true
-                : false,
-          }
-        })
+      if (this.customer?.addresses?.length) {
+        return this.customer.addresses
       }
       return
     },

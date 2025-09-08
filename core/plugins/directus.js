@@ -280,6 +280,40 @@ export default defineNuxtPlugin((nuxtApp) => {
   }
 
   /**
+   * Payments
+   */
+
+  const paymentItem = async (params) => {
+    const res = await fetchData({
+      method: "GET",
+      path: `items/payments/${params.id}`,
+      params: {
+        ...params,
+        fields: `
+          *,
+          payment.*
+        `,
+      },
+    })
+
+    return res
+  }
+  const paymentCreate = async (params) => {
+    const res = await fetchData({
+      method: "POST",
+      path: "items/payments",
+      params: {
+        ...params,
+        fields: `
+          *
+        `,
+      },
+    })
+
+    return res
+  }
+
+  /**
    * Customers
    */
 
@@ -614,6 +648,10 @@ export default defineNuxtPlugin((nuxtApp) => {
           create: orderCreate,
           update: orderUpdate,
           delete: orderDelete,
+        },
+        payment: {
+          item: paymentItem,
+          create: paymentCreate,
         },
         customer: {
           item: customerItem,
