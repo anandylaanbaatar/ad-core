@@ -125,18 +125,24 @@ export default {
         order_number: this.orderNumber,
         status: "pending",
         fulfillment_status: "open",
-        payment_status: "paid",
         customer: null,
-        line_items: this.cart.lineItems,
         subtotal: this.cart.totals.subtotalAmount,
         tax_total: this.cart.totals.taxAmount,
         discount_total: this.cart.totals.discountAmount,
         shipping_total: this.cart.totals.shippingAmount,
         total: this.cart.totals.totalAmount,
         shipping_address: null,
-        shipping_method: this.options.shipping,
+        shipping_method: null,
+        line_items: this.cart.lineItems.map((item) => {
+          return {
+            line_items_id: item,
+          }
+        }),
         payment: {
-          id: payment.id,
+          tenant_id: features().multitenancy.tenantId,
+          status: "paid",
+          total: payment.total,
+          method: payment.method,
         },
       }
 
@@ -147,8 +153,10 @@ export default {
       // Shipping and Method
       if (this.options.shipping === "pickup") {
         formData.shipping_address = this.options.location?.address?.id
+        formData.shipping_method = `Pickup from store`
       } else if (this.options.shipping === "address") {
         formData.shipping_address = this.options.address
+        formData.shipping_method = `Deliver to customer address`
       }
 
       console.log("Order Form ::: ", formData)

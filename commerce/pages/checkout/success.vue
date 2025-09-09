@@ -8,26 +8,33 @@
           <div class="col-xs-12">
             <section class="c-block text-center p-8">
               <i class="pi pi-check"></i>
-              <h3 class="my-3">{{ $utils.t("Order Successful.") }}</h3>
+              <h3 class="my-3">{{ $utils.t("Order Successfull.") }}</h3>
               <p class="mb-4">
-                Таны захиалгыг бид хүлээн авлаа. <br />Та миний захиалга хэсгээс
-                бараа хүргэлт болон захиалгын <br />дэлгэрэнгүй мэдээллийг авна
-                уу.
+                {{ $utils.t("We have recieved your order.") }} <br />
+                {{
+                  $utils.t(
+                    "You can find your detailed order and shipping information from My Orders area."
+                  )
+                }}
               </p>
 
-              <Button
-                icon="pi pi-box"
-                :label="$utils.t('My Orders')"
-                class="secondary"
-                @click="$bus.$emit('sidebarGlobal', { id: 'account' })"
-              ></Button>
-              <p class="my-3">{{ $utils.t("or") }}</p>
-              <Button
-                icon="pi pi-arrow-left"
-                :label="$utils.t('Shop')"
-                class="secondary"
-                @click="$bus.$emit('goTo', '/products/all')"
-              ></Button>
+              <div class="flex align-items-center mx-auto">
+                <Button
+                  severity="secondary"
+                  icon="pi pi-box"
+                  :label="$utils.t('My Orders')"
+                  class="sm"
+                  @click="$bus.$emit('sidebarGlobal', { id: 'account' })"
+                ></Button>
+                <p class="my-3 mx-4">{{ $utils.t("or") }}</p>
+                <Button
+                  severity="secondary"
+                  icon="pi pi-arrow-left"
+                  :label="$utils.t('Shop')"
+                  class="sm"
+                  @click="$bus.$emit('goTo', '/products/all')"
+                ></Button>
+              </div>
             </section>
           </div>
         </div>

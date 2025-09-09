@@ -194,8 +194,6 @@ export default defineNuxtPlugin((nuxtApp) => {
       path: `items/collections/${params.id}`,
     })
 
-    console.log("Delete ::: ", res)
-
     return res
   }
 
@@ -211,12 +209,13 @@ export default defineNuxtPlugin((nuxtApp) => {
         ...params,
         fields: `
           *,
+          customer.*,
+          shipping_address.*,
+          payment.*,
           line_items.*,
           line_items.product.*,
           line_items.product.featured_image.*,
           line_items.product_variant.*,
-          shipping_address.*,
-          billing_address.*
         `,
       },
     })
@@ -231,13 +230,13 @@ export default defineNuxtPlugin((nuxtApp) => {
         ...params,
         fields: `
           *,
+          customer.*,
+          shipping_address.*,
+          payment.*,
           line_items.*,
           line_items.product.*,
           line_items.product.featured_image.*,
           line_items.product_variant.*,
-          customer.*,
-          shipping_address.*,
-          billing_address.*
         `,
       },
     })
@@ -327,7 +326,9 @@ export default defineNuxtPlugin((nuxtApp) => {
           *,
           addresses.*,
           addresses.shipping_address.*,
-          orders.*
+          orders.*,
+          orders.line_items.line_items_id.*,
+          orders.line_items.line_items_id.payment.*
         `,
       },
     })

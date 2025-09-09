@@ -89,17 +89,6 @@
 
 <script>
 export default {
-  props: {
-    shippingLine: {
-      type: Object,
-      default: null,
-    },
-    shippingAddress: {
-      type: Object,
-      default: null,
-    },
-  },
-
   data() {
     return {
       testMode: true,
@@ -127,20 +116,7 @@ export default {
     },
     cart() {
       return {
-        cart: useCommerceStore().cart,
-        items: useCommerceStore().cartItems,
-        isEmpty: useCommerceStore().cart.length === 0 ? true : false,
         totals: useCommerceStore().cartTotals,
-        lineItems: useCommerceStore().cartItems.map((i) => {
-          return {
-            product: i.variant.product,
-            product_variant: i.variant.id,
-            quantity: i.qty,
-            price: i.variant.price,
-            subtotal: i.variant.price * i.qty,
-            total: i.variant.price * i.qty,
-          }
-        }),
       }
     },
     paymentType() {
@@ -318,19 +294,11 @@ export default {
           }, 3000)
         })
     },
-    async createPayment() {
-      const paymentRes = await this.$directus.payment.create({
+    async paymentComplete() {
+      this.$emit("complete", {
         total: this.cart.totals.totalAmount,
         method: "qpay",
       })
-
-      console.log("Create Payment ::: ", paymentRes)
-
-      return paymentRes.data
-    },
-    async paymentComplete() {
-      const payment = await this.createPayment()
-      this.$emit("complete", payment)
     },
   },
 }

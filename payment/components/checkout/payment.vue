@@ -68,17 +68,13 @@
     <!--QPay-->
     <CheckoutQpay
       v-if="options.payment === 'qpay'"
-      :shippingLine="shippingLine"
-      :shippingAddress="shippingAddress"
-      @complete="complete"
+      @complete="createPayment"
     ></CheckoutQpay>
 
     <!--StorePay-->
     <CheckoutStorepay
       v-else-if="options.payment === 'storepay'"
-      :shippingLine="shippingLine"
-      :shippingAddress="shippingAddress"
-      @complete="complete"
+      @complete="createPayment"
     ></CheckoutStorepay>
 
     <!--Stripe-->
@@ -90,7 +86,7 @@
       :lineItems="lineItems"
       :shippingLine="shippingLine"
       :shippingAddress="shippingAddress"
-      @complete="complete"
+      @complete="createPayment"
     ></CheckoutStripe>
   </section>
 </template>
@@ -372,8 +368,31 @@ export default {
 
       console.log("Select Item ::: ", this.options)
     },
-    async complete(payment) {
+    async createPayment(payment) {
       this.$emit("complete", payment)
+
+      // const paymentRes = await this.$directus.payment.create({
+      //   total: payment.total,
+      //   method: payment.method,
+      // })
+
+      // console.log("Create Payment ::: ", paymentRes)
+
+      // if (paymentRes?.data) {
+      //   this.$emit("complete", paymentRes.data)
+
+      //   this.$bus.$emit("toast", {
+      //     severity: "success",
+      //     summary: "Success",
+      //     detail: "Payment successful.",
+      //   })
+      // } else {
+      //   this.$bus.$emit("toast", {
+      //     severity: "error",
+      //     summary: "Error",
+      //     detail: "Error occurred during payment.",
+      //   })
+      // }
     },
   },
 }

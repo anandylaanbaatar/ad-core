@@ -145,19 +145,10 @@
 
 <script>
 export default {
-  props: {
-    shippingLine: {
-      type: Object,
-      default: null,
-    },
-    shippingAddress: {
-      type: Object,
-      default: null,
-    },
-  },
-
   data() {
     return {
+      testMode: true,
+
       loading: true,
       paymentLoading: false,
 
@@ -175,9 +166,6 @@ export default {
         invoiceId: null,
         checkPaymentMsg: null,
       },
-
-      // Order
-      draftOrderId: null,
 
       // Payment
       payment: {
@@ -198,13 +186,9 @@ export default {
     },
     cart() {
       return {
-        cart: useCommerceStore().cart,
-        items: useCommerceStore().cartItems,
-        isEmpty: useCommerceStore().cart.length === 0 ? true : false,
         totals: useCommerceStore().cartTotals,
       }
     },
-
     paymentType() {
       return usePaymentStore().paymentOptions.find((i) => i.id === "storepay")
     },
@@ -219,18 +203,6 @@ export default {
       }
 
       return null
-    },
-    orderForm() {
-      return {
-        email: this.user.email,
-        phone: this.user.phone,
-        // lineItems: this.lineItems,
-        shippingLine: this.shippingLine,
-        shippingAddress: this.shippingAddress,
-        presentmentCurrencyCode: "MNT",
-        // discountCodes: this.discountCodes,
-        note: `StorePay ::: ${this.storepay.invoiceId}`,
-      }
     },
   },
 
@@ -258,7 +230,6 @@ export default {
       this.storepay.invoiceId = null
       this.storepay.checkPaymentMsg = null
       this.storepay.user = null
-      this.draftOrderId = null
     },
     validation() {
       this.reset()
@@ -278,7 +249,7 @@ export default {
       if (res) {
         localStorage.setItem(`storepay_token`, JSON.stringify(res))
 
-        this.storepay.accessToken = res.access_token
+        this.storepay.access_token = res.access_token
       }
     },
     async checkStorePayUser() {
@@ -333,7 +304,7 @@ export default {
       await this.setStorePayToken()
 
       let storepayInvoice = {
-        token: this.storepay.accessToken,
+        token: this.storepay.access_token,
         storeId: this.paymentType.options.storeId,
         phone: this.form.phone,
         amount: this.cart.totals.totalAmount,
@@ -379,81 +350,36 @@ export default {
 
       console.log("[StorePay] ::: Check Invoice :: ", res)
 
-      // if (res && res.data) {
-      //   setTimeout(async () => {
-      //     this.storepay.isConfirmed = true
-      //     this.showErrorMsg("Төлбөр ажилттай хийгдсэн байна.")
-      //     this.paymentLoading = false
-
-      //     await this.createDraftOrder()
-      //   }, 5000)
-      // }
-
-      if (res && res.data) {
-        if (res.data.isConfirmed === true) {
-          this.storepay.isConfirmed = true
-          this.paymentLoading = false
-          this.showErrorMsg("Төлбөр ажилттай хийгдсэн байна.")
-
-          // await this.createDraftOrder()
-        } else {
-          this.storepay.isConfirmed = false
-          this.showErrorMsg("Эхний төлбөр хараахан хийгдээгүй байна.")
-
-          setTimeout(async () => {
+      if (this.testMode) {
+        await this.paymentComplete()
+      } else {
+        if (res?.data) {
+          if (res.data.isConfirmed === true) {
+            this.storepay.isConfirmed = true
             this.paymentLoading = false
-            await this.checkStorePayPayment()
-          }, 5000)
+            this.showErrorMsg("Төлбөр ажилттай хийгдсэн байна.")
+
+            await this.paymentComplete()
+          } else {
+            this.storepay.isConfirmed = false
+            this.showErrorMsg("Эхний төлбөр хараахан хийгдээгүй байна.")
+
+            setTimeout(async () => {
+              this.paymentLoading = false
+              await this.checkStorePayPayment()
+            }, 5000)
+          }
         }
       }
 
       this.paymentLoading = false
     },
-
-    // Orders
-    // async createDraftOrder() {
-    //   if (localStorage.getItem("draftOrderId") !== null) {
-    //     this.draftOrderId = localStorage.getItem("draftOrderId")
-
-    //     await this.completeDraftOrder()
-    //     return
-    //   }
-
-    //   this.checkoutLoading = true
-
-    //   const orderData = await this.$shopify.createDraftOrder(this.orderForm)
-
-    //   if (
-    //     orderData &&
-    //     orderData.draftOrderCreate &&
-    //     orderData.draftOrderCreate.draftOrder
-    //   ) {
-    //     let draftOrderId = orderData.draftOrderCreate.draftOrder.id.replace(
-    //       "gid://shopify/DraftOrder/",
-    //       ""
-    //     )
-    //     localStorage.setItem("draftOrderId", draftOrderId)
-    //     this.draftOrderId = draftOrderId
-
-    //     await this.completeDraftOrder()
-    //   }
-
-    //   this.checkoutLoading = false
-    // },
-    // async completeDraftOrder() {
-    //   this.checkoutLoading = true
-
-    //   const order = await this.$shopify.completeDraftOrder({
-    //     orderId: this.draftOrderId,
-    //   })
-
-    //   if (order) {
-    //     this.$bus.$emit("goTo", "/checkout/success")
-    //   }
-
-    //   this.checkoutLoading = false
-    // },
-
+    async paymentComplete() {
+      this.$emit("complete", {
+        total: this.cart.totals.totalAmount,
+        method: "storepay",
+      })
+    },
     showErrorMsg(msg, timer) {
       if (!msg) return
 

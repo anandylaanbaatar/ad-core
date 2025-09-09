@@ -10,28 +10,42 @@
         class="d-block px-3 relative c-link mb-2"
         @click="$bus.$emit('goTo', `/orders/${order.id}`)"
       >
-        <Tag v-if="order.cancelReason" severity="danger" class="mb-1">
-          {{ $utils.t("Cancelled") }}
-        </Tag>
         <Tag
-          v-else-if="order.fulfillmentStatus === 'UNFULFILLED'"
+          v-if="order.fulfillment_status === 'open'"
           severity="warn"
           class="mb-1"
-          icon="pi pi-exclamation-circle"
         >
-          {{ $utils.t("Not Delivered") }}
+          {{ $utils.t("Open") }}
         </Tag>
         <Tag
-          v-else-if="order.fulfillmentStatus === 'FULFILLED'"
+          v-else-if="order.fulfillment_status === 'in_progress'"
+          severity="warn"
+          class="mb-1"
+          icon="pi pi-refresh"
+        >
+          {{ $utils.t("In Progress") }}
+        </Tag>
+        <Tag
+          v-else-if="order.fulfillment_status === 'fulfilled'"
           severity="success"
           class="mb-1"
           icon="pi pi-check"
         >
           {{ $utils.t("Delivered") }}
         </Tag>
+        <Tag
+          v-else-if="order.fulfillment_status === 'on_hold'"
+          severity="info"
+          class="mb-1"
+          icon="pi pi-exclamation-circle"
+        >
+          {{ $utils.t("On Hold") }}
+        </Tag>
 
-        <p class="font3">{{ $utils.t("Order Number") }}: {{ order.name }}</p>
-        <p class="font3 text-sm line-height-2">
+        <p class="font3">
+          {{ $utils.t("Order Number") }}: #{{ order.order_number }}
+        </p>
+        <p class="opacity-50 text-sm line-height-2">
           {{ $utils.formatDateTime(order.processedAt) }}
         </p>
       </div>
@@ -54,11 +68,7 @@ export default {
       return useCommerceStore().customer
     },
     allOrders() {
-      if (
-        this.customer &&
-        this.customer.orders &&
-        this.customer.orders.length
-      ) {
+      if (this.customer?.orders?.length) {
         return this.customer.orders
       }
       return
