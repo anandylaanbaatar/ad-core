@@ -29,6 +29,110 @@ export default defineNuxtPlugin((nuxtApp) => {
         })
     })
   }
+  const getFields = (id, params) => {
+    let options = {
+      ...params,
+    }
+
+    /**
+     * Query
+     */
+
+    // Tenants
+    if (id === "tenants") {
+      options.fields = `
+        *,
+        store_sales_channels.sales_channels_id.*,
+        tax_rates.tax_rates_id.*
+      `
+    }
+    // Products
+    else if (id === "products") {
+      options.fields = `
+        *,
+        sales_channels.sales_channels_id.*,
+        collections.collections_id.*,
+        collections.collections_id.image.*,
+        featured_image.*,
+        images.files_id.*,
+        variants.*,
+        variants.image.*
+      `
+    }
+    // Collections
+    else if (id === "collections") {
+      options.fields = `
+        *,
+        image.*
+      `
+    }
+    // Orders
+    else if (id === "orders") {
+      options.fields = `
+        *,
+        customer.*,
+        shipping_address.*,
+        payment.*,
+        line_items.*,
+        line_items.product.*,
+        line_items.product.featured_image.*,
+        line_items.product_variant.*,
+      `
+    }
+    // Payments
+    else if (id === "payments") {
+      options.fields = `
+        *,
+        payment.*
+      `
+    }
+    // Customers
+    else if (id === "customers") {
+      options.fields = `
+        *,
+        addresses.*,
+        addresses.shipping_address.*,
+        orders.*,
+        orders.line_items.line_items_id.*,
+        orders.line_items.line_items_id.payment.*
+      `
+    }
+    // Files
+    else if (id === "files") {
+      options.fields = `
+        *
+      `
+    }
+    // Locations
+    else if (id === "locations") {
+      options.fields = `
+        *,
+        address.*
+      `
+    }
+    // Tax Rates
+    else if (id === "tax_rates") {
+      options.fields = `
+        *
+      `
+    }
+    // Sales Channels
+    else if (id === "sales_channels") {
+      options.fields = `
+        *
+      `
+    }
+
+    /**
+     * Override
+     */
+
+    if (params.fields) {
+      options.fields = params.fields
+    }
+
+    return options
+  }
 
   /**
    * Tenants
@@ -38,14 +142,7 @@ export default defineNuxtPlugin((nuxtApp) => {
     const res = await fetchData({
       method: "GET",
       path: `items/tenants`,
-      params: {
-        tenantId: params.tenantId,
-        fields: `
-          *,
-          store_sales_channels.sales_channels_id.*,
-          tax_rates.tax_rates_id.*
-        `,
-      },
+      params: getFields("tenants", params),
     })
 
     return res
@@ -54,7 +151,7 @@ export default defineNuxtPlugin((nuxtApp) => {
     const res = await fetchData({
       method: "POST",
       path: "items/tenants",
-      params: params,
+      params: getFields("tenants", params),
     })
 
     return res
@@ -63,7 +160,7 @@ export default defineNuxtPlugin((nuxtApp) => {
     const res = await fetchData({
       method: "PATCH",
       path: `items/tenants/${params.tenant_id}`,
-      params: params,
+      params: getFields("tenants", params),
     })
 
     return res
@@ -85,20 +182,7 @@ export default defineNuxtPlugin((nuxtApp) => {
     const res = await fetchData({
       method: "GET",
       path: `items/products`,
-      type: "getProductByExternalId",
-      params: {
-        ...params,
-        fields: `
-          *,
-          sales_channels.sales_channels_id.*,
-          collections.collections_id.*,
-          collections.collections_id.image.*,
-          featured_image.*,
-          images.files_id.*,
-          variants.*,
-          variants.image.*
-        `,
-      },
+      params: getFields("products", params),
     })
 
     return res
@@ -107,19 +191,7 @@ export default defineNuxtPlugin((nuxtApp) => {
     const res = await fetchData({
       method: "GET",
       path: `items/products`,
-      params: {
-        ...params,
-        fields: `
-          *,
-          sales_channels.sales_channels_id.*,
-          collections.collections_id.*,
-          collections.collections_id.image.*,
-          featured_image.*,
-          images.files_id.*,
-          variants.*,
-          variants.image.*
-        `,
-      },
+      params: getFields("products", params),
     })
 
     return res
@@ -128,7 +200,7 @@ export default defineNuxtPlugin((nuxtApp) => {
     const res = await fetchData({
       method: "POST",
       path: "items/products",
-      params: params,
+      params: getFields("products", params),
     })
 
     return res
@@ -137,7 +209,7 @@ export default defineNuxtPlugin((nuxtApp) => {
     const res = await fetchData({
       method: "PATCH",
       path: `items/products/${params.id}`,
-      params: params,
+      params: getFields("products", params),
     })
 
     return res
@@ -159,13 +231,7 @@ export default defineNuxtPlugin((nuxtApp) => {
     const res = await fetchData({
       method: "GET",
       path: `items/collections`,
-      params: {
-        ...params,
-        fields: `
-          *,
-          image.*
-        `,
-      },
+      params: getFields("collections", params),
     })
 
     return res
@@ -174,7 +240,7 @@ export default defineNuxtPlugin((nuxtApp) => {
     const res = await fetchData({
       method: "POST",
       path: "items/collections",
-      params: params,
+      params: getFields("collections", params),
     })
 
     return res
@@ -183,7 +249,7 @@ export default defineNuxtPlugin((nuxtApp) => {
     const res = await fetchData({
       method: "PATCH",
       path: `items/collections/${params.id}`,
-      params: params,
+      params: getFields("collections", params),
     })
 
     return res
@@ -205,19 +271,7 @@ export default defineNuxtPlugin((nuxtApp) => {
     const res = await fetchData({
       method: "GET",
       path: `items/orders/${params.id}`,
-      params: {
-        ...params,
-        fields: `
-          *,
-          customer.*,
-          shipping_address.*,
-          payment.*,
-          line_items.*,
-          line_items.product.*,
-          line_items.product.featured_image.*,
-          line_items.product_variant.*,
-        `,
-      },
+      params: getFields("orders", params),
     })
 
     return res
@@ -226,19 +280,7 @@ export default defineNuxtPlugin((nuxtApp) => {
     const res = await fetchData({
       method: "GET",
       path: `items/orders`,
-      params: {
-        ...params,
-        fields: `
-          *,
-          customer.*,
-          shipping_address.*,
-          payment.*,
-          line_items.*,
-          line_items.product.*,
-          line_items.product.featured_image.*,
-          line_items.product_variant.*,
-        `,
-      },
+      params: getFields("orders", params),
     })
 
     return res
@@ -247,15 +289,7 @@ export default defineNuxtPlugin((nuxtApp) => {
     const res = await fetchData({
       method: "POST",
       path: "items/orders",
-      params: {
-        ...params,
-        fields: `
-          *,
-          line_items.*,
-          shipping_address.*,
-          billing_address.*
-        `,
-      },
+      params: getFields("orders", params),
     })
 
     return res
@@ -264,7 +298,7 @@ export default defineNuxtPlugin((nuxtApp) => {
     const res = await fetchData({
       method: "PATCH",
       path: `items/orders/${params.id}`,
-      params: params,
+      params: getFields("orders", params),
     })
 
     return res
@@ -286,13 +320,7 @@ export default defineNuxtPlugin((nuxtApp) => {
     const res = await fetchData({
       method: "GET",
       path: `items/payments/${params.id}`,
-      params: {
-        ...params,
-        fields: `
-          *,
-          payment.*
-        `,
-      },
+      params: getFields("payments", params),
     })
 
     return res
@@ -301,12 +329,7 @@ export default defineNuxtPlugin((nuxtApp) => {
     const res = await fetchData({
       method: "POST",
       path: "items/payments",
-      params: {
-        ...params,
-        fields: `
-          *
-        `,
-      },
+      params: getFields("payments", params),
     })
 
     return res
@@ -320,38 +343,16 @@ export default defineNuxtPlugin((nuxtApp) => {
     const res = await fetchData({
       method: "GET",
       path: `items/customers`,
-      params: {
-        ...params,
-        fields: `
-          *,
-          addresses.*,
-          addresses.shipping_address.*,
-          orders.*,
-          orders.line_items.line_items_id.*,
-          orders.line_items.line_items_id.payment.*
-        `,
-      },
+      params: getFields("customers", params),
     })
 
     return res
   }
   const customerList = async (params) => {
-    let options = {
-      ...params,
-    }
-    if (!params.fields) {
-      options.fields = `
-        *,
-        addresses.*,
-        addresses.shipping_address.*,
-        orders.*
-      `
-    }
-
     const res = await fetchData({
       method: "GET",
       path: `items/customers`,
-      params: options,
+      params: getFields("customers", params),
     })
 
     return res
@@ -360,7 +361,7 @@ export default defineNuxtPlugin((nuxtApp) => {
     const res = await fetchData({
       method: "POST",
       path: "items/customers",
-      params: params,
+      params: getFields("customers", params),
     })
 
     return res
@@ -369,7 +370,7 @@ export default defineNuxtPlugin((nuxtApp) => {
     const res = await fetchData({
       method: "PATCH",
       path: `items/customers/${params.id}`,
-      params: params,
+      params: getFields("customers", params),
     })
 
     return res
@@ -405,12 +406,7 @@ export default defineNuxtPlugin((nuxtApp) => {
     const res = await fetchData({
       method: "GET",
       path: `items/files`,
-      params: {
-        ...params,
-        fields: `
-          *
-        `,
-      },
+      params: getFields("files", params),
     })
 
     return res
@@ -419,12 +415,7 @@ export default defineNuxtPlugin((nuxtApp) => {
     const res = await fetchData({
       method: "GET",
       path: `items/files`,
-      params: {
-        ...params,
-        fields: `
-          *
-        `,
-      },
+      params: getFields("files", params),
     })
 
     return res
@@ -433,7 +424,7 @@ export default defineNuxtPlugin((nuxtApp) => {
     const res = await fetchData({
       method: "POST",
       path: "items/files",
-      params: params,
+      params: getFields("files", params),
     })
 
     return res
@@ -442,7 +433,7 @@ export default defineNuxtPlugin((nuxtApp) => {
     const res = await fetchData({
       method: "PATCH",
       path: `items/files/${params.id}`,
-      params: params,
+      params: getFields("files", params),
     })
 
     return res
@@ -464,13 +455,7 @@ export default defineNuxtPlugin((nuxtApp) => {
     const res = await fetchData({
       method: "GET",
       path: `items/locations`,
-      params: {
-        ...params,
-        fields: `
-          *,
-          address.*
-        `,
-      },
+      params: getFields("locations", params),
     })
 
     return res
@@ -479,7 +464,7 @@ export default defineNuxtPlugin((nuxtApp) => {
     const res = await fetchData({
       method: "POST",
       path: "items/locations",
-      params: params,
+      params: getFields("locations", params),
     })
 
     return res
@@ -488,7 +473,7 @@ export default defineNuxtPlugin((nuxtApp) => {
     const res = await fetchData({
       method: "PATCH",
       path: `items/locations/${params.id}`,
-      params: params,
+      params: getFields("locations", params),
     })
 
     return res
@@ -510,12 +495,7 @@ export default defineNuxtPlugin((nuxtApp) => {
     const res = await fetchData({
       method: "GET",
       path: `items/tax_rates`,
-      params: {
-        ...params,
-        fields: `
-          *
-        `,
-      },
+      params: getFields("tax_rates", params),
     })
 
     return res
@@ -524,7 +504,7 @@ export default defineNuxtPlugin((nuxtApp) => {
     const res = await fetchData({
       method: "POST",
       path: "items/tax_rates",
-      params: params,
+      params: getFields("tax_rates", params),
     })
 
     return res
@@ -533,7 +513,7 @@ export default defineNuxtPlugin((nuxtApp) => {
     const res = await fetchData({
       method: "PATCH",
       path: `items/tax_rates/${params.id}`,
-      params: params,
+      params: getFields("tax_rates", params),
     })
 
     return res
@@ -551,16 +531,11 @@ export default defineNuxtPlugin((nuxtApp) => {
    * Channels
    */
 
-  const channelList = async (params) => {
+  const salesChannelList = async (params) => {
     const res = await fetchData({
       method: "GET",
       path: `items/sales_channels`,
-      params: {
-        ...params,
-        fields: `
-          *.
-        `,
-      },
+      params: getFields("sales_channels", params),
     })
 
     return res
@@ -621,7 +596,7 @@ export default defineNuxtPlugin((nuxtApp) => {
           delete: tenantDelete,
         },
         channel: {
-          list: channelList,
+          list: salesChannelList,
         },
         product: {
           item: productItem,
