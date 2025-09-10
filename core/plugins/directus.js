@@ -73,10 +73,10 @@ export default defineNuxtPlugin((nuxtApp) => {
         customer.*,
         shipping_address.*,
         payment.*,
-        line_items.*,
-        line_items.product.*,
-        line_items.product.featured_image.*,
-        line_items.product_variant.*,
+        line_items.line_items_id.*,
+        line_items.line_items_id.product.*,
+        line_items.line_items_id.product.featured_image.*,
+        line_items.line_items_id.product_variant.*
       `
     }
     // Payments
@@ -128,7 +128,9 @@ export default defineNuxtPlugin((nuxtApp) => {
      */
 
     if (params.fields) {
-      options.fields = params.fields
+      options.fields = params.fields.replace(/[\s\b]/g, "")
+    } else if (options.fields) {
+      options.fields = options.fields.replace(/[\s\b]/g, "")
     }
 
     return options
