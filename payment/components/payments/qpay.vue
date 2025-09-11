@@ -264,14 +264,14 @@ export default {
 
           // Test Mode
           if (this.testMode) {
-            await this.paymentComplete()
+            this.paymentComplete()
           } else {
             // Payment Successfull
             if (data && data.count > 0) {
               this.payment.statusMsg = this.$utils.t("Payment successfull.")
               this.payment.confirmation = data[0]
 
-              await this.paymentComplete()
+              this.paymentComplete()
               return
 
               // Payment Not Complete Yet
@@ -314,9 +314,9 @@ export default {
       setTimeout(() => {
         this.$emit("complete", {
           invoiceId: this.payment.invoiceId,
-          invoice: this.payment.invoice,
-          confirmation: this.payment.confirmation,
+          confirmation: this.payment.invoice?.invoice_id,
           isTestMode: this.testMode,
+          method: "qpay",
         })
       }, 3000)
     },

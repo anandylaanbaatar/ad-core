@@ -257,7 +257,7 @@ export default {
 
           // Test Mode
           if (this.testMode) {
-            await this.paymentComplete()
+            this.paymentComplete()
           } else {
             // Payment Successfull
             if (data && data.count > 0) {
@@ -265,7 +265,7 @@ export default {
                 "Payment successfull."
               )
 
-              await this.paymentComplete()
+              this.paymentComplete()
               return
 
               // Payment Not Complete Yet
@@ -298,6 +298,8 @@ export default {
       this.$emit("complete", {
         total: this.cart.totals.totalAmount,
         method: "qpay",
+        invoiceId: this.payment.invoiceId,
+        confirmation: this.payment.invoice?.invoice_id,
       })
     },
   },

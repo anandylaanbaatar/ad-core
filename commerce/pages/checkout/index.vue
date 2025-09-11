@@ -144,6 +144,8 @@ export default {
           type: "order",
           total: payment.total,
           method: payment.method,
+          invoice_id: payment.invoiceId,
+          confirmation: payment.confirmation,
         },
       }
 
