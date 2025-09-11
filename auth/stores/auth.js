@@ -112,6 +112,13 @@ export const useAuthStore = defineStore("auth", {
         if (userData) {
           this.set("user", userData)
           this.set("userLoggedIn", true)
+
+          // Next Redirect
+          let nextUrl = localStorage.getItem("next")
+          if (nextUrl) {
+            localStorage.removeItem("next")
+            nuxtApp.$bus.$emit("goTo", nextUrl)
+          }
         }
       }
     },
