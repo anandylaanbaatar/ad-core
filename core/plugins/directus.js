@@ -327,6 +327,15 @@ export default defineNuxtPlugin((nuxtApp) => {
 
     return res
   }
+  const paymentList = async (params) => {
+    const res = await fetchData({
+      method: "GET",
+      path: `items/payments`,
+      params: getFields("payments", params),
+    })
+
+    return res
+  }
   const paymentCreate = async (params) => {
     const res = await fetchData({
       method: "POST",
@@ -629,6 +638,7 @@ export default defineNuxtPlugin((nuxtApp) => {
         },
         payment: {
           item: paymentItem,
+          list: paymentList,
           create: paymentCreate,
         },
         customer: {

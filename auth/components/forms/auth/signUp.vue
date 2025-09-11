@@ -13,7 +13,7 @@
     <!--Email Sign Up Form-->
     <template v-if="type === null || type === 'email'">
       <div class="c-field col-xs-6">
-        <label for="firstName">{{ $utils.t("First Name") }}</label>
+        <!-- <label for="firstName">{{ $utils.t("First Name") }}</label> -->
         <InputText
           id="firstName"
           v-model="form.firstName"
@@ -28,7 +28,7 @@
       </div>
 
       <div class="c-field col-xs-6">
-        <label for="lastName">{{ $utils.t("Last Name") }}</label>
+        <!-- <label for="lastName">{{ $utils.t("Last Name") }}</label> -->
         <InputText
           id="lastName"
           v-model="form.lastName"
@@ -43,7 +43,7 @@
       </div>
 
       <div class="c-field col-xs-12">
-        <label for="email">{{ $utils.t("Email Address") }}</label>
+        <!-- <label for="email">{{ $utils.t("Email Address") }}</label> -->
         <InputText
           id="email"
           v-model="form.email"
@@ -58,7 +58,7 @@
       </div>
 
       <div class="c-field col-xs-12">
-        <label for="phone">{{ $utils.t("Phone") }}</label>
+        <!-- <label for="phone">{{ $utils.t("Phone") }}</label> -->
 
         <InputGroup>
           <InputGroupAddon class="c-phoneDropdown-wrapper p-0">
@@ -117,7 +117,7 @@
       </div>
 
       <div class="c-field col-xs-12">
-        <label for="password">{{ $utils.t("Password") }}</label>
+        <!-- <label for="password">{{ $utils.t("Password") }}</label> -->
         <Password
           v-model="form.password"
           :feedback="false"
@@ -188,7 +188,7 @@
         <!-- <div class="c-divider mt-2 mb-4"></div> -->
 
         <Button
-          label="SignUp with Google"
+          :label="$utils.t('SignUp with Google')"
           class="w-full"
           icon="pi pi-google"
           @click="signUpWithProvider('google')"

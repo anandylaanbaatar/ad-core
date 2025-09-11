@@ -96,7 +96,7 @@
         <!-- <div class="c-divider mt-2 mb-4"></div> -->
 
         <Button
-          label="Login with Google"
+          :label="$utils.t('Login with Google')"
           class="w-full"
           icon="pi pi-google"
           @click="loginWithProvider('google')"

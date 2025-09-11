@@ -141,6 +141,7 @@ export default {
         payment: {
           tenant_id: features().multitenancy.tenantId,
           status: "paid",
+          type: "order",
           total: payment.total,
           method: payment.method,
         },
