@@ -184,6 +184,13 @@ export default {
             this.$bus.$emit("sidebarGlobal", { id: "resetPassword" })
           }, 700)
         }
+        if (this.$route.query.mode && this.$route.query.oobCode) {
+          if (this.$route.query.mode === "resetPassword") {
+            setTimeout(() => {
+              this.$bus.$emit("sidebarGlobal", { id: "resetPassword" })
+            }, 700)
+          }
+        }
         if (this.$route.query.login) {
           setTimeout(() => {
             this.$bus.$emit("sidebarGlobal", { id: "account" })

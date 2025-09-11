@@ -9,6 +9,9 @@ import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signInWithCustomToken,
+  sendPasswordResetEmail,
+  verifyPasswordResetCode,
+  confirmPasswordReset,
   sendEmailVerification,
   updateProfile,
   signOut,
@@ -492,6 +495,42 @@ export default defineNuxtPlugin(async (nuxtApp) => {
         })
     })
   }
+  const resetPassword = (data) => {
+    return new Promise(async (resolve) => {
+      try {
+        await sendPasswordResetEmail(auth, data.email)
+        resolve(true)
+      } catch (err) {
+        console.log("Firebase ::: Error sending reset email!", err.message)
+        resolve(null)
+      }
+    })
+  }
+  const verifyResetPassword = (code) => {
+    return new Promise(async (resolve) => {
+      try {
+        await verifyPasswordResetCode(auth, code)
+        resolve(true)
+      } catch (err) {
+        console.log(
+          "Firebase ::: Error verifying reset password code!",
+          err.message
+        )
+        resolve(null)
+      }
+    })
+  }
+  const confirmResetPassword = (data) => {
+    return new Promise(async (resolve) => {
+      try {
+        await confirmPasswordReset(auth, data.code, data.password)
+        resolve(true)
+      } catch (err) {
+        console.log("Firebase ::: Error confirming new password!", err.message)
+        resolve(null)
+      }
+    })
+  }
   const checkProviderRedirect = async () => {
     try {
       const result = await getRedirectResult(auth)
@@ -714,6 +753,9 @@ export default defineNuxtPlugin(async (nuxtApp) => {
           verifyEmail,
           logout,
           isLoggedIn,
+          resetPassword,
+          verifyResetPassword,
+          confirmResetPassword,
           resendEmailVerification,
 
           // User

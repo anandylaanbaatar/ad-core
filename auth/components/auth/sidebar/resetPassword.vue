@@ -127,6 +127,7 @@ export default {
     return {
       active: false,
       isValid: false,
+      isVerified: false,
 
       form: {},
       errors: {},
@@ -136,20 +137,29 @@ export default {
 
   computed: {
     isReset() {
-      if (this.$route.query.resetPassword) {
+      if (
+        this.$route.query.resetPassword ||
+        (this.$route.query.mode === "resetPassword" &&
+          this.$route.query.oobCode)
+      ) {
         return true
       }
       return false
     },
   },
 
-  mounted() {
+  async mounted() {
     this.reset(true)
     this.validation()
+
+    if (this.isReset) {
+      await this.verifyCode()
+    }
   },
 
   methods: {
     reset(force) {
+      this.isVerified = false
       this.isValid = false
       this.errors = {}
 
@@ -173,6 +183,16 @@ export default {
       this.errors = validation.errors
     },
 
+    async verifyCode() {
+      if (!this.$route.query.oobCode) return
+
+      const code = this.$route.query.oobCode
+      const verify = await this.$fire.actions.verifyResetPassword(code)
+
+      if (verify) {
+        this.isVerified = true
+      }
+    },
     async resetPasswordEmail() {
       console.log("Send email reset pass to : ", this.form.email)
 
@@ -180,63 +200,50 @@ export default {
 
       this.loading = true
 
-      const res = await this.$shopify.resetPassword({
+      const res = await this.$fire.actions.resetPassword({
         email: this.form.email,
       })
 
       console.log("Email reset res ::: ", res)
 
-      if (res.error) {
-        for (let i = 0; i < res.error.length; i++) {
-          let error = res.error[i]
-          if (typeof error.field === "Array") {
-            this.errors[error.field[0]] = error.message
-          } else {
-            this.errors[error.field] = error.message
-          }
-        }
-      } else {
+      if (res) {
         this.$bus.$emit("toast", {
           severity: "success",
           summary: this.$utils.t("Reset Password"),
           detail: this.$utils.t("Sent a password reset request to your email."),
         })
         this.reset(true)
+      } else {
+        this.errors["system"] = "Error sending reset password email."
       }
 
       this.loading = false
     },
     async resetPassword() {
-      let url = this.$route.query.resetPassword
-      let fullUrl = `https://${url}`
+      if (!this.isVerified) return
+      if (!this.$route.query.oobCode) return
 
-      console.log("Reset Pass: ", fullUrl)
+      this.loading = true
 
-      if (this.isValid) {
-        this.loading = true
+      const res = await this.$fire.actions.confirmResetPassword({
+        code: this.$route.query.oobCode,
+        password: this.form.confirmPassword,
+      })
 
-        const res = await this.$shopify.resetPasswordUrl({
-          url: fullUrl,
-          password: this.form.password,
+      console.log("Reset Password ::: ", res)
+
+      if (res) {
+        this.$bus.$emit("toast", {
+          severity: "success",
+          summary: this.$utils.t("Reset Password"),
+          detail: this.$utils.t("Successfully reset password."),
         })
-
-        console.log("Reset Password ::: ", res)
-
-        if (res) {
-          this.$bus.$emit("toast", {
-            severity: "success",
-            summary: this.$utils.t("Reset Password"),
-            detail: this.$utils.t("Successfully reset password."),
-          })
-          this.reset(true)
-
-          this.$bus.$emit("sidebarGlobal", {
-            id: "account",
-          })
-        }
-
-        this.loading = false
+        this.reset(true)
+        this.$bus.$emit("sidebarGlobal", {
+          id: "account",
+        })
       }
+      this.loading = false
     },
   },
 }
