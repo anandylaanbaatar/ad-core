@@ -43,7 +43,8 @@ export default defineNuxtPlugin((nuxtApp) => {
       options.fields = `
         *,
         store_sales_channels.sales_channels_id.*,
-        tax_rates.tax_rates_id.*
+        tax_rates.tax_rates_id.*,
+        locations.locations_id.*
       `
     }
     // Products
