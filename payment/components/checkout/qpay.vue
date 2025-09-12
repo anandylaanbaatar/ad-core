@@ -89,6 +89,13 @@
 
 <script>
 export default {
+  props: {
+    invoiceNumber: {
+      type: String,
+      default: null,
+    },
+  },
+
   data() {
     return {
       testMode: true,
@@ -181,7 +188,7 @@ export default {
     },
     async createQPayInvoice() {
       this.payment.loading = true
-      this.payment.invoiceId = `${this.orderNumber}` // Set Draft Order Id
+      this.payment.invoiceId = `${this.invoiceNumber}` // Set Store Invoice Number
 
       await this.setQPayToken()
 

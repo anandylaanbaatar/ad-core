@@ -68,6 +68,7 @@
     <!--QPay-->
     <CheckoutQpay
       v-if="options.payment === 'qpay'"
+      :invoiceNumber="invoiceNumber"
       @complete="createPayment"
     ></CheckoutQpay>
 
@@ -103,9 +104,6 @@ export default {
   data() {
     return {
       loading: true,
-
-      // Order
-      draftOrderId: null,
     }
   },
 
@@ -356,10 +354,16 @@ export default {
         // discountCodes: this.discountCodes,
       }
     },
+
+    invoiceNumber() {
+      return useCommerceStore().orderNumber
+    },
   },
 
   async mounted() {
     this.loading = false
+
+    console.log("Store Invoice Number ::: ", this.invoiceNumber)
   },
 
   methods: {
@@ -370,29 +374,6 @@ export default {
     },
     async createPayment(payment) {
       this.$emit("complete", payment)
-
-      // const paymentRes = await this.$directus.payment.create({
-      //   total: payment.total,
-      //   method: payment.method,
-      // })
-
-      // console.log("Create Payment ::: ", paymentRes)
-
-      // if (paymentRes?.data) {
-      //   this.$emit("complete", paymentRes.data)
-
-      //   this.$bus.$emit("toast", {
-      //     severity: "success",
-      //     summary: "Success",
-      //     detail: "Payment successful.",
-      //   })
-      // } else {
-      //   this.$bus.$emit("toast", {
-      //     severity: "error",
-      //     summary: "Error",
-      //     detail: "Error occurred during payment.",
-      //   })
-      // }
     },
   },
 }

@@ -75,6 +75,22 @@ export default defineNuxtPlugin(async () => {
     usePaymentStore().set("stripeTestMode", true)
   }
 
+  // Check Stripe after init
+  let isValid = false
+  try {
+    // Minimal check: fetch account details to confirm key validity
+    await stripe.accounts.retrieve()
+    isValid = true
+  } catch (err) {
+    console.error(
+      "[Stripe] Invalid or expired keys, plugin disabled:",
+      err.message
+    )
+  }
+  if (!isValid) {
+    return { provide: { stripe: null } }
+  }
+
   /**
    * Frontend
    */

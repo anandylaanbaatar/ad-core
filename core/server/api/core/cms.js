@@ -37,6 +37,11 @@ const getQuery = (params) => {
     if (params.tenantIds) {
       query += `${getQueryKey()}filter[tenants][_contains]=${params.tenantIds}`
     }
+    // Payment Type
+    if (params.paymentType) {
+      query += `${getQueryKey()}filter[type][_eq]=${params.paymentType}`
+    }
+
     // Query
     if (params.query) {
       query += `${getQueryKey()}filter[title][_icontains]=${params.query}`
