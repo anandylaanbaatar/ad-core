@@ -491,12 +491,21 @@ export default defineNuxtPlugin((nuxtApp) => {
     return res
   }
   const locationDelete = async (params) => {
-    const res = await fetchData({
+    let result = {}
+
+    if (params.addressId) {
+      result.address = await fetchData({
+        method: "DELETE",
+        path: `items/addresses/${params.addressId}`,
+      })
+    }
+
+    result.location = await fetchData({
       method: "DELETE",
       path: `items/locations/${params.id}`,
     })
 
-    return res
+    return result
   }
 
   /**
