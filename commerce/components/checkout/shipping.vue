@@ -24,7 +24,7 @@
 
     <!--Shipping Options-->
     <ul class="c-radio">
-      <li>
+      <li v-if="selectedLocation.is_shipping">
         <i
           class="pi"
           :class="{
@@ -47,7 +47,7 @@
           </div>
         </div>
       </li>
-      <li>
+      <li v-if="selectedLocation.is_pickup_in_store">
         <i
           class="pi"
           :class="{
@@ -214,8 +214,6 @@
         </li>
       </ul>
     </div>
-
-    <pre>{{ options.location }}</pre>
   </section>
 </template>
 
@@ -254,6 +252,9 @@ export default {
       let allLocations = useCommerceStore().locations
       return allLocations
     },
+    selectedLocation() {
+      return useCommerceStore().selectedLocation
+    },
     shippingLines() {
       return useCommerceStore().shippingLines
     },
@@ -272,14 +273,18 @@ export default {
         this.options.address &&
         this.options.distance
       ) {
-        if (this.options.distance.price <= this.shippingLines[0].price) {
-          return this.shippingLines.find((i) => i.id === "local")
-        } else if (this.options.distance.price >= this.shippingLines[3].price) {
-          return this.shippingLines.find((i) => i.id === "international")
-        } else if (this.options.distance.price <= this.shippingLines[1].price) {
-          return this.shippingLines.find((i) => i.id === "city")
-        } else if (this.options.distance.price <= this.shippingLines[2].price) {
-          return this.shippingLines.find((i) => i.id === "provincial")
+        const local = this.shippingLines.find((i) => i.id === "local")
+        const provincial = this.shippingLines.find((i) => i.id === "provincial")
+        const international = this.shippingLines.find(
+          (i) => i.id === "international"
+        )
+
+        if (this.options.distance.price <= local.price) {
+          return local
+        } else if (this.options.distance.price >= international.price) {
+          return international
+        } else if (this.options.distance.price <= provincial.price) {
+          return provincial
         }
       }
 
@@ -385,7 +390,7 @@ export default {
           i.address?.id === useCommerceStore().selectedLocation?.address?.id
       )
 
-      // Mongolia
+      // Local & Provincial
       if (location && this.shippingAddress.country === "Mongolia") {
         let address1 = this.getFormattedAddress(location.address)
         let address2 = this.getFormattedAddress(this.shippingAddress)
@@ -413,8 +418,12 @@ export default {
             }
             distanceObj.formatted = `${distanceObj.distance.text} (${distanceObj.duration.text})`
 
-            if (distanceObj.price >= this.shippingLines[2].price) {
-              distanceObj.price = this.shippingLines[2].price
+            // Provincial
+            const provincial = this.shippingLines.find(
+              (i) => i.id === "provincial"
+            )
+            if (distanceObj.price >= provincial.price) {
+              distanceObj.price = provincial.price
             }
 
             this.options.distance = distanceObj
@@ -422,9 +431,11 @@ export default {
             console.log("Direction Summary ::: ", distanceObj)
           }
         }
-      } else {
+      }
+      // International
+      else {
         this.options.distance = {
-          price: 1000000,
+          price: this.shippingLines.find((i) => i.id === "international").price,
           distance: {
             text: "8000 km",
             value: 8000,

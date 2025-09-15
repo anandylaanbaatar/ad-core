@@ -40,11 +40,6 @@ export const useCommerceStore = defineStore("commerce", {
         price: 5000,
       },
       {
-        id: "city",
-        title: "City Shipping",
-        price: 25000,
-      },
-      {
         id: "provincial",
         title: "Provincial Shipping",
         price: 40000,
@@ -274,11 +269,40 @@ export const useCommerceStore = defineStore("commerce", {
     async setLocation(location) {
       this.selectedLocation = location
 
+      // Set Locations
       if (!this.locations) {
         await this.setLocations()
       }
 
-      console.log("[Commerce] ::: Set Location :: ", location)
+      // Set Shipping Prices
+      if (location.is_fulfillment) {
+        if (location.is_shipping) {
+          if (!location.is_shipping_price_auto) {
+            if (location.is_local_delivery && location.local_delivery_price) {
+              let local = this.shippingLines.find((i) => i.id === "local")
+              local.price = location.local_delivery_price
+            }
+            if (
+              location.is_provincial_delivery &&
+              location.provincial_delivery_price
+            ) {
+              let provincial = this.shippingLines.find(
+                (i) => i.id === "provincial"
+              )
+              provincial.price = location.provincial_delivery_price
+            }
+            if (
+              location.is_international_delivery &&
+              location.international_delivery_price
+            ) {
+              let international = this.shippingLines.find(
+                (i) => i.id === "international"
+              )
+              international.price = location.international_delivery_price
+            }
+          }
+        }
+      }
     },
 
     // Collections
