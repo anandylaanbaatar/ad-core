@@ -105,6 +105,7 @@
           v-for="address in allAddresses"
           :key="`address_item_${address.id}`"
           @click="selectItem('address', address.id)"
+          class="flex align-items-center"
         >
           <i
             class="pi"
@@ -117,7 +118,7 @@
             class="d-block"
             :class="{ active: options.address === address.id }"
           >
-            <div class="row px-3 relative mb-2">
+            <div class="row px-3 relative">
               <p class="font2">{{ address.full_address }}</p>
               <Tag
                 v-if="checkAddress(address)"
@@ -151,7 +152,7 @@
       <!--Distance-->
       <Message
         v-if="options.distance"
-        severity="info"
+        severity="success"
         class="c-message mt-3"
         :closable="false"
       >
@@ -159,13 +160,11 @@
           <i class="pi pi-check"></i>
         </template>
 
-        <span class="ml-2">
+        <span class="ml-2 w-full">
           {{ $utils.t(shippingLine.title) }} -
           {{ $currency.format(shippingLine.price) }}
 
-          <!-- {{ options.distance.formatted }} - ({{
-                      $utils.formatPrice(options.distance.price)
-                    }}₮ / km нь 2,000₮) -->
+          <span class="ml-auto"> - {{ options.distance.formatted }} </span>
         </span>
 
         <template #closeicon>
@@ -215,6 +214,8 @@
         </li>
       </ul>
     </div>
+
+    <pre>{{ options.location }}</pre>
   </section>
 </template>
 
@@ -272,19 +273,15 @@ export default {
         this.options.distance
       ) {
         if (this.options.distance.price <= this.shippingLines[0].price) {
-          return this.shippingLines[0]
+          return this.shippingLines.find((i) => i.id === "local")
         } else if (this.options.distance.price >= this.shippingLines[3].price) {
-          return this.shippingLines[3]
+          return this.shippingLines.find((i) => i.id === "international")
         } else if (this.options.distance.price <= this.shippingLines[1].price) {
-          return this.shippingLines[1]
+          return this.shippingLines.find((i) => i.id === "city")
         } else if (this.options.distance.price <= this.shippingLines[2].price) {
-          return this.shippingLines[2]
+          return this.shippingLines.find((i) => i.id === "provincial")
         }
       }
-
-      // if (this.options.shipping === "address" && this.options.address) {
-      //   return this.shippingLines[0]
-      // }
 
       return null
     },
@@ -359,6 +356,7 @@ export default {
 
         if (value === "pickup") {
           this.options.location = this.locations.find((i) => i.id === value)
+          useCommerceStore().set("shippingAmount", null)
         }
       }
       if (type === "address") {

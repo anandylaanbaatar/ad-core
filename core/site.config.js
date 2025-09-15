@@ -134,18 +134,16 @@ if (
     // Commerce
     if (mainConfig.store_theme === "commerce") {
       if (!config.commerce) {
-        config.commerce = {
-          allowTax: false,
-          location: null,
-          shippingLines: null,
-        }
+        config.commerce = {}
       }
-      if (mainConfig.commerce_allow_tax) {
-        config.commerce.allowTax = mainConfig.commerce_allow_tax
-      }
-      if (mainConfig.commerce_weight_unit) {
-        config.commerce.weightUnit = mainConfig.commerce_weight_unit
-      }
+
+      // if (mainConfig.commerce_allow_tax) {
+      //   config.commerce.allowTax = mainConfig.commerce_allow_tax
+      // }
+      // if (mainConfig.commerce_weight_unit) {
+      //   config.commerce.weightUnit = mainConfig.commerce_weight_unit
+      // }
+
       // Sales Channels
       if (mainConfig.store_sales_channels?.length) {
         config.commerce.salesChannels = mainConfig.store_sales_channels.map(
@@ -448,44 +446,44 @@ if (config.features.payments) {
  * 5. Commerce Settings
  */
 
-if (config.theme.type === "commerce" && config.commerce) {
-  let siteShippingLines = []
+// if (config.theme.type === "commerce" && config.commerce) {
+//   // let siteShippingLines = []
 
-  // Shipping Lines
-  if (config.commerce.shipping) {
-    if (config.commerce.shipping.local) {
-      siteShippingLines.push({
-        title: "Local Shipping",
-        price: config.commerce.shipping.local,
-      })
-    }
-    if (config.commerce.shipping.city) {
-      siteShippingLines.push({
-        title: "City Shipping",
-        price: config.commerce.shipping.city,
-      })
-    }
-    if (config.commerce.shipping.provincial) {
-      siteShippingLines.push({
-        title: "Provincial Shipping",
-        price: config.commerce.shipping.provincial,
-      })
-    }
-    if (config.commerce.shipping.international) {
-      siteShippingLines.push({
-        title: "International Shipping",
-        price: config.commerce.shipping.international,
-      })
-    }
-  }
+//   // // Shipping Lines
+//   // if (config.commerce.shipping) {
+//   //   if (config.commerce.shipping.local) {
+//   //     siteShippingLines.push({
+//   //       title: "Local Shipping",
+//   //       price: config.commerce.shipping.local,
+//   //     })
+//   //   }
+//   //   if (config.commerce.shipping.city) {
+//   //     siteShippingLines.push({
+//   //       title: "City Shipping",
+//   //       price: config.commerce.shipping.city,
+//   //     })
+//   //   }
+//   //   if (config.commerce.shipping.provincial) {
+//   //     siteShippingLines.push({
+//   //       title: "Provincial Shipping",
+//   //       price: config.commerce.shipping.provincial,
+//   //     })
+//   //   }
+//   //   if (config.commerce.shipping.international) {
+//   //     siteShippingLines.push({
+//   //       title: "International Shipping",
+//   //       price: config.commerce.shipping.international,
+//   //     })
+//   //   }
+//   // }
 
-  // Theme
-  theme.commerce = {
-    location: config.commerce.location,
-    allowTax: config.commerce.allowTax,
-    shippingLines: siteShippingLines,
-  }
-}
+//   // // Theme
+//   // theme.commerce = {
+//   //   location: config.commerce.location,
+//   //   allowTax: config.commerce.allowTax,
+//   //   shippingLines: siteShippingLines,
+//   // }
+// }
 
 // Site Head
 const siteHead = {

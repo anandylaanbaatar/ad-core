@@ -23,23 +23,38 @@ export const useCommerceStore = defineStore("commerce", {
 
     // Collections
     collections: null,
-    collectionsCount: 0,
+    // collectionsCount: 0,
     advancedCollections: false,
 
-    allowTax:
-      theme().type === "commerce"
-        ? useAppConfig().theme.commerce?.allowTax
-        : null,
+    allowTax: false,
 
     // Location
     locations: null,
     selectedLocation: null,
 
     // Shipping
-    shippingLines:
-      theme().type === "commerce"
-        ? useAppConfig().theme.commerce?.shippingLines
-        : null,
+    shippingLines: [
+      {
+        id: "local",
+        title: "Local Shipping",
+        price: 5000,
+      },
+      {
+        id: "city",
+        title: "City Shipping",
+        price: 25000,
+      },
+      {
+        id: "provincial",
+        title: "Provincial Shipping",
+        price: 40000,
+      },
+      {
+        id: "international",
+        title: "International Shipping",
+        price: 100000,
+      },
+    ],
     shippingAmount: null,
   }),
 
@@ -119,14 +134,14 @@ export const useCommerceStore = defineStore("commerce", {
       // const tenantId =
       //   useRuntimeConfig().public.features?.multitenancy?.tenantId
 
-      console.log("[Commerce] ::: UserData ::: ", user, userData)
+      // console.log("[Commerce] ::: UserData ::: ", user, userData)
 
       // 1. Check Customer Exists
       const customerData = await nuxtApp.$directus.customer.item({
         uid: userData.uid,
       })
 
-      console.log("[Commerce] ::: Customer Exists ::: ", customerData)
+      // console.log("[Commerce] ::: Customer Exists ::: ", customerData)
 
       // Check Customer
       if (
@@ -200,7 +215,7 @@ export const useCommerceStore = defineStore("commerce", {
       }
 
       this.customer = customer
-      console.log("[Commerce] ::: Customer Set ::: ", this.customer)
+      // console.log("[Commerce] ::: Customer Set ::: ", this.customer)
     },
     async getUserByEmail(email) {
       const user = await useNuxtApp().$shopify.customerByEmail({
@@ -241,7 +256,7 @@ export const useCommerceStore = defineStore("commerce", {
         tenantId: appConfig.public.features.multitenancy.tenantId,
       })
 
-      console.log("Locations ::: ", locationsRes)
+      // console.log("Locations ::: ", locationsRes)
 
       if (locationsRes?.success && locationsRes?.data) {
         const allLocations = locationsRes.data
@@ -250,14 +265,20 @@ export const useCommerceStore = defineStore("commerce", {
           this.locations = allLocations
 
           if (!this.selectedLocation) {
-            this.selectedLocation = allLocations[0]
+            // this.selectedLocation = allLocations[0]
+            this.setLocation(allLocations[0])
           }
         }
       }
     },
     async setLocation(location) {
       this.selectedLocation = location
-      await this.setLocations()
+
+      if (!this.locations) {
+        await this.setLocations()
+      }
+
+      console.log("[Commerce] ::: Set Location :: ", location)
     },
 
     // Collections
