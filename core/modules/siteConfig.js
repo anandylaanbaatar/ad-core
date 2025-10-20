@@ -4,6 +4,12 @@ export default async function siteConfigModule(moduleOptions, nuxt) {
     "firebase-admin/app"
   )
   const { getDatabase } = await import("firebase-admin/database")
+
+  // Check if Env Var setup.
+  if(!process.env.NUXT_FIREBASE_PROJECT_ID) return
+  if(!process.env.NUXT_FIREBASE_CLIENT_EMAIL) return
+  if(!process.env.NUXT_FIREBASE_PRIVATE_KEY) return
+
   const credentials = {
     projectId: process.env.NUXT_FIREBASE_PROJECT_ID,
     clientEmail: process.env.NUXT_FIREBASE_CLIENT_EMAIL,
