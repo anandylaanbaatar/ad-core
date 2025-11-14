@@ -280,88 +280,12 @@ export const useAuthStore = defineStore("auth", {
             }
           }
 
-          // Check Loops User
+          // Check Loops User - NON-BLOCKING (run in background)
           if (!isSet) {
-            let userId = null
-            const loopUser = await useNuxtApp().$notifications.loops.user.find(
-              userData.email
-            )
-
-            // Check Mailing List
-            let mailingLists = {}
-            mailingLists[features().notifications.loops.listId] = true
-            let userUpdateData = {
-              userId: userData.uid,
-              email: userData.email,
-              firstName: userData.firstName ? userData.firstName : null,
-              lastName: userData.lastName ? userData.lastName : null,
-              mailingLists: mailingLists,
-            }
-
-            // Create User
-            if (!loopUser) {
-              userId =
-                await useNuxtApp().$notifications.loops.user.create(
-                  userUpdateData
-                )
-
-              console.log(
-                "[Store] ::: [Auth] ::: New Loops User Id :::",
-                userId
-              )
-
-              // Update User
-            } else {
-              let isUpdate = false
-
-              if (loopUser.mailingLists) {
-                if (
-                  !loopUser.mailingLists[features().notifications.loops.listId]
-                ) {
-                  isUpdate = true
-                }
-              }
-
-              if (isUpdate) {
-                userId =
-                  await useNuxtApp().$notifications.loops.user.update(
-                    userUpdateData
-                  )
-
-                console.log(
-                  "[Store] ::: [Auth] ::: Found Loops User Id and Updated :::",
-                  userId
-                )
-              } else {
-                // console.log(
-                //   "[Store] ::: [Auth] ::: Found Loops User Id not Updated :::",
-                //   userId
-                // )
-              }
-            }
-
-            // Add to updates
-            if (userId) {
-              if (features().multitenancy && features().multitenancy.tenantId) {
-                const tenantId = features().multitenancy.tenantId
-
-                if (!userData[tenantId]) {
-                  updates[tenantId] = {
-                    loopsUserId: userId,
-                  }
-                  newUserData[tenantId] = {
-                    loopsUserId: userId,
-                  }
-                } else {
-                  updates[tenantId] = userData[tenantId]
-                  updates[tenantId].loopsUserId = userId
-                  newUserData[tenantId].loopsUserId = userId
-                }
-              } else {
-                updates.loopsUserId = userId
-                newUserData.loopsUserId = userId
-              }
-            }
+            // Run Loops API calls in background to avoid blocking auth flow
+            this.syncLoopsUser(userData).catch((error) => {
+              console.error("[Store] ::: [Auth] ::: Loops sync error (non-blocking):", error)
+            })
           }
         }
       }
@@ -374,6 +298,108 @@ export const useAuthStore = defineStore("auth", {
       // console.log("[Store] ::: [Auth] ::: User Data Check ::", userData)
 
       return newUserData
+    },
+
+    /**
+     * Sync user with Loops email service (non-blocking background task)
+     */
+    async syncLoopsUser(userData) {
+      const uid = userData.uid
+
+      try {
+        let userId = null
+        const loopUser = await useNuxtApp().$notifications.loops.user.find(
+          userData.email
+        )
+
+        // Check Mailing List
+        let mailingLists = {}
+        mailingLists[features().notifications.loops.listId] = true
+        let userUpdateData = {
+          userId: userData.uid,
+          email: userData.email,
+          firstName: userData.firstName ? userData.firstName : null,
+          lastName: userData.lastName ? userData.lastName : null,
+          mailingLists: mailingLists,
+        }
+
+        // Create User
+        if (!loopUser) {
+          userId = await useNuxtApp().$notifications.loops.user.create(
+            userUpdateData
+          )
+
+          console.log(
+            "[Store] ::: [Auth] ::: New Loops User Id :::",
+            userId
+          )
+
+          // Update User
+        } else {
+          let isUpdate = false
+
+          if (loopUser.mailingLists) {
+            if (
+              !loopUser.mailingLists[features().notifications.loops.listId]
+            ) {
+              isUpdate = true
+            }
+          }
+
+          if (isUpdate) {
+            userId = await useNuxtApp().$notifications.loops.user.update(
+              userUpdateData
+            )
+
+            console.log(
+              "[Store] ::: [Auth] ::: Found Loops User Id and Updated :::",
+              userId
+            )
+          }
+        }
+
+        // Add to updates
+        if (userId) {
+          let updates = {}
+
+          if (features().multitenancy && features().multitenancy.tenantId) {
+            const tenantId = features().multitenancy.tenantId
+
+            if (!userData[tenantId]) {
+              updates[tenantId] = {
+                loopsUserId: userId,
+              }
+            } else {
+              updates[tenantId] = { ...userData[tenantId] }
+              updates[tenantId].loopsUserId = userId
+            }
+          } else {
+            updates.loopsUserId = userId
+          }
+
+          // Update Firebase in background
+          await useNuxtApp().$fire.actions.update(`/users/${uid}`, updates)
+
+          // Update local store state
+          if (this.user && this.user.uid === uid) {
+            const updatedUser = { ...this.user }
+            if (features().multitenancy && features().multitenancy.tenantId) {
+              const tenantId = features().multitenancy.tenantId
+              if (!updatedUser[tenantId]) {
+                updatedUser[tenantId] = {}
+              }
+              updatedUser[tenantId].loopsUserId = userId
+            } else {
+              updatedUser.loopsUserId = userId
+            }
+            this.user = updatedUser
+          }
+
+          console.log("[Store] ::: [Auth] ::: Loops user synced in background")
+        }
+      } catch (error) {
+        console.error("[Store] ::: [Auth] ::: Loops sync failed:", error)
+      }
     },
   },
 })
