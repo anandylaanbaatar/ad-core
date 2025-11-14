@@ -17,6 +17,8 @@ import {
   signOut,
   getAdditionalUserInfo,
   applyActionCode,
+  setPersistence,
+  browserLocalPersistence,
 } from "firebase/auth"
 import { getFirestore } from "firebase/firestore"
 import {
@@ -78,11 +80,26 @@ export default defineNuxtPlugin(async (nuxtApp) => {
   const app =
     getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0]
   const auth = getAuth(app)
+
+  // Configure Firebase Auth Persistence - CRITICAL for auth state to persist
+  try {
+    await setPersistence(auth, browserLocalPersistence)
+    if (runtimeConfig.public.features.log) {
+      console.log('[Plugins] ::: [Firebase] ::: Auth persistence enabled (browserLocalPersistence)')
+    }
+  } catch (error) {
+    console.error('[Plugins] ::: [Firebase] ::: Error setting persistence:', error)
+  }
+
   const firestore = getFirestore(app)
   const database = getDatabase(app)
   const dbRef = ref(getDatabase(app))
   // const messaging = getMessaging(app)
   let analytics = null
+
+  // Initialize centralized auth composable (single source of truth)
+  const { initialize: initializeAuth } = useFirebaseAuth()
+  initializeAuth()
 
   /**
    * Analytics
@@ -284,27 +301,22 @@ export default defineNuxtPlugin(async (nuxtApp) => {
     })
   }
   const authState = async () => {
-    return new Promise(async (resolve, reject) => {
-      auth.onAuthStateChanged((user) => {
-        // console.log(
-        //   "[Plugins] ::: [Firebase] ::: [Auth State Changed] ::: User: ",
-        //   user
-        // )
+    // Use centralized auth composable instead of creating new listeners
+    const { waitForAuth } = useFirebaseAuth()
+    const user = await waitForAuth()
 
-        if (user) {
-          // useInAppNotifications().listen(user.uid)
-          if (runtimeConfig.public.features.auth.userPresence) {
-            usePresence(user)
-          }
-          resolve(user)
-        } else {
-          // useInAppNotifications().stop()
-          useAuthStore().set("user", null)
-          useAuthStore().set("userLoggedIn", false)
-          resolve(null)
-        }
-      })
-    })
+    // Handle user presence if enabled
+    if (user && runtimeConfig.public.features.auth.userPresence) {
+      usePresence(user)
+    }
+
+    // Update auth store state
+    if (!user) {
+      useAuthStore().set("user", null)
+      useAuthStore().set("userLoggedIn", false)
+    }
+
+    return user
   }
   const signUp = (data) => {
     return new Promise((resolve, reject) => {

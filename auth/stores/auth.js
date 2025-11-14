@@ -7,6 +7,9 @@ export const useAuthStore = defineStore("auth", {
     users: null,
     user: null,
     userLoggedIn: false,
+    authInitialized: false, // Track if auth has been initialized
+    userDataFetched: false, // Track if user data has been fetched
+    lastUserFetch: null, // Timestamp of last user data fetch
   }),
 
   actions: {
