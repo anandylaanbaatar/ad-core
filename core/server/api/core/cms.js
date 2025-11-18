@@ -70,6 +70,23 @@ const getQuery = (params) => {
     if (params.sort) {
       query += `${getQueryKey()}sort=${params.sort}`
     }
+
+    // Generic Filters (Directus filter object)
+    if (params.filter) {
+      const buildFilter = (filterObj, prefix = "filter") => {
+        let filterQuery = ""
+        for (const key in filterObj) {
+          const value = filterObj[key]
+          if (typeof value === "object" && !Array.isArray(value)) {
+            filterQuery += buildFilter(value, `${prefix}[${key}]`)
+          } else {
+            filterQuery += `${getQueryKey()}${prefix}[${key}]=${value}`
+          }
+        }
+        return filterQuery
+      }
+      query += buildFilter(params.filter)
+    }
   }
 
   return query
@@ -102,10 +119,16 @@ export default defineEventHandler(async (event) => {
       options.body = JSON.stringify(body.params)
     }
 
-    const res = await fetch(
-      `${URL}/${body.path}${getQuery(body.params)}`,
-      options
-    )
+    const queryString = getQuery(body.params)
+    const fullUrl = `${URL}/${body.path}${queryString}`
+
+    // Debug log for filters
+    if (body.params?.filter) {
+      console.log("Filter Query String:", queryString)
+      console.log("Full URL:", fullUrl)
+    }
+
+    const res = await fetch(fullUrl, options)
 
     // Delete Response
     if (body.method === "DELETE") {
