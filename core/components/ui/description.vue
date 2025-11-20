@@ -3,19 +3,19 @@
 </template>
 
 <script>
-import * as prismic from "@prismicio/client"
+import { renderRichText } from '~/utils/richtext'
 
 export default {
   props: {
     desc: {
-      type: Array,
+      type: [Array, String, Object],
       default: null,
     },
   },
 
   methods: {
     getItemDescription(description) {
-      return prismic.asHTML(description)
+      return renderRichText(description)
     },
   },
 }

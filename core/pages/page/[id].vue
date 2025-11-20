@@ -63,22 +63,33 @@ export default {
   methods: {
     async getPage() {
       if (this.page) return
-      if (!useRuntimeConfig().public.integrations.prismic) {
-        this.errorPage("Integration is disabled!")
+
+      // Check if CMS is enabled
+      const config = useRuntimeConfig()
+      const cmsProvider = config.public.features?.cms?.provider || 'prismic'
+      const prismicEnabled = config.public.integrations.prismic
+      const directusEnabled = config.public.integrations.directus
+
+      if (!prismicEnabled && !directusEnabled) {
+        this.errorPage("CMS Integration is disabled!")
         return
       }
+
       if (!this.pageId) {
         this.errorPage("No Page Found!")
         return
       }
-      if (!this.$prismicClient) return
 
       try {
-        const page = await this.$prismicClient.getByUID("page", this.pageId)
+        // Use CMS abstraction layer
+        const cms = useCMS()
+        const page = await cms.getPage(this.pageId)
 
         if (page) {
           this.page = page
           this.slices = page.data.slices
+        } else {
+          this.errorPage("Page not found in CMS")
         }
 
         this.loading = false
@@ -89,7 +100,7 @@ export default {
     async errorPage(errMsg) {
       let msg = errMsg ? errMsg : null
 
-      console.log("[Page] ::: Prismic page has errors!", msg)
+      console.log("[Page] ::: CMS page has errors!", msg)
 
       this.loading = false
       this.error = msg

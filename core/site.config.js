@@ -160,6 +160,162 @@ if (
 }
 
 /**
+ * Directus CMS Config (Website Settings)
+ */
+let directusCMSConfig = null
+
+const getDirectusCMSConfig = async () => {
+  // Use storefront API URL for CMS content
+  const url = config.features.directus?.storefront?.apiUrl || config.features.directus?.admin?.apiUrl || 'https://store.adcommerce.mn'
+  const token = process.env.NUXT_DIRECTUS_STOREFRONT_TOKEN
+
+  if (!token) {
+    console.log("NUXT_DIRECTUS_STOREFRONT_TOKEN not found, skipping Directus CMS config")
+    return null
+  }
+
+  const fields = `
+    *,
+    site_logo.*,
+    site_logo_dark.*,
+    site_mobile_logo.*,
+    site_mobile_logo_dark.*,
+    site_splash.*
+  `
+
+  try {
+    const res = await fetch(
+      `${url}/items/cms_website_settings?fields=${fields.replace(/[\s\b]/g, "")}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    )
+
+    if (!res.ok) {
+      console.log("Failed to fetch Directus CMS settings")
+      return null
+    }
+
+    const data = await res.json()
+
+    if (data?.data) {
+      return data.data
+    }
+  } catch (err) {
+    console.log("Directus CMS Config error ::: ", err.message)
+  }
+
+  return null
+}
+
+// Try Directus CMS config if enabled and no commerce config loaded
+if (
+  config.integrations.directus &&
+  config.features.directus &&
+  process.env.NUXT_DIRECTUS_STOREFRONT_TOKEN &&
+  !mainConfig
+) {
+  directusCMSConfig = await getDirectusCMSConfig()
+
+  if (directusCMSConfig) {
+    // Required Fields
+    if (directusCMSConfig.site_id) {
+      config.theme.storeId = directusCMSConfig.site_id
+    }
+    if (directusCMSConfig.site_type) {
+      config.theme.type = directusCMSConfig.site_type
+    }
+    if (directusCMSConfig.site_name) {
+      config.defaults.name = directusCMSConfig.site_name
+    }
+    if (directusCMSConfig.site_url) {
+      config.defaults.siteUrl = directusCMSConfig.site_url
+    }
+
+    // Location Specific Required Fields
+    if (directusCMSConfig.site_language) {
+      config.theme.language = directusCMSConfig.site_language
+    }
+    if (directusCMSConfig.site_country) {
+      config.theme.country = directusCMSConfig.site_country
+    }
+    if (directusCMSConfig.site_currency) {
+      config.theme.currency = directusCMSConfig.site_currency
+    }
+    if (directusCMSConfig.site_timezone) {
+      config.theme.timezone = directusCMSConfig.site_timezone
+    }
+
+    // Optional Fields
+    if (directusCMSConfig.site_name_short) {
+      config.defaults.name_short = directusCMSConfig.site_name_short
+    }
+    if (directusCMSConfig.site_slogan) {
+      config.defaults.slogan = directusCMSConfig.site_slogan
+    }
+    if (directusCMSConfig.site_description) {
+      config.defaults.description = directusCMSConfig.site_description
+    }
+
+    // Theme - Transform Directus file objects to URLs (use storefront API)
+    const storefrontUrl = config.features.directus?.storefront?.apiUrl || 'https://store.adcommerce.mn'
+
+    if (directusCMSConfig.site_logo) {
+      const logoUrl = directusCMSConfig.site_logo.id
+        ? `${storefrontUrl}/assets/${directusCMSConfig.site_logo.id}`
+        : directusCMSConfig.site_logo
+      config.logo.desktop = logoUrl
+    }
+    if (directusCMSConfig.site_logo_dark) {
+      const logoUrl = directusCMSConfig.site_logo_dark.id
+        ? `${storefrontUrl}/assets/${directusCMSConfig.site_logo_dark.id}`
+        : directusCMSConfig.site_logo_dark
+      config.logo.desktop_dark = logoUrl
+    }
+    if (directusCMSConfig.site_mobile_logo) {
+      const logoUrl = directusCMSConfig.site_mobile_logo.id
+        ? `${storefrontUrl}/assets/${directusCMSConfig.site_mobile_logo.id}`
+        : directusCMSConfig.site_mobile_logo
+      config.logo.mobile = logoUrl
+    }
+    if (directusCMSConfig.site_mobile_logo_dark) {
+      const logoUrl = directusCMSConfig.site_mobile_logo_dark.id
+        ? `${storefrontUrl}/assets/${directusCMSConfig.site_mobile_logo_dark.id}`
+        : directusCMSConfig.site_mobile_logo_dark
+      config.logo.mobile_dark = logoUrl
+    }
+    if (directusCMSConfig.site_splash) {
+      const splashUrl = directusCMSConfig.site_splash.id
+        ? `${storefrontUrl}/assets/${directusCMSConfig.site_splash.id}`
+        : directusCMSConfig.site_splash
+      config.theme.splash = splashUrl
+    }
+    if (directusCMSConfig.site_light_dark_mode) {
+      if (directusCMSConfig.site_light_dark_mode === "both") {
+        config.theme.darkLightMode = null
+      } else if (directusCMSConfig.site_light_dark_mode === "light") {
+        config.theme.darkLightMode = "light"
+      } else if (directusCMSConfig.site_light_dark_mode === "dark") {
+        config.theme.darkLightMode = "dark"
+      }
+    }
+
+    // Contact
+    if (directusCMSConfig.contact_email) {
+      config.contact.email = directusCMSConfig.contact_email
+    }
+    if (directusCMSConfig.contact_phone) {
+      config.contact.phone = directusCMSConfig.contact_phone
+    }
+
+    console.log("[Site Config] ::: Using Directus CMS Settings!")
+  }
+}
+
+/**
  * Prismic Config
  */
 let prismicConfig = null
@@ -181,7 +337,7 @@ const getSitePrismicConfig = async (repoId) => {
 
   return null
 }
-if (config.features.prismic && !mainConfig) {
+if (config.features.prismic && !mainConfig && !directusCMSConfig) {
   prismicConfig = await getSitePrismicConfig(config.features.prismic)
 
   if (prismicConfig) {
