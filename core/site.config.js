@@ -200,7 +200,9 @@ const getDirectusCMSConfig = async () => {
     )
 
     if (!res.ok) {
-      console.log("Failed to fetch Directus CMS settings")
+      console.log(
+        "[Site Config] ::: Failed to fetch Directus Storefront settings"
+      )
       return null
     }
 
@@ -210,7 +212,7 @@ const getDirectusCMSConfig = async () => {
       return data.data
     }
   } catch (err) {
-    console.log("Directus CMS Config error ::: ", err.message)
+    console.log("[Site Config] ::: Directus CMS Config error ::: ", err.message)
   }
 
   return null
