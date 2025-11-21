@@ -166,11 +166,16 @@ let directusCMSConfig = null
 
 const getDirectusCMSConfig = async () => {
   // Use storefront API URL for CMS content
-  const url = config.features.directus?.storefront?.apiUrl || config.features.directus?.admin?.apiUrl || 'https://store.adcommerce.mn'
+  const url =
+    config.features.directus?.storefront?.apiUrl ||
+    config.features.directus?.admin?.apiUrl ||
+    "https://storefront.adcommerce.mn"
   const token = process.env.NUXT_DIRECTUS_STOREFRONT_TOKEN
 
   if (!token) {
-    console.log("NUXT_DIRECTUS_STOREFRONT_TOKEN not found, skipping Directus CMS config")
+    console.log(
+      "NUXT_DIRECTUS_STOREFRONT_TOKEN not found, skipping Directus CMS config"
+    )
     return null
   }
 
@@ -261,7 +266,9 @@ if (
     }
 
     // Theme - Transform Directus file objects to URLs (use storefront API)
-    const storefrontUrl = config.features.directus?.storefront?.apiUrl || 'https://store.adcommerce.mn'
+    const storefrontUrl =
+      config.features.directus?.storefront?.apiUrl ||
+      "https://storefront.adcommerce.mn"
 
     if (directusCMSConfig.site_logo) {
       const logoUrl = directusCMSConfig.site_logo.id
