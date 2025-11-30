@@ -377,6 +377,303 @@ export const useCMS = () => {
         console.error('[useCMS] Directus getTestimonials error:', error)
         return null
       }
+    },
+
+    /**
+     * Get navigation menus for a tenant
+     * @param {string} tenantId - Tenant identifier
+     * @param {string} [location] - Optional location filter (header, footer, mobile, sidebar)
+     */
+    async getMenus(tenantId, location = null) {
+      try {
+        const filter = { tenant_id: { _eq: tenantId }, status: { _eq: 'published' } }
+        if (location) {
+          filter.location = { _eq: location }
+        }
+
+        const response = await nuxtApp.$directusStorefront.ad_menus.list({
+          filter,
+          sort: ['sort']
+        })
+
+        if (!response.data) {
+          return []
+        }
+
+        return response.data.map(menu => ({
+          id: menu.id,
+          name: menu.name,
+          location: menu.location,
+          items: menu.items || []
+        }))
+      } catch (error) {
+        console.error('[useCMS] Directus getMenus error:', error)
+        return []
+      }
+    },
+
+    /**
+     * Get extended settings for a tenant
+     * @param {string} tenantId - Tenant identifier
+     */
+    async getExtendedSettings(tenantId) {
+      try {
+        const response = await nuxtApp.$directusStorefront.ad_settings.get({
+          filter: { tenant_id: { _eq: tenantId } }
+        })
+
+        if (!response.data || response.data.length === 0) {
+          return null
+        }
+
+        const settings = Array.isArray(response.data) ? response.data[0] : response.data
+
+        return {
+          google_analytics_id: settings.google_analytics_id,
+          google_tag_manager_id: settings.google_tag_manager_id,
+          facebook_pixel_id: settings.facebook_pixel_id,
+          tiktok_pixel_id: settings.tiktok_pixel_id,
+          custom_scripts_head: settings.custom_scripts_head,
+          custom_scripts_body: settings.custom_scripts_body,
+          custom_css: settings.custom_css,
+          default_meta_title: settings.default_meta_title,
+          default_meta_description: settings.default_meta_description,
+          default_meta_image: transformImage(settings.default_meta_image),
+          page_404_title: settings.page_404_title,
+          page_404_description: settings.page_404_description,
+          page_404_image: transformImage(settings.page_404_image)
+        }
+      } catch (error) {
+        console.error('[useCMS] Directus getExtendedSettings error:', error)
+        return null
+      }
+    },
+
+    /**
+     * Get all slice templates (global, not per-tenant)
+     * @param {string} [category] - Optional category filter
+     */
+    async getSliceTemplates(category = null) {
+      try {
+        const filter = { status: { _eq: 'active' } }
+        if (category) {
+          filter.category = { _eq: category }
+        }
+
+        const response = await nuxtApp.$directusStorefront.ad_slice_templates.list({
+          filter,
+          sort: ['sort', 'name']
+        })
+
+        if (!response.data) {
+          return []
+        }
+
+        return response.data.map(template => ({
+          id: template.id,
+          name: template.name,
+          display_name: template.display_name,
+          category: template.category,
+          description: template.description,
+          thumbnail: transformImage(template.thumbnail),
+          schema: template.schema,
+          variations: template.variations,
+          default_data: template.default_data,
+          ai_prompt: template.ai_prompt,
+          ai_examples: template.ai_examples
+        }))
+      } catch (error) {
+        console.error('[useCMS] Directus getSliceTemplates error:', error)
+        return []
+      }
+    },
+
+    /**
+     * Get a single slice template by name
+     * @param {string} name - Template name/ID
+     */
+    async getSliceTemplate(name) {
+      try {
+        const response = await nuxtApp.$directusStorefront.ad_slice_templates.list({
+          filter: { name: { _eq: name }, status: { _eq: 'active' } },
+          limit: 1
+        })
+
+        if (!response.data || response.data.length === 0) {
+          return null
+        }
+
+        const template = response.data[0]
+        return {
+          id: template.id,
+          name: template.name,
+          display_name: template.display_name,
+          category: template.category,
+          description: template.description,
+          thumbnail: transformImage(template.thumbnail),
+          schema: template.schema,
+          variations: template.variations,
+          default_data: template.default_data,
+          ai_prompt: template.ai_prompt,
+          ai_examples: template.ai_examples
+        }
+      } catch (error) {
+        console.error('[useCMS] Directus getSliceTemplate error:', error)
+        return null
+      }
+    },
+
+    /**
+     * Get all wireframe templates (global, not per-tenant)
+     * @param {string} [category] - Optional category filter
+     */
+    async getWireframes(category = null) {
+      try {
+        const filter = { status: { _eq: 'active' } }
+        if (category) {
+          filter.category = { _eq: category }
+        }
+
+        const response = await nuxtApp.$directusStorefront.ad_wireframes.list({
+          filter,
+          sort: ['sort', 'name']
+        })
+
+        if (!response.data) {
+          return []
+        }
+
+        return response.data.map(wireframe => ({
+          id: wireframe.id,
+          name: wireframe.name,
+          display_name: wireframe.display_name,
+          description: wireframe.description,
+          preview_image: transformImage(wireframe.preview_image),
+          category: wireframe.category,
+          industry_tags: wireframe.industry_tags,
+          default_pages: wireframe.default_pages,
+          header_template: wireframe.header_template,
+          footer_template: wireframe.footer_template,
+          menu_template: wireframe.menu_template,
+          color_palette: wireframe.color_palette,
+          font_pairing: wireframe.font_pairing,
+          ai_system_prompt: wireframe.ai_system_prompt,
+          generation_rules: wireframe.generation_rules
+        }))
+      } catch (error) {
+        console.error('[useCMS] Directus getWireframes error:', error)
+        return []
+      }
+    },
+
+    /**
+     * Get a single wireframe by name
+     * @param {string} name - Wireframe name/ID
+     */
+    async getWireframe(name) {
+      try {
+        const response = await nuxtApp.$directusStorefront.ad_wireframes.list({
+          filter: { name: { _eq: name }, status: { _eq: 'active' } },
+          limit: 1
+        })
+
+        if (!response.data || response.data.length === 0) {
+          return null
+        }
+
+        const wireframe = response.data[0]
+        return {
+          id: wireframe.id,
+          name: wireframe.name,
+          display_name: wireframe.display_name,
+          description: wireframe.description,
+          preview_image: transformImage(wireframe.preview_image),
+          category: wireframe.category,
+          industry_tags: wireframe.industry_tags,
+          default_pages: wireframe.default_pages,
+          header_template: wireframe.header_template,
+          footer_template: wireframe.footer_template,
+          menu_template: wireframe.menu_template,
+          color_palette: wireframe.color_palette,
+          font_pairing: wireframe.font_pairing,
+          ai_system_prompt: wireframe.ai_system_prompt,
+          generation_rules: wireframe.generation_rules
+        }
+      } catch (error) {
+        console.error('[useCMS] Directus getWireframe error:', error)
+        return null
+      }
+    },
+
+    /**
+     * Create an AI generation job
+     * @param {Object} jobData - Job data
+     */
+    async createAiJob(jobData) {
+      try {
+        const response = await nuxtApp.$directusStorefront.ad_ai_jobs.create({
+          tenant_id: jobData.tenant_id,
+          wireframe_id: jobData.wireframe_id,
+          status: 'pending',
+          input_prompt: jobData.input_prompt,
+          input_assets: jobData.input_assets
+        })
+
+        return response.data
+      } catch (error) {
+        console.error('[useCMS] Directus createAiJob error:', error)
+        return null
+      }
+    },
+
+    /**
+     * Get AI job status
+     * @param {string} jobId - Job ID
+     */
+    async getAiJob(jobId) {
+      try {
+        const response = await nuxtApp.$directusStorefront.ad_ai_jobs.item({ id: jobId })
+        return response.data
+      } catch (error) {
+        console.error('[useCMS] Directus getAiJob error:', error)
+        return null
+      }
+    },
+
+    /**
+     * Update AI job
+     * @param {string} jobId - Job ID
+     * @param {Object} updateData - Data to update
+     */
+    async updateAiJob(jobId, updateData) {
+      try {
+        const response = await nuxtApp.$directusStorefront.ad_ai_jobs.update({
+          id: jobId,
+          ...updateData
+        })
+        return response.data
+      } catch (error) {
+        console.error('[useCMS] Directus updateAiJob error:', error)
+        return null
+      }
+    },
+
+    /**
+     * List AI jobs for a tenant
+     * @param {string} tenantId - Tenant identifier
+     */
+    async listAiJobs(tenantId) {
+      try {
+        const response = await nuxtApp.$directusStorefront.ad_ai_jobs.list({
+          filter: { tenant_id: { _eq: tenantId } },
+          sort: ['-date_created']
+        })
+
+        return response.data || []
+      } catch (error) {
+        console.error('[useCMS] Directus listAiJobs error:', error)
+        return []
+      }
     }
   }
 
@@ -444,11 +741,32 @@ export const useCMS = () => {
   // Return unified CMS interface
   return {
     provider,
+    // Core content methods
     getPage: selectedProvider.getPage,
     getSettings: selectedProvider.getSettings,
     getHeader: selectedProvider.getHeader,
     getFooter: selectedProvider.getFooter,
     getTestimonials: selectedProvider.getTestimonials,
+
+    // New storefront CMS methods (Directus only)
+    getMenus: directusProvider.getMenus,
+    getExtendedSettings: directusProvider.getExtendedSettings,
+
+    // Slice templates (global)
+    getSliceTemplates: directusProvider.getSliceTemplates,
+    getSliceTemplate: directusProvider.getSliceTemplate,
+
+    // Wireframes (global)
+    getWireframes: directusProvider.getWireframes,
+    getWireframe: directusProvider.getWireframe,
+
+    // AI job management
+    createAiJob: directusProvider.createAiJob,
+    getAiJob: directusProvider.getAiJob,
+    updateAiJob: directusProvider.updateAiJob,
+    listAiJobs: directusProvider.listAiJobs,
+
+    // Transform utilities
     transformImage,
     transformLink,
     transformRichText,
