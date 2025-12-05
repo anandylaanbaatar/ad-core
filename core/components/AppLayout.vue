@@ -5,10 +5,18 @@
 
     <div>
       <!--Page Loader-->
-      <Loader v-if="siteLoading() && pageTransitionEnabled" type="xxl" class="fullPage"></Loader>
+      <Loader
+        v-if="siteLoading() && pageTransitionEnabled"
+        type="xxl"
+        class="fullPage"
+      ></Loader>
 
       <!--Header-->
-      <template v-if="layoutType === 'regular' && (!siteLoading() || !pageTransitionEnabled)">
+      <template
+        v-if="
+          layoutType === 'regular' && (!siteLoading() || !pageTransitionEnabled)
+        "
+      >
         <SlicesHeaderBanner></SlicesHeaderBanner>
         <SlicesHeader></SlicesHeader>
       </template>
@@ -26,7 +34,9 @@
 
       <!--Footer-->
       <SlicesFooter
-        v-if="layoutType === 'regular' && (!siteLoading() || !pageTransitionEnabled)"
+        v-if="
+          layoutType === 'regular' && (!siteLoading() || !pageTransitionEnabled)
+        "
       ></SlicesFooter>
     </div>
 
