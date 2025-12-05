@@ -6,7 +6,7 @@
           <div
             class="c-block c-image imageItem"
             :class="`imageItem_${i}`"
-            :style="$utils.setBackImage(item[`image_${i}`].url)"
+            v-lazy-bg="item[`image_${i}`].url"
           ></div>
         </div>
       </div>

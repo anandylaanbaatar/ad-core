@@ -14,7 +14,7 @@
         <div
           v-if="item.image && item.image.url"
           class="image"
-          :style="$utils.setBackImage(item.image.url)"
+          v-lazy-bg="item.image.url"
         ></div>
         <div class="dimmer"></div>
       </div>

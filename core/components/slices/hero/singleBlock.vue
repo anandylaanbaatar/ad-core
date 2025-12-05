@@ -6,7 +6,7 @@
           <div
             class="c-block c-image size-xl"
             v-if="item.image && item.image.url"
-            :style="$utils.setBackImage(item.image.url)"
+            v-lazy-bg="item.image.url"
           >
             <div class="c-block-bottom-left p-4">
               <i v-if="item.icon" class="pi mb-2" :class="item.icon"></i><br />
@@ -63,40 +63,6 @@ export default {
         return this.data.primary
       }
       return null
-    },
-  },
-
-  methods: {
-    setStyle(item) {
-      if (item) {
-        let style = ``
-
-        if (item.image && item.image.url) {
-          style += `${this.$utils.setBackImage(item.image.url)}`
-
-          if (item.image_position) {
-            style += `background-size:${item.image_position};`
-          }
-        }
-        if (item.background_color) {
-          style += `${this.$utils.setBackColor(item.background_color)}`
-        }
-
-        return style
-      }
-      return
-    },
-    setTextColor(item) {
-      if (item) {
-        let style = ``
-
-        if (item.text_color) {
-          style += `color:${item.text_color};`
-        }
-
-        return style
-      }
-      return
     },
   },
 }

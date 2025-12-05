@@ -5,7 +5,7 @@
         <div class="col-xs-12 col-md-8 left">
           <div
             class="c-block c-image c-link block_1"
-            :style="$utils.setBackImage(item.image_1.url)"
+            v-lazy-bg="item.image_1.url"
           >
             <div class="c-block-bottom-left p-4">
               <i
@@ -54,7 +54,7 @@
         <div class="col-xs-12 col-md-4 right">
           <div
             class="c-block c-image c-link block_2"
-            :style="$utils.setBackImage(item.image_2.url)"
+            v-lazy-bg="item.image_2.url"
           >
             <div class="c-block-bottom-left p-4">
               <i
@@ -101,7 +101,7 @@
 
           <div
             class="c-block c-image c-link block_3"
-            :style="$utils.setBackImage(item.image_3.url)"
+            v-lazy-bg="item.image_3.url"
           >
             <div class="c-block-bottom-left p-4">
               <i

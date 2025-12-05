@@ -10,7 +10,7 @@
           <div
             v-if="item.image && item.image.url"
             class="content c-image"
-            :style="$utils.setBackImage(item.image.url)"
+            v-lazy-bg="item.image.url"
           ></div>
         </div>
 
@@ -55,7 +55,7 @@
           <div
             v-if="item.image && item.image.url"
             class="content c-image"
-            :style="$utils.setBackImage(item.image.url)"
+            v-lazy-bg="item.image.url"
           ></div>
         </div>
       </div>

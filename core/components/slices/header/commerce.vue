@@ -78,7 +78,8 @@
               <div
                 class="c-header-menu-item c-image"
                 :class="{ hasImage: collection.image && collection.image.url }"
-                :style="setStyle(collection)"
+                v-lazy-bg="collection.image && collection.image.url ? collection.image.url : null"
+                :style="collection.background_color ? $utils.setBackColor(collection.background_color) : ''"
                 @click="goTo(`/products/${collection.handle}/`)"
               >
                 <div class="dimmer p-4 text-center">
@@ -338,22 +339,6 @@ export default {
     goTo(link) {
       this.menu = false
       this.$bus.$emit("goTo", link)
-    },
-    setStyle(item) {
-      if (item) {
-        let style = ``
-
-        if (item.image && item.image.url) {
-          style += `${this.$utils.setBackImage(item.image.url)}`
-        }
-        if (item.background_color) {
-          style += `${this.$utils.setBackColor(item.background_color)}`
-        }
-
-        return style
-      }
-
-      return ""
     },
     getTitle(title) {
       return this.$utils.t(title)

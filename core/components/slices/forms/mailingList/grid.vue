@@ -20,7 +20,7 @@
           </div>
         </div>
         <div class="col-xs-12" :class="gridSize.right">
-          <div class="c-block c-image size-m" :style="imageStyle"></div>
+          <div class="c-block c-image size-m" v-lazy-bg="item.image ? item.image.url : null"></div>
         </div>
       </div>
     </div>
@@ -42,14 +42,6 @@ export default {
         return this.data.primary
       }
       return
-    },
-    imageStyle() {
-      if (this.item) {
-        if (this.item.image) {
-          return this.$utils.setBackImage(this.item.image.url)
-        }
-      }
-      return ""
     },
     gridSize() {
       let sizing = {

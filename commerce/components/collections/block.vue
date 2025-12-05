@@ -9,7 +9,7 @@
           'size-md': collectionImage,
           'size-xs': !collectionImage,
         }"
-        :style="blockStyle"
+        v-lazy-bg="collectionImage"
       >
         <div class="c-block-center">
           <div>
@@ -44,7 +44,7 @@
           'size-md': collectionImage,
           'size-xs': !collectionImage,
         }"
-        :style="blockStyle"
+        v-lazy-bg="collectionImage"
       >
         <div class="c-block-center">
           <div>
@@ -93,12 +93,6 @@ export default {
         }
       }
       return
-    },
-    blockStyle() {
-      if (this.collectionImage) {
-        return this.$utils.setBackImage(this.collectionImage)
-      }
-      return ""
     },
   },
 }

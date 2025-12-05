@@ -18,7 +18,7 @@
         <div
           v-if="item.featured_image.url"
           class="c-block c-image size-m"
-          :style="$utils.setBackImage(item.featured_image.url)"
+          v-lazy-bg="item.featured_image.url"
           @click.stop="$bus.$emit('goTo', productUrl)"
         ></div>
       </div>

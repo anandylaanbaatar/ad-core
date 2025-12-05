@@ -1,7 +1,7 @@
 <template>
   <div v-if="item" class="c-hero mb-8">
     <div class="container">
-      <div class="c-block c-image size-md" :style="imageStyle">
+      <div class="c-block c-image size-md" v-lazy-bg="item.image ? item.image.url : null">
         <div class="c-block-center-center">
           <div>
             <Tag v-if="item.tag" class="c-custom-tag mb-3">{{ item.tag }}</Tag>
@@ -35,14 +35,6 @@ export default {
         return this.data.primary
       }
       return
-    },
-    imageStyle() {
-      if (this.item) {
-        if (this.item.image) {
-          return this.$utils.setBackImage(this.item.image.url)
-        }
-      }
-      return ""
     },
   },
 }

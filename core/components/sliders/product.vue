@@ -6,7 +6,7 @@
       <SplideSlide v-for="item in itemImages" :key="`item_${item}`">
         <div
           class="c-block c-image size-m"
-          :style="$utils.setBackImage(item.url)"
+          v-lazy-bg="item.url"
           @click.stop="goToUrl(item.pathUrl)"
         ></div>
       </SplideSlide>

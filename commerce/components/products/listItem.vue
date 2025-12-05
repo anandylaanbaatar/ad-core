@@ -10,7 +10,7 @@
         <div
           v-if="item.featuredImage.url"
           class="c-block c-image w-full size-xxs"
-          :style="$utils.setBackImage(item.featuredImage.url)"
+          v-lazy-bg="item.featuredImage.url"
         ></div>
       </div>
 
