@@ -7,9 +7,12 @@
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  transition: filter 0.3s ease-in-out, opacity 0.3s ease-in-out;
+  transition:
+    filter 0.3s ease-in-out,
+    opacity 0.3s ease-in-out;
   filter: blur(10px);
   opacity: 0.6;
+  overflow: hidden;
 
   // Optional: Add a subtle animation
   &::before {
@@ -33,7 +36,9 @@
 .lazy-loaded {
   filter: blur(0);
   opacity: 1;
-  transition: filter 0.3s ease-in-out, opacity 0.3s ease-in-out;
+  transition:
+    filter 0.3s ease-in-out,
+    opacity 0.3s ease-in-out;
 
   &::before {
     display: none;
