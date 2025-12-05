@@ -115,6 +115,13 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
   if (import.meta.client) {
     const coreStore = useCoreStore()
 
+    // Page Transition - disable if config is false
+    if (appConfig.pageTransition === false) {
+      document.body.classList.add("no-page-transition")
+    } else {
+      document.body.classList.remove("no-page-transition")
+    }
+
     // Rules
     if (appConfig.rules) {
       // Redirect

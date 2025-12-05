@@ -1,21 +1,21 @@
 <template>
   <div class="app-layout" :class="layoutType">
     <!--Splash Loader-->
-    <LoaderPage v-if="splashLoading"></LoaderPage>
+    <LoaderPage v-if="splashLoading && pageTransitionEnabled"></LoaderPage>
 
     <div>
       <!--Page Loader-->
-      <Loader v-if="siteLoading()" type="xxl" class="fullPage"></Loader>
+      <Loader v-if="siteLoading() && pageTransitionEnabled" type="xxl" class="fullPage"></Loader>
 
       <!--Header-->
-      <template v-if="layoutType === 'regular' && !siteLoading()">
+      <template v-if="layoutType === 'regular' && (!siteLoading() || !pageTransitionEnabled)">
         <SlicesHeaderBanner></SlicesHeaderBanner>
         <SlicesHeader></SlicesHeader>
       </template>
 
       <!--Page-->
       <div
-        v-if="!siteLoading()"
+        v-if="!siteLoading() || !pageTransitionEnabled"
         :class="{
           'c-page': layoutType === 'regular',
           'c-app-layout': layoutType === 'app',
@@ -26,7 +26,7 @@
 
       <!--Footer-->
       <SlicesFooter
-        v-if="layoutType === 'regular' && !siteLoading()"
+        v-if="layoutType === 'regular' && (!siteLoading() || !pageTransitionEnabled)"
       ></SlicesFooter>
     </div>
 
@@ -53,6 +53,9 @@ export default {
   computed: {
     globalItemsInit() {
       return useCoreStore().globalItemsInit
+    },
+    pageTransitionEnabled() {
+      return useAppConfig().theme?.pageTransition !== false
     },
     layoutType() {
       let layout = this.type || layout()

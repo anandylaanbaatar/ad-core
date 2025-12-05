@@ -18,7 +18,8 @@ export const useCoreStore = defineStore("core", {
     user: null,
     userNotifications: [],
 
-    loading: true,
+    // Only show loading if pageTransition is enabled
+    loading: useAppConfig().theme?.pageTransition !== false,
     layout: useAppConfig().theme.type,
   }),
 
