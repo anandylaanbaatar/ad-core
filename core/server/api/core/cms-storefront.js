@@ -14,41 +14,73 @@ export default defineEventHandler(async (event) => {
   const body = await readBody(event)
 
   // Get storefront API URL and token
-  const apiUrl = config.public.features?.directus?.storefront?.apiUrl || "https://store.adcommerce.mn"
-  const token = config.NUXT_DIRECTUS_STOREFRONT_TOKEN
+  // This API is for storefront.adcommerce.mn Directus instance
+  // Uses NUXT_STOREFRONT_TOKEN for ALL operations (read and write)
+  const apiUrl =
+    config.public.features?.directus?.storefront?.apiUrl ||
+    "https://storefront.adcommerce.mn"
+  const token = config.storefrontToken || process.env.NUXT_STOREFRONT_TOKEN
 
   if (!token) {
-    console.error("[CMS Storefront API] Missing NUXT_DIRECTUS_STOREFRONT_TOKEN")
+    console.error("[CMS Storefront API] Missing NUXT_STOREFRONT_TOKEN")
     return {
       error: true,
-      message: "Storefront API token not configured"
+      message: "Storefront API token not configured",
     }
   }
 
   // Build query string from params
-  let queryString = ""
-  if (body.params) {
-    const params = new URLSearchParams()
+  // Directus expects nested query params like filter[field][operator]=value
+  const buildQueryString = (params) => {
+    const parts = []
 
-    Object.keys(body.params).forEach((key) => {
-      if (body.params[key] !== undefined && body.params[key] !== null) {
-        if (key === "filter" || key === "fields" || key === "sort") {
-          // Handle complex query params
-          if (typeof body.params[key] === "object") {
-            params.append(key, JSON.stringify(body.params[key]))
-          } else {
-            params.append(key, body.params[key])
-          }
+    const addParam = (key, value, prefix = "") => {
+      const fullKey = prefix ? `${prefix}[${key}]` : key
+
+      if (value === null || value === undefined) return
+
+      if (typeof value === "object" && !Array.isArray(value)) {
+        // Recursively handle nested objects (for filters)
+        Object.keys(value).forEach((nestedKey) => {
+          addParam(nestedKey, value[nestedKey], fullKey)
+        })
+      } else if (Array.isArray(value)) {
+        // Handle arrays - for fields, convert to comma-separated
+        if (key === "fields") {
+          parts.push(`${fullKey}=${encodeURIComponent(value.join(","))}`)
+        } else if (key === "sort") {
+          parts.push(`${fullKey}=${encodeURIComponent(value.join(","))}`)
         } else {
-          params.append(key, body.params[key])
+          value.forEach((item, index) => {
+            if (typeof item === "object") {
+              Object.keys(item).forEach((itemKey) => {
+                addParam(itemKey, item[itemKey], `${fullKey}[${index}]`)
+              })
+            } else {
+              parts.push(`${fullKey}[]=${encodeURIComponent(item)}`)
+            }
+          })
         }
+      } else {
+        parts.push(`${fullKey}=${encodeURIComponent(value)}`)
       }
+    }
+
+    Object.keys(params).forEach((key) => {
+      addParam(key, params[key])
     })
 
-    queryString = params.toString()
+    return parts.join("&")
+  }
+
+  let queryString = ""
+  if (body.params && body.method === "GET") {
+    queryString = buildQueryString(body.params)
   }
 
   const url = `${apiUrl}/${body.path}${queryString ? `?${queryString}` : ""}`
+
+  console.log(`[CMS Storefront API] ${body.method} ${url}`)
 
   try {
     const response = await fetch(url, {
@@ -66,13 +98,15 @@ export default defineEventHandler(async (event) => {
     })
 
     if (!response.ok) {
+      const errorBody = await response.text()
       console.error(
-        `[CMS Storefront API] Request failed: ${response.status} ${response.statusText}`
+        `[CMS Storefront API] Request failed: ${response.status} ${response.statusText}`,
+        errorBody
       )
       return {
         error: true,
         status: response.status,
-        message: response.statusText,
+        message: `${response.statusText}: ${errorBody}`,
       }
     }
 

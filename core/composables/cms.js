@@ -15,7 +15,7 @@ export const useCMS = () => {
   const config = useRuntimeConfig()
 
   // Determine which CMS provider to use
-  const provider = config.public.features?.cms?.provider || 'prismic'
+  const provider = config.public.features?.cms?.provider || "prismic"
 
   /**
    * Transform Directus image object to Prismic-compatible format
@@ -31,18 +31,20 @@ export const useCMS = () => {
     // Transform Directus file object
     if (image.id) {
       // Use storefront API URL for CMS images
-      const baseUrl = config.public.features?.directus?.storefront?.apiUrl || 'https://store.adcommerce.mn'
+      const baseUrl =
+        config.public.features?.directus?.storefront?.apiUrl ||
+        "https://store.adcommerce.mn"
       return {
         id: image.id,
         url: `${baseUrl}/assets/${image.id}`,
-        alt: image.title || image.filename_download || '',
+        alt: image.title || image.filename_download || "",
         width: image.width || null,
         height: image.height || null,
         dimensions: {
           width: image.width || null,
-          height: image.height || null
+          height: image.height || null,
         },
-        filename: image.filename_download || ''
+        filename: image.filename_download || "",
       }
     }
 
@@ -61,21 +63,21 @@ export const useCMS = () => {
     }
 
     // Transform simple Directus link
-    if (typeof link === 'string') {
+    if (typeof link === "string") {
       return {
-        link_type: 'Web',
+        link_type: "Web",
         url: link,
-        target: '_self'
+        target: "_self",
       }
     }
 
     // Transform Directus link object
     return {
-      link_type: link.type || 'Web',
-      url: link.url || link.href || '',
-      target: link.target || '_self',
-      text: link.text || '',
-      variant: link.variant || 'primary'
+      link_type: link.type || "Web",
+      url: link.url || link.href || "",
+      target: link.target || "_self",
+      text: link.text || "",
+      variant: link.variant || "primary",
     }
   }
 
@@ -86,13 +88,13 @@ export const useCMS = () => {
     if (!text) return null
 
     // If it's already HTML string, return as is
-    if (typeof text === 'string') {
+    if (typeof text === "string") {
       return text
     }
 
     // If it's Prismic StructuredText, use asHTML
     if (Array.isArray(text)) {
-      const prismic = require('@prismicio/client')
+      const prismic = require("@prismicio/client")
       return prismic.asHTML(text)
     }
 
@@ -107,24 +109,24 @@ export const useCMS = () => {
 
     const transformed = {
       slice_type: slice.type,
-      variation: slice.variation || 'default',
+      variation: slice.variation || "default",
       primary: {},
-      items: []
+      items: [],
     }
 
     // Transform data.primary fields
     if (slice.data && slice.data.primary) {
       const primary = slice.data.primary
 
-      Object.keys(primary).forEach(key => {
+      Object.keys(primary).forEach((key) => {
         const value = primary[key]
 
         // Transform based on field type
-        if (key.includes('image') || key.includes('logo')) {
+        if (key.includes("image") || key.includes("logo")) {
           transformed.primary[key] = transformImage(value)
-        } else if (key.includes('link')) {
+        } else if (key.includes("link")) {
           transformed.primary[key] = transformLink(value)
-        } else if (key.includes('description') || key.includes('text')) {
+        } else if (key.includes("description") || key.includes("text")) {
           transformed.primary[key] = transformRichText(value)
         } else {
           transformed.primary[key] = value
@@ -134,17 +136,17 @@ export const useCMS = () => {
 
     // Transform data.items array
     if (slice.data && slice.data.items) {
-      transformed.items = slice.data.items.map(item => {
+      transformed.items = slice.data.items.map((item) => {
         const transformedItem = {}
 
-        Object.keys(item).forEach(key => {
+        Object.keys(item).forEach((key) => {
           const value = item[key]
 
-          if (key.includes('image') || key.includes('logo')) {
+          if (key.includes("image") || key.includes("logo")) {
             transformedItem[key] = transformImage(value)
-          } else if (key.includes('link')) {
+          } else if (key.includes("link")) {
             transformedItem[key] = transformLink(value)
-          } else if (key.includes('description') || key.includes('text')) {
+          } else if (key.includes("description") || key.includes("text")) {
             transformedItem[key] = transformRichText(value)
           } else {
             transformedItem[key] = value
@@ -164,7 +166,7 @@ export const useCMS = () => {
   const prismicProvider = {
     async getPage(uid) {
       try {
-        const page = await nuxtApp.$prismicClient.getByUID('page', uid)
+        const page = await nuxtApp.$prismicClient.getByUID("page", uid)
         return {
           uid: page.uid,
           type: page.type,
@@ -173,54 +175,56 @@ export const useCMS = () => {
             slices: page.data.slices || [],
             meta_title: page.data.meta_title,
             meta_description: page.data.meta_description,
-            meta_image: page.data.meta_image
-          }
+            meta_image: page.data.meta_image,
+          },
         }
       } catch (error) {
-        console.error('[useCMS] Prismic getPage error:', error)
+        console.error("[useCMS] Prismic getPage error:", error)
         return null
       }
     },
 
     async getSettings() {
       try {
-        const settings = await nuxtApp.$prismicClient.getSingle('website_settings')
+        const settings =
+          await nuxtApp.$prismicClient.getSingle("website_settings")
         return settings.data
       } catch (error) {
-        console.error('[useCMS] Prismic getSettings error:', error)
+        console.error("[useCMS] Prismic getSettings error:", error)
         return null
       }
     },
 
     async getHeader() {
       try {
-        const header = await nuxtApp.$prismicClient.getSingle('header')
+        const header = await nuxtApp.$prismicClient.getSingle("header")
         return header.data
       } catch (error) {
-        console.error('[useCMS] Prismic getHeader error:', error)
+        console.error("[useCMS] Prismic getHeader error:", error)
         return null
       }
     },
 
     async getFooter() {
       try {
-        const footer = await nuxtApp.$prismicClient.getSingle('footer')
+        const footer = await nuxtApp.$prismicClient.getSingle("footer")
         return footer.data
       } catch (error) {
-        console.error('[useCMS] Prismic getFooter error:', error)
+        console.error("[useCMS] Prismic getFooter error:", error)
         return null
       }
     },
 
     async getTestimonials() {
       try {
-        const testimonials = await nuxtApp.$prismicClient.getSingle('testimonials')
+        const testimonials =
+          await nuxtApp.$prismicClient.getSingle("testimonials")
         return testimonials.data
       } catch (error) {
-        console.error('[useCMS] Prismic getTestimonials error:', error)
+        console.error("[useCMS] Prismic getTestimonials error:", error)
         return null
       }
-    }
+    },
   }
 
   /**
@@ -229,10 +233,10 @@ export const useCMS = () => {
   const directusProvider = {
     async getPage(slug) {
       try {
-        const response = await nuxtApp.$directusStorefront.cms_page.list({
-          filter: { slug: { _eq: slug }, status: { _eq: 'published' } },
-          fields: ['*', 'meta_image.*'],
-          limit: 1
+        const response = await nuxtApp.$directusStorefront.pages.list({
+          filter: { slug: { _eq: slug }, status: { _eq: "published" } },
+          fields: ["*", "meta_image.*"],
+          limit: 1,
         })
 
         if (!response.data || response.data.length === 0) {
@@ -246,25 +250,32 @@ export const useCMS = () => {
 
         return {
           uid: page.slug,
-          type: 'page',
+          type: "page",
           data: {
             page_type: page.page_type,
             slices: slices,
             meta_title: page.meta_title,
             meta_description: page.meta_description,
-            meta_image: transformImage(page.meta_image)
-          }
+            meta_image: transformImage(page.meta_image),
+          },
         }
       } catch (error) {
-        console.error('[useCMS] Directus getPage error:', error)
+        console.error("[useCMS] Directus getPage error:", error)
         return null
       }
     },
 
     async getSettings() {
       try {
-        const response = await nuxtApp.$directusStorefront.cms_website_settings.get({
-          fields: ['*', 'site_logo.*', 'site_logo_dark.*', 'site_mobile_logo.*', 'site_mobile_logo_dark.*', 'site_splash.*']
+        const response = await nuxtApp.$directusStorefront.store_settings.get({
+          fields: [
+            "*",
+            "site_logo.*",
+            "site_logo_dark.*",
+            "site_mobile_logo.*",
+            "site_mobile_logo_dark.*",
+            "site_splash.*",
+          ],
         })
 
         if (!response.data) {
@@ -294,17 +305,17 @@ export const useCMS = () => {
           site_maintenance_mode: settings.site_maintenance_mode,
           site_light_dark_mode: settings.site_light_dark_mode,
           contact_email: settings.contact_email,
-          contact_phone: settings.contact_phone
+          contact_phone: settings.contact_phone,
         }
       } catch (error) {
-        console.error('[useCMS] Directus getSettings error:', error)
+        console.error("[useCMS] Directus getSettings error:", error)
         return null
       }
     },
 
     async getHeader() {
       try {
-        const response = await nuxtApp.$directusStorefront.cms_header.get()
+        const response = await nuxtApp.$directusStorefront.headers.list()
 
         if (!response.data) {
           return null
@@ -314,22 +325,24 @@ export const useCMS = () => {
 
         // Return slices array with single header slice
         return {
-          slices: [{
-            slice_type: 'header',
-            variation: header.variation || 'default',
-            primary: header.data || {},
-            items: []
-          }]
+          slices: [
+            {
+              slice_type: "header",
+              variation: header.variation || "default",
+              primary: header.data || {},
+              items: [],
+            },
+          ],
         }
       } catch (error) {
-        console.error('[useCMS] Directus getHeader error:', error)
+        console.error("[useCMS] Directus getHeader error:", error)
         return null
       }
     },
 
     async getFooter() {
       try {
-        const response = await nuxtApp.$directusStorefront.cms_footer.get()
+        const response = await nuxtApp.$directusStorefront.footers.list()
 
         if (!response.data) {
           return null
@@ -339,22 +352,24 @@ export const useCMS = () => {
 
         // Return slices array with single footer slice
         return {
-          slices: [{
-            slice_type: 'footer',
-            variation: footer.variation || 'default',
-            primary: footer.data || {},
-            items: []
-          }]
+          slices: [
+            {
+              slice_type: "footer",
+              variation: footer.variation || "default",
+              primary: footer.data || {},
+              items: [],
+            },
+          ],
         }
       } catch (error) {
-        console.error('[useCMS] Directus getFooter error:', error)
+        console.error("[useCMS] Directus getFooter error:", error)
         return null
       }
     },
 
     async getTestimonials() {
       try {
-        const response = await nuxtApp.$directusStorefront.cms_testimonials.get()
+        const response = null // testimonials collection removed from storefront
 
         if (!response.data) {
           return null
@@ -363,18 +378,20 @@ export const useCMS = () => {
         const testimonials = response.data
 
         // Transform items if they exist
-        const items = testimonials.items ? testimonials.items.map(item => ({
-          ...item,
-          image: transformImage(item.image)
-        })) : []
+        const items = testimonials.items
+          ? testimonials.items.map((item) => ({
+              ...item,
+              image: transformImage(item.image),
+            }))
+          : []
 
         return {
           use_rating: testimonials.use_rating,
           data_type: testimonials.data_type,
-          static_data: items
+          static_data: items,
         }
       } catch (error) {
-        console.error('[useCMS] Directus getTestimonials error:', error)
+        console.error("[useCMS] Directus getTestimonials error:", error)
         return null
       }
     },
@@ -386,28 +403,31 @@ export const useCMS = () => {
      */
     async getMenus(tenantId, location = null) {
       try {
-        const filter = { tenant_id: { _eq: tenantId }, status: { _eq: 'published' } }
+        const filter = {
+          tenant_id: { _eq: tenantId },
+          status: { _eq: "published" },
+        }
         if (location) {
           filter.location = { _eq: location }
         }
 
         const response = await nuxtApp.$directusStorefront.ad_menus.list({
           filter,
-          sort: ['sort']
+          sort: ["sort"],
         })
 
         if (!response.data) {
           return []
         }
 
-        return response.data.map(menu => ({
+        return response.data.map((menu) => ({
           id: menu.id,
           name: menu.name,
           location: menu.location,
-          items: menu.items || []
+          items: menu.items || [],
         }))
       } catch (error) {
-        console.error('[useCMS] Directus getMenus error:', error)
+        console.error("[useCMS] Directus getMenus error:", error)
         return []
       }
     },
@@ -419,14 +439,16 @@ export const useCMS = () => {
     async getExtendedSettings(tenantId) {
       try {
         const response = await nuxtApp.$directusStorefront.ad_settings.get({
-          filter: { tenant_id: { _eq: tenantId } }
+          filter: { tenant_id: { _eq: tenantId } },
         })
 
         if (!response.data || response.data.length === 0) {
           return null
         }
 
-        const settings = Array.isArray(response.data) ? response.data[0] : response.data
+        const settings = Array.isArray(response.data)
+          ? response.data[0]
+          : response.data
 
         return {
           google_analytics_id: settings.google_analytics_id,
@@ -441,10 +463,10 @@ export const useCMS = () => {
           default_meta_image: transformImage(settings.default_meta_image),
           page_404_title: settings.page_404_title,
           page_404_description: settings.page_404_description,
-          page_404_image: transformImage(settings.page_404_image)
+          page_404_image: transformImage(settings.page_404_image),
         }
       } catch (error) {
-        console.error('[useCMS] Directus getExtendedSettings error:', error)
+        console.error("[useCMS] Directus getExtendedSettings error:", error)
         return null
       }
     },
@@ -455,21 +477,22 @@ export const useCMS = () => {
      */
     async getSliceTemplates(category = null) {
       try {
-        const filter = { status: { _eq: 'active' } }
+        const filter = { status: { _eq: "active" } }
         if (category) {
           filter.category = { _eq: category }
         }
 
-        const response = await nuxtApp.$directusStorefront.ad_slice_templates.list({
-          filter,
-          sort: ['sort', 'name']
-        })
+        const response =
+          await nuxtApp.$directusStorefront.ad_slice_templates.list({
+            filter,
+            sort: ["sort", "name"],
+          })
 
         if (!response.data) {
           return []
         }
 
-        return response.data.map(template => ({
+        return response.data.map((template) => ({
           id: template.id,
           name: template.name,
           display_name: template.display_name,
@@ -480,10 +503,10 @@ export const useCMS = () => {
           variations: template.variations,
           default_data: template.default_data,
           ai_prompt: template.ai_prompt,
-          ai_examples: template.ai_examples
+          ai_examples: template.ai_examples,
         }))
       } catch (error) {
-        console.error('[useCMS] Directus getSliceTemplates error:', error)
+        console.error("[useCMS] Directus getSliceTemplates error:", error)
         return []
       }
     },
@@ -494,10 +517,11 @@ export const useCMS = () => {
      */
     async getSliceTemplate(name) {
       try {
-        const response = await nuxtApp.$directusStorefront.ad_slice_templates.list({
-          filter: { name: { _eq: name }, status: { _eq: 'active' } },
-          limit: 1
-        })
+        const response =
+          await nuxtApp.$directusStorefront.ad_slice_templates.list({
+            filter: { name: { _eq: name }, status: { _eq: "active" } },
+            limit: 1,
+          })
 
         if (!response.data || response.data.length === 0) {
           return null
@@ -515,10 +539,10 @@ export const useCMS = () => {
           variations: template.variations,
           default_data: template.default_data,
           ai_prompt: template.ai_prompt,
-          ai_examples: template.ai_examples
+          ai_examples: template.ai_examples,
         }
       } catch (error) {
-        console.error('[useCMS] Directus getSliceTemplate error:', error)
+        console.error("[useCMS] Directus getSliceTemplate error:", error)
         return null
       }
     },
@@ -529,21 +553,21 @@ export const useCMS = () => {
      */
     async getWireframes(category = null) {
       try {
-        const filter = { status: { _eq: 'active' } }
+        const filter = { status: { _eq: "active" } }
         if (category) {
           filter.category = { _eq: category }
         }
 
         const response = await nuxtApp.$directusStorefront.ad_wireframes.list({
           filter,
-          sort: ['sort', 'name']
+          sort: ["sort", "name"],
         })
 
         if (!response.data) {
           return []
         }
 
-        return response.data.map(wireframe => ({
+        return response.data.map((wireframe) => ({
           id: wireframe.id,
           name: wireframe.name,
           display_name: wireframe.display_name,
@@ -558,10 +582,10 @@ export const useCMS = () => {
           color_palette: wireframe.color_palette,
           font_pairing: wireframe.font_pairing,
           ai_system_prompt: wireframe.ai_system_prompt,
-          generation_rules: wireframe.generation_rules
+          generation_rules: wireframe.generation_rules,
         }))
       } catch (error) {
-        console.error('[useCMS] Directus getWireframes error:', error)
+        console.error("[useCMS] Directus getWireframes error:", error)
         return []
       }
     },
@@ -573,8 +597,8 @@ export const useCMS = () => {
     async getWireframe(name) {
       try {
         const response = await nuxtApp.$directusStorefront.ad_wireframes.list({
-          filter: { name: { _eq: name }, status: { _eq: 'active' } },
-          limit: 1
+          filter: { name: { _eq: name }, status: { _eq: "active" } },
+          limit: 1,
         })
 
         if (!response.data || response.data.length === 0) {
@@ -597,10 +621,10 @@ export const useCMS = () => {
           color_palette: wireframe.color_palette,
           font_pairing: wireframe.font_pairing,
           ai_system_prompt: wireframe.ai_system_prompt,
-          generation_rules: wireframe.generation_rules
+          generation_rules: wireframe.generation_rules,
         }
       } catch (error) {
-        console.error('[useCMS] Directus getWireframe error:', error)
+        console.error("[useCMS] Directus getWireframe error:", error)
         return null
       }
     },
@@ -614,14 +638,14 @@ export const useCMS = () => {
         const response = await nuxtApp.$directusStorefront.ad_ai_jobs.create({
           tenant_id: jobData.tenant_id,
           wireframe_id: jobData.wireframe_id,
-          status: 'pending',
+          status: "pending",
           input_prompt: jobData.input_prompt,
-          input_assets: jobData.input_assets
+          input_assets: jobData.input_assets,
         })
 
         return response.data
       } catch (error) {
-        console.error('[useCMS] Directus createAiJob error:', error)
+        console.error("[useCMS] Directus createAiJob error:", error)
         return null
       }
     },
@@ -632,10 +656,12 @@ export const useCMS = () => {
      */
     async getAiJob(jobId) {
       try {
-        const response = await nuxtApp.$directusStorefront.ad_ai_jobs.item({ id: jobId })
+        const response = await nuxtApp.$directusStorefront.ad_ai_jobs.item({
+          id: jobId,
+        })
         return response.data
       } catch (error) {
-        console.error('[useCMS] Directus getAiJob error:', error)
+        console.error("[useCMS] Directus getAiJob error:", error)
         return null
       }
     },
@@ -649,11 +675,11 @@ export const useCMS = () => {
       try {
         const response = await nuxtApp.$directusStorefront.ad_ai_jobs.update({
           id: jobId,
-          ...updateData
+          ...updateData,
         })
         return response.data
       } catch (error) {
-        console.error('[useCMS] Directus updateAiJob error:', error)
+        console.error("[useCMS] Directus updateAiJob error:", error)
         return null
       }
     },
@@ -666,15 +692,15 @@ export const useCMS = () => {
       try {
         const response = await nuxtApp.$directusStorefront.ad_ai_jobs.list({
           filter: { tenant_id: { _eq: tenantId } },
-          sort: ['-date_created']
+          sort: ["-date_created"],
         })
 
         return response.data || []
       } catch (error) {
-        console.error('[useCMS] Directus listAiJobs error:', error)
+        console.error("[useCMS] Directus listAiJobs error:", error)
         return []
       }
-    }
+    },
   }
 
   /**
@@ -685,7 +711,7 @@ export const useCMS = () => {
       const directusPage = await directusProvider.getPage(uid)
       if (directusPage) return directusPage
 
-      console.log('[useCMS] Directus page not found, falling back to Prismic')
+      console.log("[useCMS] Directus page not found, falling back to Prismic")
       return await prismicProvider.getPage(uid)
     },
 
@@ -693,7 +719,9 @@ export const useCMS = () => {
       const directusSettings = await directusProvider.getSettings()
       if (directusSettings) return directusSettings
 
-      console.log('[useCMS] Directus settings not found, falling back to Prismic')
+      console.log(
+        "[useCMS] Directus settings not found, falling back to Prismic"
+      )
       return await prismicProvider.getSettings()
     },
 
@@ -701,7 +729,7 @@ export const useCMS = () => {
       const directusHeader = await directusProvider.getHeader()
       if (directusHeader) return directusHeader
 
-      console.log('[useCMS] Directus header not found, falling back to Prismic')
+      console.log("[useCMS] Directus header not found, falling back to Prismic")
       return await prismicProvider.getHeader()
     },
 
@@ -709,7 +737,7 @@ export const useCMS = () => {
       const directusFooter = await directusProvider.getFooter()
       if (directusFooter) return directusFooter
 
-      console.log('[useCMS] Directus footer not found, falling back to Prismic')
+      console.log("[useCMS] Directus footer not found, falling back to Prismic")
       return await prismicProvider.getFooter()
     },
 
@@ -717,22 +745,24 @@ export const useCMS = () => {
       const directusTestimonials = await directusProvider.getTestimonials()
       if (directusTestimonials) return directusTestimonials
 
-      console.log('[useCMS] Directus testimonials not found, falling back to Prismic')
+      console.log(
+        "[useCMS] Directus testimonials not found, falling back to Prismic"
+      )
       return await prismicProvider.getTestimonials()
-    }
+    },
   }
 
   // Select provider based on config
   let selectedProvider
 
   switch (provider) {
-    case 'directus':
+    case "directus":
       selectedProvider = directusProvider
       break
-    case 'hybrid':
+    case "hybrid":
       selectedProvider = hybridProvider
       break
-    case 'prismic':
+    case "prismic":
     default:
       selectedProvider = prismicProvider
       break
@@ -770,6 +800,6 @@ export const useCMS = () => {
     transformImage,
     transformLink,
     transformRichText,
-    transformSlice
+    transformSlice,
   }
 }

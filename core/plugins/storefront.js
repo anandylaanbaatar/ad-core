@@ -1,11 +1,17 @@
 /**
  * Storefront CMS Plugin
  *
- * Separate Directus client for public storefront content (CMS)
- * Uses NUXT_DIRECTUS_STOREFRONT_TOKEN and store.adcommerce.mn endpoint
+ * Separate Directus client for storefront.adcommerce.mn
+ * Uses NUXT_STOREFRONT_TOKEN for authentication
  *
- * This is different from the main directus.js plugin which handles
- * admin/commerce operations (products, orders, customers, etc.)
+ * Collections:
+ * - store_settings (with design_tokens)
+ * - headers
+ * - footers
+ * - menus (with menu_items)
+ * - pages (with sections)
+ * - themes
+ * - wireframes
  */
 
 export default defineNuxtPlugin((nuxtApp) => {
@@ -41,530 +47,606 @@ export default defineNuxtPlugin((nuxtApp) => {
   }
 
   /**
-   * CMS - Website Settings
+   * Store Settings
    */
 
-  const cmsWebsiteSettingsGet = async (params) => {
+  const storeSettingsGet = async (params) => {
     const res = await fetchData({
       method: "GET",
-      path: `items/cms_website_settings`,
+      path: "items/store_settings",
       params: {
         ...params,
-        fields: `
-          *,
-          site_logo.*,
-          site_logo_dark.*,
-          site_mobile_logo.*,
-          site_mobile_logo_dark.*,
-          site_splash.*
-        `
-      }
+        fields: params?.fields || "*",
+      },
     })
-
     return res
   }
 
-  const cmsWebsiteSettingsUpdate = async (params) => {
+  const storeSettingsItem = async (params) => {
+    const res = await fetchData({
+      method: "GET",
+      path: "items/store_settings/" + params.id,
+      params: {
+        ...params,
+        fields: params?.fields || "*",
+      },
+    })
+    return res
+  }
+
+  const storeSettingsUpdate = async (params) => {
     const res = await fetchData({
       method: "PATCH",
-      path: `items/cms_website_settings/${params.id}`,
-      params: params
+      path: "items/store_settings/" + params.id,
+      params: params,
     })
+    return res
+  }
 
+  const storeSettingsCreate = async (params) => {
+    const res = await fetchData({
+      method: "POST",
+      path: "items/store_settings",
+      params: params,
+    })
     return res
   }
 
   /**
-   * CMS - Pages
+   * Design Tokens (child of store_settings)
    */
 
-  const cmsPageItem = async (params) => {
+  const designTokensList = async (params) => {
     const res = await fetchData({
       method: "GET",
-      path: `items/cms_pages/${params.id}`,
+      path: "items/design_tokens",
       params: {
         ...params,
-        fields: `
-          *,
-          meta_image.*
-        `
-      }
+        fields: params?.fields || "*",
+      },
     })
-
     return res
   }
 
-  const cmsPageList = async (params) => {
+  const designTokensItem = async (params) => {
     const res = await fetchData({
       method: "GET",
-      path: `items/cms_pages`,
-      params: {
-        ...params,
-        fields: `
-          *,
-          meta_image.*
-        `
-      }
+      path: "items/design_tokens/" + params.id,
+      params: params,
     })
-
     return res
   }
 
-  const cmsPageCreate = async (params) => {
+  const designTokensCreate = async (params) => {
     const res = await fetchData({
       method: "POST",
-      path: "items/cms_pages",
-      params: params
+      path: "items/design_tokens",
+      params: params,
     })
-
     return res
   }
 
-  const cmsPageUpdate = async (params) => {
+  const designTokensUpdate = async (params) => {
     const res = await fetchData({
       method: "PATCH",
-      path: `items/cms_pages/${params.id}`,
-      params: params
+      path: "items/design_tokens/" + params.id,
+      params: params,
     })
-
     return res
   }
 
-  const cmsPageDelete = async (params) => {
+  const designTokensDelete = async (params) => {
     const res = await fetchData({
       method: "DELETE",
-      path: `items/cms_pages/${params.id}`
+      path: "items/design_tokens/" + params.id,
     })
-
     return res
   }
 
   /**
-   * CMS - Header
+   * Headers
    */
 
-  const cmsHeaderGet = async (params) => {
+  const headersList = async (params) => {
     const res = await fetchData({
       method: "GET",
-      path: `items/cms_header`,
-      params: params
+      path: "items/headers",
+      params: {
+        ...params,
+        fields: params?.fields || "*",
+      },
     })
-
     return res
   }
 
-  const cmsHeaderUpdate = async (params) => {
-    const res = await fetchData({
-      method: "PATCH",
-      path: `items/cms_header/${params.id}`,
-      params: params
-    })
-
-    return res
-  }
-
-  /**
-   * CMS - Footer
-   */
-
-  const cmsFooterGet = async (params) => {
+  const headersItem = async (params) => {
     const res = await fetchData({
       method: "GET",
-      path: `items/cms_footer`,
-      params: params
+      path: "items/headers/" + params.id,
+      params: params,
     })
-
     return res
   }
 
-  const cmsFooterUpdate = async (params) => {
-    const res = await fetchData({
-      method: "PATCH",
-      path: `items/cms_footer/${params.id}`,
-      params: params
-    })
-
-    return res
-  }
-
-  /**
-   * CMS - Testimonials
-   */
-
-  const cmsTestimonialsGet = async (params) => {
-    const res = await fetchData({
-      method: "GET",
-      path: `items/cms_testimonials`,
-      params: params
-    })
-
-    return res
-  }
-
-  const cmsTestimonialsUpdate = async (params) => {
-    const res = await fetchData({
-      method: "PATCH",
-      path: `items/cms_testimonials/${params.id}`,
-      params: params
-    })
-
-    return res
-  }
-
-  /**
-   * CMS - Header Banner
-   */
-
-  const cmsHeaderBannerGet = async (params) => {
-    const res = await fetchData({
-      method: "GET",
-      path: `items/cms_header_banner`,
-      params: params
-    })
-
-    return res
-  }
-
-  const cmsHeaderBannerUpdate = async (params) => {
-    const res = await fetchData({
-      method: "PATCH",
-      path: `items/cms_header_banner/${params.id}`,
-      params: params
-    })
-
-    return res
-  }
-
-  /**
-   * AD - Menus (Navigation menus per tenant)
-   */
-
-  const adMenusItem = async (params) => {
-    const res = await fetchData({
-      method: "GET",
-      path: `items/ad_menus/${params.id}`,
-      params: params
-    })
-
-    return res
-  }
-
-  const adMenusList = async (params) => {
-    const res = await fetchData({
-      method: "GET",
-      path: `items/ad_menus`,
-      params: params
-    })
-
-    return res
-  }
-
-  const adMenusCreate = async (params) => {
+  const headersCreate = async (params) => {
     const res = await fetchData({
       method: "POST",
-      path: "items/ad_menus",
-      params: params
+      path: "items/headers",
+      params: params,
     })
-
     return res
   }
 
-  const adMenusUpdate = async (params) => {
+  const headersUpdate = async (params) => {
     const res = await fetchData({
       method: "PATCH",
-      path: `items/ad_menus/${params.id}`,
-      params: params
+      path: "items/headers/" + params.id,
+      params: params,
     })
-
     return res
   }
 
-  const adMenusDelete = async (params) => {
+  const headersDelete = async (params) => {
     const res = await fetchData({
       method: "DELETE",
-      path: `items/ad_menus/${params.id}`
+      path: "items/headers/" + params.id,
     })
-
     return res
   }
 
   /**
-   * AD - Settings (Extended settings per tenant)
+   * Footers
    */
 
-  const adSettingsGet = async (params) => {
+  const footersList = async (params) => {
     const res = await fetchData({
       method: "GET",
-      path: `items/ad_settings`,
+      path: "items/footers",
       params: {
         ...params,
-        fields: `
-          *,
-          default_meta_image.*,
-          page_404_image.*
-        `
-      }
+        fields: params?.fields || "*",
+      },
     })
-
     return res
   }
 
-  const adSettingsUpdate = async (params) => {
+  const footersItem = async (params) => {
     const res = await fetchData({
-      method: "PATCH",
-      path: `items/ad_settings/${params.id}`,
-      params: params
+      method: "GET",
+      path: "items/footers/" + params.id,
+      params: params,
     })
-
     return res
   }
 
-  const adSettingsCreate = async (params) => {
+  const footersCreate = async (params) => {
     const res = await fetchData({
       method: "POST",
-      path: "items/ad_settings",
-      params: params
+      path: "items/footers",
+      params: params,
     })
-
     return res
   }
 
-  /**
-   * AD - Slice Templates (Global - for page builder and AI)
-   */
-
-  const adSliceTemplatesItem = async (params) => {
-    const res = await fetchData({
-      method: "GET",
-      path: `items/ad_slice_templates/${params.id}`,
-      params: {
-        ...params,
-        fields: `*, thumbnail.*`
-      }
-    })
-
-    return res
-  }
-
-  const adSliceTemplatesList = async (params) => {
-    const res = await fetchData({
-      method: "GET",
-      path: `items/ad_slice_templates`,
-      params: {
-        ...params,
-        fields: `*, thumbnail.*`
-      }
-    })
-
-    return res
-  }
-
-  const adSliceTemplatesCreate = async (params) => {
-    const res = await fetchData({
-      method: "POST",
-      path: "items/ad_slice_templates",
-      params: params
-    })
-
-    return res
-  }
-
-  const adSliceTemplatesUpdate = async (params) => {
+  const footersUpdate = async (params) => {
     const res = await fetchData({
       method: "PATCH",
-      path: `items/ad_slice_templates/${params.id}`,
-      params: params
+      path: "items/footers/" + params.id,
+      params: params,
     })
-
     return res
   }
 
-  const adSliceTemplatesDelete = async (params) => {
+  const footersDelete = async (params) => {
     const res = await fetchData({
       method: "DELETE",
-      path: `items/ad_slice_templates/${params.id}`
+      path: "items/footers/" + params.id,
     })
-
     return res
   }
 
   /**
-   * AD - Wireframes (Global - AI store generation templates)
+   * Menus
    */
 
-  const adWireframesItem = async (params) => {
+  const menusList = async (params) => {
     const res = await fetchData({
       method: "GET",
-      path: `items/ad_wireframes/${params.id}`,
+      path: "items/menus",
       params: {
         ...params,
-        fields: `*, preview_image.*`
-      }
+        fields: params?.fields || "*",
+      },
     })
-
     return res
   }
 
-  const adWireframesList = async (params) => {
+  const menusItem = async (params) => {
     const res = await fetchData({
       method: "GET",
-      path: `items/ad_wireframes`,
+      path: "items/menus/" + params.id,
       params: {
         ...params,
-        fields: `*, preview_image.*`
-      }
+        fields: params?.fields || "*, menu_items.*",
+      },
     })
-
     return res
   }
 
-  const adWireframesCreate = async (params) => {
+  const menusCreate = async (params) => {
     const res = await fetchData({
       method: "POST",
-      path: "items/ad_wireframes",
-      params: params
+      path: "items/menus",
+      params: params,
     })
-
     return res
   }
 
-  const adWireframesUpdate = async (params) => {
+  const menusUpdate = async (params) => {
     const res = await fetchData({
       method: "PATCH",
-      path: `items/ad_wireframes/${params.id}`,
-      params: params
+      path: "items/menus/" + params.id,
+      params: params,
     })
-
     return res
   }
 
-  const adWireframesDelete = async (params) => {
+  const menusDelete = async (params) => {
     const res = await fetchData({
       method: "DELETE",
-      path: `items/ad_wireframes/${params.id}`
+      path: "items/menus/" + params.id,
     })
-
     return res
   }
 
   /**
-   * AD - AI Jobs (AI generation job tracking)
+   * Menu Items (child of menus)
    */
 
-  const adAiJobsItem = async (params) => {
+  const menuItemsList = async (params) => {
     const res = await fetchData({
       method: "GET",
-      path: `items/ad_ai_jobs/${params.id}`,
-      params: params
+      path: "items/menu_items",
+      params: {
+        ...params,
+        fields: params?.fields || "*",
+      },
     })
-
     return res
   }
 
-  const adAiJobsList = async (params) => {
+  const menuItemsItem = async (params) => {
     const res = await fetchData({
       method: "GET",
-      path: `items/ad_ai_jobs`,
-      params: params
+      path: "items/menu_items/" + params.id,
+      params: params,
     })
-
     return res
   }
 
-  const adAiJobsCreate = async (params) => {
+  const menuItemsCreate = async (params) => {
     const res = await fetchData({
       method: "POST",
-      path: "items/ad_ai_jobs",
-      params: params
+      path: "items/menu_items",
+      params: params,
     })
-
     return res
   }
 
-  const adAiJobsUpdate = async (params) => {
+  const menuItemsUpdate = async (params) => {
     const res = await fetchData({
       method: "PATCH",
-      path: `items/ad_ai_jobs/${params.id}`,
-      params: params
+      path: "items/menu_items/" + params.id,
+      params: params,
     })
-
     return res
   }
 
-  const adAiJobsDelete = async (params) => {
+  const menuItemsDelete = async (params) => {
     const res = await fetchData({
       method: "DELETE",
-      path: `items/ad_ai_jobs/${params.id}`
+      path: "items/menu_items/" + params.id,
     })
+    return res
+  }
 
+  /**
+   * Pages
+   */
+
+  const pagesList = async (params) => {
+    const res = await fetchData({
+      method: "GET",
+      path: "items/pages",
+      params: {
+        ...params,
+        fields: params?.fields || "*",
+      },
+    })
+    return res
+  }
+
+  const pagesItem = async (params) => {
+    const res = await fetchData({
+      method: "GET",
+      path: "items/pages/" + params.id,
+      params: {
+        ...params,
+        fields: params?.fields || "*, sections.*",
+      },
+    })
+    return res
+  }
+
+  const pagesCreate = async (params) => {
+    const res = await fetchData({
+      method: "POST",
+      path: "items/pages",
+      params: params,
+    })
+    return res
+  }
+
+  const pagesUpdate = async (params) => {
+    const res = await fetchData({
+      method: "PATCH",
+      path: "items/pages/" + params.id,
+      params: params,
+    })
+    return res
+  }
+
+  const pagesDelete = async (params) => {
+    const res = await fetchData({
+      method: "DELETE",
+      path: "items/pages/" + params.id,
+    })
+    return res
+  }
+
+  /**
+   * Sections (child of pages)
+   */
+
+  const sectionsList = async (params) => {
+    const res = await fetchData({
+      method: "GET",
+      path: "items/sections",
+      params: {
+        ...params,
+        fields: params?.fields || "*",
+      },
+    })
+    return res
+  }
+
+  const sectionsItem = async (params) => {
+    const res = await fetchData({
+      method: "GET",
+      path: "items/sections/" + params.id,
+      params: params,
+    })
+    return res
+  }
+
+  const sectionsCreate = async (params) => {
+    const res = await fetchData({
+      method: "POST",
+      path: "items/sections",
+      params: params,
+    })
+    return res
+  }
+
+  const sectionsUpdate = async (params) => {
+    const res = await fetchData({
+      method: "PATCH",
+      path: "items/sections/" + params.id,
+      params: params,
+    })
+    return res
+  }
+
+  const sectionsDelete = async (params) => {
+    const res = await fetchData({
+      method: "DELETE",
+      path: "items/sections/" + params.id,
+    })
+    return res
+  }
+
+  /**
+   * Themes
+   */
+
+  const themesList = async (params) => {
+    const res = await fetchData({
+      method: "GET",
+      path: "items/themes",
+      params: {
+        ...params,
+        fields: params?.fields || "*",
+      },
+    })
+    return res
+  }
+
+  const themesItem = async (params) => {
+    const res = await fetchData({
+      method: "GET",
+      path: "items/themes/" + params.id,
+      params: params,
+    })
+    return res
+  }
+
+  const themesCreate = async (params) => {
+    const res = await fetchData({
+      method: "POST",
+      path: "items/themes",
+      params: params,
+    })
+    return res
+  }
+
+  const themesUpdate = async (params) => {
+    const res = await fetchData({
+      method: "PATCH",
+      path: "items/themes/" + params.id,
+      params: params,
+    })
+    return res
+  }
+
+  const themesDelete = async (params) => {
+    const res = await fetchData({
+      method: "DELETE",
+      path: "items/themes/" + params.id,
+    })
+    return res
+  }
+
+  /**
+   * Wireframes
+   */
+
+  const wireframesList = async (params) => {
+    const res = await fetchData({
+      method: "GET",
+      path: "items/wireframes",
+      params: {
+        ...params,
+        fields: params?.fields || "*",
+      },
+    })
+    return res
+  }
+
+  const wireframesItem = async (params) => {
+    const res = await fetchData({
+      method: "GET",
+      path: "items/wireframes/" + params.id,
+      params: params,
+    })
+    return res
+  }
+
+  const wireframesCreate = async (params) => {
+    const res = await fetchData({
+      method: "POST",
+      path: "items/wireframes",
+      params: params,
+    })
+    return res
+  }
+
+  const wireframesUpdate = async (params) => {
+    const res = await fetchData({
+      method: "PATCH",
+      path: "items/wireframes/" + params.id,
+      params: params,
+    })
+    return res
+  }
+
+  const wireframesDelete = async (params) => {
+    const res = await fetchData({
+      method: "DELETE",
+      path: "items/wireframes/" + params.id,
+    })
     return res
   }
 
   return {
     provide: {
       directusStorefront: {
-        // Legacy CMS collections (cms_ prefix)
-        cms_website_settings: {
-          get: cmsWebsiteSettingsGet,
-          update: cmsWebsiteSettingsUpdate,
-        },
-        cms_page: {
-          item: cmsPageItem,
-          list: cmsPageList,
-          create: cmsPageCreate,
-          update: cmsPageUpdate,
-          delete: cmsPageDelete,
-        },
-        cms_header: {
-          get: cmsHeaderGet,
-          update: cmsHeaderUpdate,
-        },
-        cms_footer: {
-          get: cmsFooterGet,
-          update: cmsFooterUpdate,
-        },
-        cms_testimonials: {
-          get: cmsTestimonialsGet,
-          update: cmsTestimonialsUpdate,
-        },
-        cms_header_banner: {
-          get: cmsHeaderBannerGet,
-          update: cmsHeaderBannerUpdate,
+        // Store Settings
+        store_settings: {
+          get: storeSettingsGet,
+          item: storeSettingsItem,
+          create: storeSettingsCreate,
+          update: storeSettingsUpdate,
         },
 
-        // New AD collections (ad_ prefix)
-        ad_menus: {
-          item: adMenusItem,
-          list: adMenusList,
-          create: adMenusCreate,
-          update: adMenusUpdate,
-          delete: adMenusDelete,
+        // Design Tokens (child of store_settings)
+        design_tokens: {
+          list: designTokensList,
+          item: designTokensItem,
+          create: designTokensCreate,
+          update: designTokensUpdate,
+          delete: designTokensDelete,
         },
-        ad_settings: {
-          get: adSettingsGet,
-          create: adSettingsCreate,
-          update: adSettingsUpdate,
+
+        // Headers
+        headers: {
+          list: headersList,
+          item: headersItem,
+          create: headersCreate,
+          update: headersUpdate,
+          delete: headersDelete,
         },
-        ad_slice_templates: {
-          item: adSliceTemplatesItem,
-          list: adSliceTemplatesList,
-          create: adSliceTemplatesCreate,
-          update: adSliceTemplatesUpdate,
-          delete: adSliceTemplatesDelete,
+
+        // Footers
+        footers: {
+          list: footersList,
+          item: footersItem,
+          create: footersCreate,
+          update: footersUpdate,
+          delete: footersDelete,
         },
-        ad_wireframes: {
-          item: adWireframesItem,
-          list: adWireframesList,
-          create: adWireframesCreate,
-          update: adWireframesUpdate,
-          delete: adWireframesDelete,
+
+        // Menus
+        menus: {
+          list: menusList,
+          item: menusItem,
+          create: menusCreate,
+          update: menusUpdate,
+          delete: menusDelete,
         },
-        ad_ai_jobs: {
-          item: adAiJobsItem,
-          list: adAiJobsList,
-          create: adAiJobsCreate,
-          update: adAiJobsUpdate,
-          delete: adAiJobsDelete,
+
+        // Menu Items (child of menus)
+        menu_items: {
+          list: menuItemsList,
+          item: menuItemsItem,
+          create: menuItemsCreate,
+          update: menuItemsUpdate,
+          delete: menuItemsDelete,
+        },
+
+        // Pages
+        pages: {
+          list: pagesList,
+          item: pagesItem,
+          create: pagesCreate,
+          update: pagesUpdate,
+          delete: pagesDelete,
+        },
+
+        // Sections (child of pages)
+        sections: {
+          list: sectionsList,
+          item: sectionsItem,
+          create: sectionsCreate,
+          update: sectionsUpdate,
+          delete: sectionsDelete,
+        },
+
+        // Themes
+        themes: {
+          list: themesList,
+          item: themesItem,
+          create: themesCreate,
+          update: themesUpdate,
+          delete: themesDelete,
+        },
+
+        // Wireframes
+        wireframes: {
+          list: wireframesList,
+          item: wireframesItem,
+          create: wireframesCreate,
+          update: wireframesUpdate,
+          delete: wireframesDelete,
         },
       },
     },
