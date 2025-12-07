@@ -33,6 +33,11 @@
 </template>
 
 <script>
+import {
+  parseGooglePlace,
+  parseFormattedAddress,
+} from "~/v1/core/composables/useAddressParsing.js"
+
 export default {
   props: {
     address: {
@@ -304,78 +309,7 @@ export default {
 
     // Results and Address Mapping
     formatPlace(place) {
-      // console.log("Map ::: Place :: ", place)
-
-      let formData = {}
-
-      // Country
-      place.address_components
-        .filter((i) => i.types.includes("country"))
-        .map((i) => (formData.country = i.long_name))
-
-      // Zipcode
-      place.address_components
-        .filter((i) => i.types.includes("postal_code"))
-        .map((i) => (formData.zip = i.long_name))
-
-      // City
-      place.address_components
-        .filter((i) => i.types.includes("locality"))
-        .map((i) => (formData.city = i.long_name))
-
-      for (let i = 0; i < place.address_components.length; i++) {
-        let item = place.address_components[i]
-
-        // Mongolia
-        if (formData.country === "Mongolia") {
-          // Province
-          if (item.types.includes("sublocality_level_1")) {
-            formData.province = item.long_name
-          }
-          if (!formData.province) {
-            if (item.types.includes("administrative_area_level_2")) {
-              formData.province = item.long_name
-            }
-          }
-          // Street
-          if (item.types.includes("street_number")) {
-            formData.street = item.long_name
-          }
-          if (item.types.includes("route")) {
-            if (formData.street) {
-              formData.street += " " + item.short_name
-            }
-          }
-          if (item.types.includes("plus_code")) {
-            formData.street = item.long_name
-          }
-          if (item.types.includes("premise")) {
-            formData.street = item.long_name
-          }
-          // Other Countries
-        } else {
-          // Province
-          if (item.types.includes("administrative_area_level_1")) {
-            formData.province = item.long_name
-          }
-          // Street
-          if (item.types.includes("street_number")) {
-            formData.street = item.long_name
-          }
-          if (item.types.includes("route")) {
-            if (formData.street) {
-              formData.street += " " + item.short_name
-            }
-          }
-        }
-      }
-
-      formData.location = {
-        lat: place.geometry.location.lat(),
-        lng: place.geometry.location.lng(),
-      }
-      formData.formatted_address = place.formatted_address
-      // formData.name = place.name
+      const formData = parseGooglePlace(place)
 
       console.log("Map ::: Format Place :: ", place, formData)
 
