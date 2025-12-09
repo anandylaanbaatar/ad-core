@@ -8,6 +8,7 @@ export const useCoreStore = defineStore("core", {
     // cors: "https://cors.adcreative.studio",
     cors: "https://cors.melodu.com",
     globalItemsInit: false,
+    appInitialized: false, // Track if app has completed first load
 
     darkMode: null,
     currency: useAppConfig().theme.currency,

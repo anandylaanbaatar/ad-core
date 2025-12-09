@@ -14,6 +14,9 @@ export const layout = () => {
 export const siteLoading = () => {
   return useCoreStore().loading
 }
+export const appInitialized = () => {
+  return useCoreStore().appInitialized
+}
 export const features = () => {
   return useRuntimeConfig().public.features
 }

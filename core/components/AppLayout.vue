@@ -4,9 +4,9 @@
     <LoaderPage v-if="splashLoading && pageTransitionEnabled"></LoaderPage>
 
     <div>
-      <!--Page Loader-->
+      <!--Page Loader - only show on initial app load-->
       <Loader
-        v-if="siteLoading() && pageTransitionEnabled"
+        v-if="siteLoading() && pageTransitionEnabled && !appInitialized"
         type="xxl"
         class="fullPage"
       ></Loader>
@@ -63,6 +63,9 @@ export default {
   computed: {
     globalItemsInit() {
       return useCoreStore().globalItemsInit
+    },
+    appInitialized() {
+      return useCoreStore().appInitialized
     },
     pageTransitionEnabled() {
       return useAppConfig().theme?.pageTransition !== false

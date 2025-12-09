@@ -150,10 +150,11 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
       }
     }
 
-    // Main Splash Loading
-    if (coreStore.loading) {
+    // Main Splash Loading - only on first app load
+    if (coreStore.loading && !coreStore.appInitialized) {
       setTimeout(() => {
         coreStore.set("loading", false)
+        coreStore.set("appInitialized", true) // Mark app as initialized after first load
       }, 500)
     }
   }
