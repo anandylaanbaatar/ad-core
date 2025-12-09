@@ -80,7 +80,7 @@ export default defineEventHandler(async (event) => {
 
   const url = `${apiUrl}/${body.path}${queryString ? `?${queryString}` : ""}`
 
-  console.log(`[CMS Storefront API] ${body.method} ${url}`)
+  // console.log(`[CMS Storefront API] ${body.method} ${url}`)
 
   try {
     const response = await fetch(url, {
