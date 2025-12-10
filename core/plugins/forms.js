@@ -361,26 +361,40 @@ export default defineNuxtPlugin((app) => {
       }
     }
 
-    // 1. Fetch Image
-    const remoteRes = await $fetch(url)
-    if (!remoteRes.ok) {
+    try {
+      // 1. Fetch Image
+      const blob = await $fetch(url, {
+        responseType: "blob",
+      })
+
+      if (!blob) {
+        return {
+          success: false,
+          error: "Remote url fetch failed!",
+        }
+      }
+
+      const remoteFileName = url.split("/").pop().split("?")[0].split("#")[0]
+      const file = new File([blob], remoteFileName, { type: blob.type })
+
+      // 2. Upload Image to Bunny
+      const downloaded = await uploader(file, tenantId, filePath)
+
+      if (downloaded) {
+        return downloaded
+      }
+
       return {
         success: false,
-        error: "Remote url fetch failed!",
+        error: "Upload to CDN failed!",
+      }
+    } catch (err) {
+      console.log("Error uploading from URL ::: ", err.message)
+      return {
+        success: false,
+        error: err.message || "Remote url fetch failed!",
       }
     }
-    const blob = await remoteRes.blob()
-    const remoteFileName = url.split("/").pop().split("?")[0].split("#")[0]
-    const file = new File([blob], remoteFileName, { type: blob.type })
-
-    // 2. Upload Image to Bunny
-    const downloaded = await uploader(file, tenantId, filePath)
-
-    if (downloaded) {
-      return downloaded
-    }
-
-    return null
   }
 
   return {
