@@ -60,7 +60,7 @@ export default async function siteConfigModule(moduleOptions, nuxt) {
             bunny: {
               storageUrl: "https://storage.bunnycdn.com/melodu",
               cdnUrl: "https://melodu.b-cdn.net",
-              filesPath: storeData.tenantId,
+              filesPath: "adcommerce",
             },
           }
         }

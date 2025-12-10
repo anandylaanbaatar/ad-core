@@ -256,7 +256,7 @@ export default defineNuxtPlugin((app) => {
    * Uploader
    */
 
-  const uploader = async (file, filePath) => {
+  const uploader = async (file, tenantId, filePath) => {
     return new Promise(async (resolve) => {
       const apiKey = UPLOADER_KEY.value
       let storageUrl = "https://storage.bunnycdn.com/melodu"
@@ -275,10 +275,15 @@ export default defineNuxtPlugin((app) => {
 
       try {
         const filename = app.$utils.processFileName(file.name)
-        let filesPath = `${features().fileSystem.bunny.filesPath}`
+
+        // Build path: adcommerce/{tenantId}/{filePath?}/{filename}
+        const rootPath = features().fileSystem.bunny.filesPath // "adcommerce"
+        let filesPath = `${rootPath}/${tenantId}`
+
         if (filePath) {
-          filesPath = `${features().fileSystem.bunny.filesPath}/${filePath}`
+          filesPath = `${filesPath}/${filePath}`
         }
+
         const requestUrl = `${storageUrl}/${filesPath}/${filename}`
         const downloadUrl = `${siteUrl}/${filesPath}/${filename}`
         const downloadOriginUrl = `${cdnUrl}/${filesPath}/${filename}`
@@ -307,16 +312,22 @@ export default defineNuxtPlugin((app) => {
       }
     })
   }
-  const upload = async (files, filePath) => {
+  const upload = async (files, tenantId, filePath) => {
     if (!UPLOADER_KEY.value) return
     if (!features().fileSystem) return
     if (!features().fileSystem.bunny) return
     if (!features().fileSystem.bunny.filesPath) return
 
+    // Validate tenant ID is provided
+    if (!tenantId) {
+      console.warn("[Forms] Upload failed: No tenant ID provided")
+      return null
+    }
+
     let results = []
 
     for (let i = 0; i < files.length; i++) {
-      const downloaded = await uploader(files[i], filePath)
+      const downloaded = await uploader(files[i], tenantId, filePath)
 
       if (downloaded) {
         results.push(downloaded)
@@ -329,11 +340,20 @@ export default defineNuxtPlugin((app) => {
 
     return null
   }
-  const uploadUrl = async (url, filePath) => {
+  const uploadUrl = async (url, tenantId, filePath) => {
     if (!UPLOADER_KEY.value) return
     if (!features().fileSystem) return
     if (!features().fileSystem.bunny) return
     if (!features().fileSystem.bunny.filesPath) return
+
+    // Validate tenant ID is provided
+    if (!tenantId) {
+      return {
+        success: false,
+        error: "No tenant ID provided!",
+      }
+    }
+
     if (!url) {
       return {
         success: false,
@@ -354,7 +374,7 @@ export default defineNuxtPlugin((app) => {
     const file = new File([blob], remoteFileName, { type: blob.type })
 
     // 2. Upload Image to Bunny
-    const downloaded = await uploader(file, filePath)
+    const downloaded = await uploader(file, tenantId, filePath)
 
     if (downloaded) {
       return downloaded

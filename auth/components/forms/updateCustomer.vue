@@ -345,7 +345,8 @@ export default {
 
       // Upload to user folder
       const userUid = this.account.uid
-      const images = await this.$forms.upload(e.files, userUid)
+      const tenantId = features().multitenancy?.tenantId || features().multitenancy?.parentId || 'adcommerce'
+      const images = await this.$forms.upload(e.files, tenantId, userUid)
 
       // Set Images to fields
       if (images) {
