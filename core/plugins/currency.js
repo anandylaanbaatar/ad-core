@@ -2,18 +2,9 @@ import moment from "moment"
 import { fx } from "money"
 
 export default defineNuxtPlugin((nuxtApp) => {
-  const KEY = useState(
-    "currencyKey",
-    () => process.env.NUXT_OPEN_EXCHANGE_RATES
-  )
-
   if (import.meta.client) {
     if (!useRuntimeConfig().public.features.currency) {
       // console.log("[Plugins] ::: [Currency] ::: Not Initialized!")
-      return
-    }
-    if (!KEY.value) {
-      console.log("[Plugins] ::: [Currency] ::: Missing Integration Key!")
       return
     }
 
@@ -22,7 +13,6 @@ export default defineNuxtPlugin((nuxtApp) => {
     return
   }
 
-  let key = KEY.value
   let BASE_CURRENCY = useAppConfig().theme.currency
   let CURRENCY = null
   let TIMESTAMP = null
@@ -56,7 +46,7 @@ export default defineNuxtPlugin((nuxtApp) => {
       // console.log("[Plugins] ::: [Currency] :: Setup rates from Localhost!")
     } else {
       const res = await fetch(
-        `https://openexchangerates.org/api/latest.json?app_id=${key}`
+        `https://api.adcommerce.mn/adcommerce/v2/exchange-rates`
       )
       if (res) {
         const data = await res.json()
@@ -71,7 +61,7 @@ export default defineNuxtPlugin((nuxtApp) => {
 
         setupRates(data.rates, data.timestamp)
 
-        console.log("[Plugins] ::: [Currency] :: Setup rates from API!")
+        console.log("[Plugins] ::: [Currency] :: Setup rates from Cached API!")
       }
     }
   }
