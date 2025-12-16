@@ -31,6 +31,7 @@ const app = defineNuxtConfig({
     "flexboxgrid/css/flexboxgrid.min.css",
     "primeicons/primeicons.css",
     "@splidejs/vue-splide/css",
+    "leaflet/dist/leaflet.css",
     resolve("./assets/scss/app.scss"),
   ],
 
@@ -103,6 +104,7 @@ const plugins = defineNuxtConfig({
   plugins: [
     resolve("./plugins/utils.js"),
     resolve("./plugins/algolia.js"),
+    resolve("./plugins/map-provider.client.js"),
     resolve("./plugins/address.js"),
     resolve("./plugins/currency.js"),
     resolve("./plugins/prismic.js"),

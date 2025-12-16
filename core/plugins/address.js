@@ -25,16 +25,23 @@ export default defineNuxtPlugin((nuxtApp) => {
   }
 
   if (import.meta.client) {
-    if (!useRuntimeConfig().public.features.googleMaps) {
-      // console.log("[Plugins] ::: [Address] ::: Not Initialized!")
-      return
-    }
-    if (!MAIN_KEY.value) {
-      console.log("[Plugins] ::: [Address] ::: Missing Integration Key!")
+    const config = useRuntimeConfig()
+    const hasGoogleMaps = config.public.features.googleMaps
+    const hasLeaflet = config.public.features?.leaflet?.enabled
+
+    // Plugin is needed for both Google Maps and Leaflet
+    if (!hasGoogleMaps && !hasLeaflet) {
+      console.log("[Plugins] ::: [Address] ::: No map provider enabled!")
       return
     }
 
-    // console.log("[Plugins] ::: [Address] ::: Initialized!")
+    // Google Maps key is only required if Google Maps is enabled
+    if (hasGoogleMaps && !MAIN_KEY.value) {
+      console.log("[Plugins] ::: [Address] ::: Missing Google Maps key!")
+      return
+    }
+
+    console.log("[Plugins] ::: [Address] ::: Initialized for:", hasGoogleMaps ? 'Google Maps' : 'Leaflet')
   } else {
     return
   }
@@ -72,16 +79,33 @@ export default defineNuxtPlugin((nuxtApp) => {
     return new Promise((resolve) => {
       if (typeof navigator !== "undefined") {
         if (navigator && navigator.geolocation) {
-          navigator.geolocation.getCurrentPosition((position) => {
-            let latLng = {
-              lat: position.coords.latitude,
-              lng: position.coords.longitude,
+          navigator.geolocation.getCurrentPosition(
+            (position) => {
+              console.log('[Address] Browser location obtained:', position.coords)
+              let latLng = {
+                lat: position.coords.latitude,
+                lng: position.coords.longitude,
+              }
+              resolve(latLng)
+            },
+            (error) => {
+              console.error('[Address] Geolocation error:', error.message)
+              resolve(null)
+            },
+            {
+              enableHighAccuracy: true,
+              timeout: 10000,
+              maximumAge: 0
             }
-            resolve(latLng)
-          })
+          )
+        } else {
+          console.warn('[Address] Geolocation not supported')
+          resolve(null)
         }
+      } else {
+        console.warn('[Address] Navigator not available')
+        resolve(null)
       }
-      resolve(null)
     })
   }
 
@@ -207,25 +231,59 @@ export default defineNuxtPlugin((nuxtApp) => {
     return formattedAddress
   }
 
+  /**
+   * Get active map provider
+   * Delegates all methods to the active provider (Google or Leaflet)
+   */
+  const getProvider = () => {
+    return nuxtApp.$mapProvider
+  }
+
   return {
     provide: {
       GoogleMap,
       Marker,
       address: {
-        // Geo
-        getBrowserLocation,
-        geoLocation,
+        // Geo - delegate to provider
+        getBrowserLocation: async () => {
+          const provider = getProvider()
+          return provider ? await provider.getBrowserLocation() : await getBrowserLocation()
+        },
+        geoLocation: async () => {
+          const provider = getProvider()
+          return provider ? await provider.geoLocation() : await geoLocation()
+        },
 
-        // Search Location
+        // Search Location - delegate to provider
         typeSearch,
-        typeSearchGoogle,
-        addressToLatLng,
+        typeSearchGoogle: async (value) => {
+          const provider = getProvider()
+          return provider ? await provider.typeSearchGoogle(value) : await typeSearchGoogle(value)
+        },
+        addressToLatLng: async (value) => {
+          const provider = getProvider()
+          return provider ? await provider.addressToLatLng(value) : await addressToLatLng(value)
+        },
+        latLngToAddress: async (lat, lng) => {
+          const provider = getProvider()
+          if (provider && provider.latLngToAddress) {
+            return provider.latLngToAddress(lat, lng)
+          }
+          // Fallback: Use addressToLatLng with coordinates string
+          return await addressToLatLng(`${lat},${lng}`)
+        },
 
-        // Directions & Calculations
-        getDirections,
+        // Directions & Calculations - delegate to provider
+        getDirections: async (address1, address2) => {
+          const provider = getProvider()
+          return provider ? await provider.getDirections(address1, address2) : await getDirections(address1, address2)
+        },
 
-        // Formatting
-        formatAddress,
+        // Formatting - delegate to provider
+        formatAddress: (address) => {
+          const provider = getProvider()
+          return provider ? provider.formatAddress(address) : formatAddress(address)
+        },
       },
     },
   }
