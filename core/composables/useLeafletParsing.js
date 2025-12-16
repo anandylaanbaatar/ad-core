@@ -16,6 +16,4 @@ export const useLeafletParsing = () => {
   }
 }
 
-export { parseNominatimPlace }
-
 export default useLeafletParsing
