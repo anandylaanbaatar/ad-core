@@ -557,6 +557,210 @@ export default defineNuxtPlugin((nuxtApp) => {
     return res
   }
 
+  /**
+   * Theme Sections
+   */
+
+  const themeSectionsList = async (params) => {
+    const res = await fetchData({
+      method: "GET",
+      path: "items/theme_sections",
+      params: {
+        ...params,
+        fields: params?.fields || "*",
+      },
+    })
+    return res
+  }
+
+  const themeSectionsItem = async (params) => {
+    const res = await fetchData({
+      method: "GET",
+      path: "items/theme_sections/" + params.id,
+      params: params,
+    })
+    return res
+  }
+
+  const themeSectionsCreate = async (params) => {
+    const res = await fetchData({
+      method: "POST",
+      path: "items/theme_sections",
+      params: params,
+    })
+    return res
+  }
+
+  const themeSectionsUpdate = async (params) => {
+    const res = await fetchData({
+      method: "PATCH",
+      path: "items/theme_sections/" + params.id,
+      params: params,
+    })
+    return res
+  }
+
+  const themeSectionsDelete = async (params) => {
+    const res = await fetchData({
+      method: "DELETE",
+      path: "items/theme_sections/" + params.id,
+    })
+    return res
+  }
+
+  /**
+   * Theme Snippets
+   */
+
+  const themeSnippetsList = async (params) => {
+    const res = await fetchData({
+      method: "GET",
+      path: "items/theme_snippets",
+      params: {
+        ...params,
+        fields: params?.fields || "*",
+      },
+    })
+    return res
+  }
+
+  const themeSnippetsItem = async (params) => {
+    const res = await fetchData({
+      method: "GET",
+      path: "items/theme_snippets/" + params.id,
+      params: params,
+    })
+    return res
+  }
+
+  const themeSnippetsCreate = async (params) => {
+    const res = await fetchData({
+      method: "POST",
+      path: "items/theme_snippets",
+      params: params,
+    })
+    return res
+  }
+
+  const themeSnippetsUpdate = async (params) => {
+    const res = await fetchData({
+      method: "PATCH",
+      path: "items/theme_snippets/" + params.id,
+      params: params,
+    })
+    return res
+  }
+
+  const themeSnippetsDelete = async (params) => {
+    const res = await fetchData({
+      method: "DELETE",
+      path: "items/theme_snippets/" + params.id,
+    })
+    return res
+  }
+
+  /**
+   * Theme Settings (per-store instances)
+   */
+
+  const themeSettingsList = async (params) => {
+    const res = await fetchData({
+      method: "GET",
+      path: "items/theme_settings",
+      params: {
+        ...params,
+        fields: params?.fields || "*",
+      },
+    })
+    return res
+  }
+
+  const themeSettingsItem = async (params) => {
+    const res = await fetchData({
+      method: "GET",
+      path: "items/theme_settings/" + params.id,
+      params: params,
+    })
+    return res
+  }
+
+  const themeSettingsCreate = async (params) => {
+    const res = await fetchData({
+      method: "POST",
+      path: "items/theme_settings",
+      params: params,
+    })
+    return res
+  }
+
+  const themeSettingsUpdate = async (params) => {
+    const res = await fetchData({
+      method: "PATCH",
+      path: "items/theme_settings/" + params.id,
+      params: params,
+    })
+    return res
+  }
+
+  const themeSettingsDelete = async (params) => {
+    const res = await fetchData({
+      method: "DELETE",
+      path: "items/theme_settings/" + params.id,
+    })
+    return res
+  }
+
+  /**
+   * Theme Assets
+   */
+
+  const themeAssetsList = async (params) => {
+    const res = await fetchData({
+      method: "GET",
+      path: "items/theme_assets",
+      params: {
+        ...params,
+        fields: params?.fields || "*",
+      },
+    })
+    return res
+  }
+
+  const themeAssetsItem = async (params) => {
+    const res = await fetchData({
+      method: "GET",
+      path: "items/theme_assets/" + params.id,
+      params: params,
+    })
+    return res
+  }
+
+  const themeAssetsCreate = async (params) => {
+    const res = await fetchData({
+      method: "POST",
+      path: "items/theme_assets",
+      params: params,
+    })
+    return res
+  }
+
+  const themeAssetsUpdate = async (params) => {
+    const res = await fetchData({
+      method: "PATCH",
+      path: "items/theme_assets/" + params.id,
+      params: params,
+    })
+    return res
+  }
+
+  const themeAssetsDelete = async (params) => {
+    const res = await fetchData({
+      method: "DELETE",
+      path: "items/theme_assets/" + params.id,
+    })
+    return res
+  }
+
   return {
     provide: {
       directusStorefront: {
@@ -647,6 +851,42 @@ export default defineNuxtPlugin((nuxtApp) => {
           create: wireframesCreate,
           update: wireframesUpdate,
           delete: wireframesDelete,
+        },
+
+        // Theme Sections
+        theme_sections: {
+          list: themeSectionsList,
+          item: themeSectionsItem,
+          create: themeSectionsCreate,
+          update: themeSectionsUpdate,
+          delete: themeSectionsDelete,
+        },
+
+        // Theme Snippets
+        theme_snippets: {
+          list: themeSnippetsList,
+          item: themeSnippetsItem,
+          create: themeSnippetsCreate,
+          update: themeSnippetsUpdate,
+          delete: themeSnippetsDelete,
+        },
+
+        // Theme Settings (per-store)
+        theme_settings: {
+          list: themeSettingsList,
+          item: themeSettingsItem,
+          create: themeSettingsCreate,
+          update: themeSettingsUpdate,
+          delete: themeSettingsDelete,
+        },
+
+        // Theme Assets
+        theme_assets: {
+          list: themeAssetsList,
+          item: themeAssetsItem,
+          create: themeAssetsCreate,
+          update: themeAssetsUpdate,
+          delete: themeAssetsDelete,
         },
       },
     },

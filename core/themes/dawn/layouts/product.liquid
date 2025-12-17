@@ -1,0 +1,127 @@
+{%- comment -%}
+  Product Page Layout
+  Used for individual product detail pages
+{%- endcomment -%}
+
+<div class="product-template">
+  {%- if settings.enable_breadcrumbs -%}
+    <div class="container">
+      {% render 'breadcrumbs' %}
+    </div>
+  {%- endif -%}
+
+  <div class="product-page">
+    <div class="container">
+      <div class="product-grid">
+        <!-- Product Images -->
+        <div class="product-media">
+          {% section 'product-media' %}
+        </div>
+
+        <!-- Product Information -->
+        <div class="product-info">
+          <div class="product-info__header">
+            {%- if product.vendor and settings.show_vendor -%}
+              <p class="product-info__vendor">{{ product.vendor }}</p>
+            {%- endif -%}
+            <h1 class="product-info__title">{{ product.title }}</h1>
+            {%- if product.reviews_enabled -%}
+              <div class="product-info__reviews">
+                {% render 'product-rating', product: product %}
+              </div>
+            {%- endif -%}
+          </div>
+
+          <!-- Price -->
+          <div class="product-info__price">
+            <span class="price">{{ product.price | money }}</span>
+            {%- if product.compare_at_price > product.price -%}
+              <span class="price--compare">{{ product.compare_at_price | money }}</span>
+              <span class="price--savings">
+                {{ 'products.product.save' | t }}
+                {{ product.compare_at_price | minus: product.price | money }}
+              </span>
+            {%- endif -%}
+          </div>
+
+          <!-- Description -->
+          {%- if product.description != blank -%}
+            <div class="product-info__description">
+              {{ product.description }}
+            </div>
+          {%- endif -%}
+
+          <!-- Product Form -->
+          <div class="product-info__form">
+            {% render 'product-form', product: product, show_quantity: true, show_inventory: true, enable_dynamic_checkout: settings.enable_dynamic_checkout %}
+          </div>
+
+          <!-- Additional Information -->
+          {%- if product.metafields.custom.additional_info -%}
+            <div class="product-info__additional">
+              {{ product.metafields.custom.additional_info }}
+            </div>
+          {%- endif -%}
+
+          <!-- Share Buttons -->
+          <div class="product-info__share">
+            {% render 'social-share', share_title: product.title, share_url: product.url, share_image: product.featured_image %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Product Tabs -->
+      {%- if product.description != blank or product.metafields.custom.specifications or product.metafields.custom.shipping_info -%}
+        <div class="product-tabs">
+          {% section 'product-tabs' %}
+        </div>
+      {%- endif -%}
+    </div>
+  </div>
+
+  <!-- Related Products -->
+  {%- if product.related_products.count > 0 -%}
+    <div class="product-recommendations">
+      {% section 'product-recommendations' %}
+    </div>
+  {%- endif -%}
+
+  <!-- Recently Viewed -->
+  <div class="recently-viewed">
+    {% section 'recently-viewed' %}
+  </div>
+</div>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org/",
+  "@type": "Product",
+  "name": {{ product.title | json }},
+  "image": {{ product.featured_image | img_url: '1024x1024' | json }},
+  "description": {{ product.description | strip_html | json }},
+  {%- if product.vendor -%}
+    "brand": {
+      "@type": "Brand",
+      "name": {{ product.vendor | json }}
+    },
+  {%- endif -%}
+  {%- if product.reviews_enabled and product.reviews_count > 0 -%}
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": {{ product.reviews_rating }},
+      "reviewCount": {{ product.reviews_count }}
+    },
+  {%- endif -%}
+  "offers": {
+    "@type": "Offer",
+    "url": {{ product.url | json }},
+    "priceCurrency": {{ shop.currency | json }},
+    "price": {{ product.price | divided_by: 100.0 | json }},
+    "availability": "https://schema.org/{% if product.available %}InStock{% else %}OutOfStock{% endif %}",
+    "seller": {
+      "@type": "Organization",
+      "name": {{ shop.name | json }}
+    }
+  }
+}
+</script>

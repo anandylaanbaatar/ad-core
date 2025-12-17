@@ -1,0 +1,40 @@
+{%- comment -%}
+  Homepage Layout
+  Main landing page for the store
+{%- endcomment -%}
+
+<div class="index-template">
+  <!-- Hero Section -->
+  {% section 'hero' %}
+
+  <!-- Featured Collection -->
+  {%- if settings.featured_collection -%}
+    {% section 'featured-collection' %}
+  {%- endif -%}
+
+  <!-- Featured Products -->
+  {% section 'featured-products' %}
+
+  <!-- Collection List -->
+  {%- if settings.show_collections_on_homepage -%}
+    {% section 'collection-list' %}
+  {%- endif -%}
+
+  <!-- Testimonials -->
+  {%- if settings.show_testimonials -%}
+    {% section 'testimonials' %}
+  {%- endif -%}
+
+  <!-- Newsletter -->
+  {% section 'newsletter' %}
+
+  <!-- Rich Text / About -->
+  {%- if settings.show_about_section -%}
+    {% section 'rich-text' %}
+  {%- endif -%}
+
+  <!-- Instagram Feed -->
+  {%- if settings.social_instagram and settings.show_instagram_feed -%}
+    {% section 'instagram-feed' %}
+  {%- endif -%}
+</div>

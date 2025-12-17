@@ -1,0 +1,380 @@
+{%- comment -%}
+  Header Section
+  Main site navigation header with logo, menu, search, and cart
+{%- endcomment -%}
+
+{% schema %}
+{
+  "name": "Header",
+  "settings": [
+    {
+      "type": "select",
+      "id": "logo_position",
+      "label": "Logo Position",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "select",
+      "id": "menu_style",
+      "label": "Menu Style",
+      "options": [
+        { "value": "inline", "label": "Inline" },
+        { "value": "dropdown", "label": "Dropdown" },
+        { "value": "mega", "label": "Mega Menu" }
+      ],
+      "default": "inline"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_sticky",
+      "label": "Enable Sticky Header",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_transparent",
+      "label": "Transparent on Homepage",
+      "info": "Header becomes transparent over hero section",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "show_search",
+      "label": "Show Search",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_account",
+      "label": "Show Account Link",
+      "default": true
+    },
+    {
+      "type": "link_list",
+      "id": "menu",
+      "label": "Menu",
+      "default": "main-menu"
+    }
+  ]
+}
+{% endschema %}
+
+<header
+  class="header{% if section.settings.enable_sticky %} header--sticky{% endif %}{% if section.settings.enable_transparent and template == 'index' %} header--transparent{% endif %}"
+  data-section-id="{{ section.id }}"
+  data-section-type="header"
+>
+  <div class="container">
+    <div class="header__inner">
+      <!-- Mobile Menu Toggle -->
+      <button type="button" class="header__mobile-toggle" aria-label="{{ 'general.accessibility.menu' | t }}" data-mobile-menu-toggle>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+      </button>
+
+      <!-- Logo -->
+      <div class="header__logo{% if section.settings.logo_position == 'center' %} header__logo--center{% endif %}">
+        <a href="/" class="header__logo-link">
+          {%- if shop.logo -%}
+            <img
+              src="{{ shop.logo | img_url: '200x' }}"
+              alt="{{ shop.name | escape }}"
+              width="auto"
+              height="40"
+              loading="eager"
+              class="header__logo-image"
+            >
+          {%- else -%}
+            <span class="header__logo-text">{{ shop.name }}</span>
+          {%- endif -%}
+        </a>
+      </div>
+
+      <!-- Main Navigation -->
+      <nav class="header__nav" role="navigation" aria-label="{{ 'general.accessibility.main_navigation' | t }}">
+        <ul class="header__menu">
+          {%- for link in linklists[section.settings.menu].links -%}
+            <li class="header__menu-item{% if link.active %} header__menu-item--active{% endif %}">
+              <a href="{{ link.url }}" class="header__menu-link">
+                {{ link.title }}
+              </a>
+
+              {%- if link.links.size > 0 -%}
+                <ul class="header__submenu">
+                  {%- for child_link in link.links -%}
+                    <li class="header__submenu-item">
+                      <a href="{{ child_link.url }}" class="header__submenu-link">
+                        {{ child_link.title }}
+                      </a>
+                    </li>
+                  {%- endfor -%}
+                </ul>
+              {%- endif -%}
+            </li>
+          {%- endfor -%}
+        </ul>
+      </nav>
+
+      <!-- Header Actions -->
+      <div class="header__actions">
+        <!-- Search -->
+        {%- if section.settings.show_search -%}
+          <button type="button" class="header__action" aria-label="{{ 'general.search.title' | t }}" data-search-toggle>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"></circle>
+              <path d="m21 21-4.35-4.35"></path>
+            </svg>
+          </button>
+        {%- endif -%}
+
+        <!-- Account -->
+        {%- if section.settings.show_account -%}
+          <a href="/account" class="header__action" aria-label="{{ 'customer.account.title' | t }}">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+              <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+          </a>
+        {%- endif -%}
+
+        <!-- Cart -->
+        <button type="button" class="header__action header__cart" aria-label="{{ 'cart.general.title' | t }}" data-cart-toggle>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="9" cy="21" r="1"></circle>
+            <circle cx="20" cy="21" r="1"></circle>
+            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+          </svg>
+          <span class="header__cart-count" data-cart-count>{{ cart.item_count }}</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Search Dropdown -->
+  {%- if section.settings.show_search -%}
+    <div class="header__search" aria-hidden="true" data-search-dropdown>
+      <div class="container">
+        <form action="/search" method="get" class="header__search-form" role="search">
+          <input
+            type="search"
+            name="q"
+            placeholder="{{ 'general.search.placeholder' | t }}"
+            class="header__search-input"
+            aria-label="{{ 'general.search.title' | t }}"
+            autocomplete="off"
+            data-search-input
+          >
+          <button type="submit" class="header__search-submit" aria-label="{{ 'general.search.submit' | t }}">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"></circle>
+              <path d="m21 21-4.35-4.35"></path>
+            </svg>
+          </button>
+          <button type="button" class="header__search-close" aria-label="{{ 'general.search.close' | t }}" data-search-close>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </form>
+
+        {%- if settings.enable_predictive_search -%}
+          <div class="header__search-results" data-search-results></div>
+        {%- endif -%}
+      </div>
+    </div>
+  {%- endif -%}
+</header>
+
+<!-- Mobile Menu -->
+<div class="mobile-menu" aria-hidden="true" data-mobile-menu>
+  <div class="mobile-menu__overlay" data-mobile-menu-close></div>
+  <div class="mobile-menu__content">
+    <div class="mobile-menu__header">
+      <span class="mobile-menu__title">{{ 'general.accessibility.menu' | t }}</span>
+      <button type="button" class="mobile-menu__close" aria-label="{{ 'general.accessibility.close' | t }}" data-mobile-menu-close>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+
+    <nav class="mobile-menu__nav">
+      <ul class="mobile-menu__list">
+        {%- for link in linklists[section.settings.menu].links -%}
+          <li class="mobile-menu__item">
+            <a href="{{ link.url }}" class="mobile-menu__link">
+              {{ link.title }}
+            </a>
+
+            {%- if link.links.size > 0 -%}
+              <button type="button" class="mobile-menu__toggle" aria-label="{{ 'general.accessibility.expand' | t }}">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+              </button>
+              <ul class="mobile-menu__submenu">
+                {%- for child_link in link.links -%}
+                  <li class="mobile-menu__subitem">
+                    <a href="{{ child_link.url }}" class="mobile-menu__sublink">
+                      {{ child_link.title }}
+                    </a>
+                  </li>
+                {%- endfor -%}
+              </ul>
+            {%- endif -%}
+          </li>
+        {%- endfor -%}
+      </ul>
+    </nav>
+  </div>
+</div>
+
+<style>
+.header {
+  background: var(--color-background);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  position: relative;
+  z-index: 100;
+}
+
+.header--sticky {
+  position: sticky;
+  top: 0;
+}
+
+.header--transparent {
+  background: transparent;
+  border-bottom-color: transparent;
+  position: absolute;
+  width: 100%;
+  top: 0;
+  left: 0;
+}
+
+.header__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 0;
+  gap: 2rem;
+}
+
+.header__mobile-toggle {
+  display: none;
+  background: none;
+  border: none;
+  padding: 0.5rem;
+  cursor: pointer;
+}
+
+.header__logo {
+  flex-shrink: 0;
+}
+
+.header__logo--center {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.header__logo-link {
+  display: block;
+  line-height: 0;
+}
+
+.header__logo-image {
+  max-height: 40px;
+  width: auto;
+}
+
+.header__logo-text {
+  font-family: var(--font-heading);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.header__nav {
+  flex: 1;
+}
+
+.header__menu {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.header__menu-link {
+  color: var(--color-text);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.header__menu-link:hover {
+  color: var(--color-accent);
+}
+
+.header__actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.header__action {
+  background: none;
+  border: none;
+  padding: 0.5rem;
+  cursor: pointer;
+  color: var(--color-text);
+  transition: color 0.2s;
+  position: relative;
+}
+
+.header__action:hover {
+  color: var(--color-accent);
+}
+
+.header__cart-count {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background: var(--color-accent);
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 700;
+  border-radius: 50%;
+  min-width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+}
+
+@media (max-width: 768px) {
+  .header__mobile-toggle {
+    display: block;
+  }
+
+  .header__nav {
+    display: none;
+  }
+}
+</style>
+
+<script>
+// Header JavaScript will be in theme.js
+</script>

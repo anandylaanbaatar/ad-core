@@ -1,0 +1,64 @@
+{%- comment -%}
+  Collection Page Layout
+  Used for product collection/category pages
+{%- endcomment -%}
+
+<div class="collection-template">
+  {%- if settings.enable_breadcrumbs -%}
+    <div class="container">
+      {% render 'breadcrumbs' %}
+    </div>
+  {%- endif -%}
+
+  <!-- Collection Header -->
+  <div class="collection-header">
+    <div class="container">
+      <h1 class="collection-header__title">{{ collection.title }}</h1>
+      {%- if collection.description != blank -%}
+        <div class="collection-header__description">
+          {{ collection.description }}
+        </div>
+      {%- endif -%}
+      {%- if collection.image -%}
+        <div class="collection-header__image">
+          <img
+            src="{{ collection.image | img_url: '1600x400' }}"
+            alt="{{ collection.title | escape }}"
+            width="1600"
+            height="400"
+            loading="eager"
+          >
+        </div>
+      {%- endif -%}
+    </div>
+  </div>
+
+  <!-- Collection Grid with Filters -->
+  <div class="collection-grid-container">
+    <div class="container">
+      {% render 'collection-grid',
+        collection: collection,
+        products: collection.products,
+        show_filters: settings.enable_collection_filters,
+        show_sorting: settings.enable_collection_sorting,
+        products_per_page: settings.products_per_page,
+        columns: settings.collection_columns,
+        pagination_type: settings.pagination_type
+      %}
+    </div>
+  </div>
+</div>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org/",
+  "@type": "CollectionPage",
+  "name": {{ collection.title | json }},
+  "description": {{ collection.description | strip_html | json }},
+  "url": {{ collection.url | json }},
+  {%- if collection.image -%}
+    "image": {{ collection.image | img_url: '1024x1024' | json }},
+  {%- endif -%}
+  "numberOfItems": {{ collection.products_count }}
+}
+</script>

@@ -1,0 +1,711 @@
+{% comment %}
+  Collection Grid Snippet
+
+  Product collection grid with filters, sorting, pagination, and multiple view modes.
+
+  Parameters:
+  - collection (required): Collection object
+  - products (required): Array of products to display
+  - show_filters (optional): boolean (default: true)
+  - show_sorting (optional): boolean (default: true)
+  - products_per_page (optional): number (default: 16)
+  - columns (optional): number of grid columns (default: 4)
+  - view_mode (optional): "grid" | "list" (default: "grid")
+  - enable_quick_view (optional): boolean (default: true)
+  - pagination_type (optional): "pagination" | "load_more" | "infinite" (default: "pagination")
+
+  Usage:
+  {% render 'collection-grid', collection: collection, products: products, columns: 4 %}
+{% endcomment %}
+
+{% assign show_filters = show_filters | default: true %}
+{% assign show_sorting = show_sorting | default: true %}
+{% assign products_per_page = products_per_page | default: 16 %}
+{% assign columns = columns | default: 4 %}
+{% assign view_mode = view_mode | default: 'grid' %}
+{% assign enable_quick_view = enable_quick_view | default: true %}
+{% assign pagination_type = pagination_type | default: 'pagination' %}
+
+<div class="collection-grid" data-collection-grid>
+  {% comment %} Collection Header {% endcomment %}
+  <div class="collection-grid__header">
+    <div class="collection-grid__header-content">
+      <div class="collection-grid__title-wrapper">
+        <h1 class="collection-grid__title">{{ collection.title }}</h1>
+        {% if collection.description %}
+          <p class="collection-grid__description">{{ collection.description }}</p>
+        {% endif %}
+      </div>
+
+      <div class="collection-grid__toolbar">
+        <div class="collection-grid__count">
+          <span data-product-count>{{ products.size }}</span>
+          {% if products.size == 1 %}
+            {{ 'collections.product' | t }}
+          {% else %}
+            {{ 'collections.products' | t }}
+          {% endif %}
+        </div>
+
+        <div class="collection-grid__view-switcher">
+          <button
+            type="button"
+            class="view-switcher__button {% if view_mode == 'grid' %}view-switcher__button--active{% endif %}"
+            data-view-mode="grid"
+            aria-label="{{ 'collections.grid_view' | t }}"
+          >
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <rect x="3" y="3" width="7" height="7"/>
+              <rect x="14" y="3" width="7" height="7"/>
+              <rect x="14" y="14" width="7" height="7"/>
+              <rect x="3" y="14" width="7" height="7"/>
+            </svg>
+          </button>
+          <button
+            type="button"
+            class="view-switcher__button {% if view_mode == 'list' %}view-switcher__button--active{% endif %}"
+            data-view-mode="list"
+            aria-label="{{ 'collections.list_view' | t }}"
+          >
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <line x1="8" y1="6" x2="21" y2="6"/>
+              <line x1="8" y1="12" x2="21" y2="12"/>
+              <line x1="8" y1="18" x2="21" y2="18"/>
+              <line x1="3" y1="6" x2="3.01" y2="6"/>
+              <line x1="3" y1="12" x2="3.01" y2="12"/>
+              <line x1="3" y1="18" x2="3.01" y2="18"/>
+            </svg>
+          </button>
+        </div>
+
+        {% if show_sorting %}
+          <div class="collection-grid__sorting">
+            <label for="sort-by" class="collection-grid__sort-label">
+              {{ 'collections.sort_by' | t }}:
+            </label>
+            <select id="sort-by" class="collection-grid__sort-select" data-sort-select>
+              <option value="default">{{ 'collections.featured' | t }}</option>
+              <option value="best-selling">{{ 'collections.best_selling' | t }}</option>
+              <option value="title-asc">{{ 'collections.alphabetically_a_z' | t }}</option>
+              <option value="title-desc">{{ 'collections.alphabetically_z_a' | t }}</option>
+              <option value="price-asc">{{ 'collections.price_low_to_high' | t }}</option>
+              <option value="price-desc">{{ 'collections.price_high_to_low' | t }}</option>
+              <option value="created-desc">{{ 'collections.date_new_to_old' | t }}</option>
+              <option value="created-asc">{{ 'collections.date_old_to_new' | t }}</option>
+            </select>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="collection-grid__body">
+    {% if show_filters %}
+      <aside class="collection-grid__sidebar">
+        <div class="collection-grid__filters" data-collection-filters>
+          <div class="filters__header">
+            <h3 class="filters__title">{{ 'collections.filters' | t }}</h3>
+            <button type="button" class="filters__clear" data-clear-filters>
+              {{ 'collections.clear_all' | t }}
+            </button>
+          </div>
+
+          {% comment %} Price Range Filter {% endcomment %}
+          <div class="filter-group">
+            <h4 class="filter-group__title">{{ 'collections.price' | t }}</h4>
+            <div class="filter-group__content">
+              <div class="price-range">
+                <input
+                  type="number"
+                  class="price-range__input"
+                  placeholder="{{ 'collections.min_price' | t }}"
+                  data-price-min
+                  min="0"
+                />
+                <span class="price-range__separator">—</span>
+                <input
+                  type="number"
+                  class="price-range__input"
+                  placeholder="{{ 'collections.max_price' | t }}"
+                  data-price-max
+                  min="0"
+                />
+              </div>
+            </div>
+          </div>
+
+          {% comment %} Availability Filter {% endcomment %}
+          <div class="filter-group">
+            <h4 class="filter-group__title">{{ 'collections.availability' | t }}</h4>
+            <div class="filter-group__content">
+              <label class="filter-option">
+                <input type="checkbox" name="availability" value="in-stock" data-filter-checkbox />
+                <span>{{ 'collections.in_stock' | t }}</span>
+                <span class="filter-option__count">({{ products | where: 'available', true | size }})</span>
+              </label>
+              <label class="filter-option">
+                <input type="checkbox" name="availability" value="out-of-stock" data-filter-checkbox />
+                <span>{{ 'collections.out_of_stock' | t }}</span>
+                <span class="filter-option__count">({{ products | where: 'available', false | size }})</span>
+              </label>
+            </div>
+          </div>
+
+          {% comment %} Vendor Filter {% endcomment %}
+          {% assign vendors = products | map: 'vendor' | uniq | sort %}
+          {% if vendors.size > 0 %}
+            <div class="filter-group">
+              <h4 class="filter-group__title">{{ 'collections.vendor' | t }}</h4>
+              <div class="filter-group__content">
+                {% for vendor in vendors %}
+                  {% if vendor != blank %}
+                    <label class="filter-option">
+                      <input type="checkbox" name="vendor" value="{{ vendor }}" data-filter-checkbox />
+                      <span>{{ vendor }}</span>
+                      <span class="filter-option__count">({{ products | where: 'vendor', vendor | size }})</span>
+                    </label>
+                  {% endif %}
+                {% endfor %}
+              </div>
+            </div>
+          {% endif %}
+
+          {% comment %} Tags Filter {% endcomment %}
+          {% assign all_tags = products | map: 'tags' | join: ',' | split: ',' | uniq | sort %}
+          {% if all_tags.size > 0 %}
+            <div class="filter-group">
+              <h4 class="filter-group__title">{{ 'collections.tags' | t }}</h4>
+              <div class="filter-group__content">
+                {% for tag in all_tags limit: 10 %}
+                  {% if tag != blank %}
+                    <label class="filter-option">
+                      <input type="checkbox" name="tag" value="{{ tag }}" data-filter-checkbox />
+                      <span>{{ tag }}</span>
+                    </label>
+                  {% endif %}
+                {% endfor %}
+              </div>
+            </div>
+          {% endif %}
+        </div>
+
+        <button type="button" class="collection-grid__apply-filters button button--primary" data-apply-filters>
+          {{ 'collections.apply_filters' | t }}
+        </button>
+      </aside>
+    {% endif %}
+
+    <main class="collection-grid__main">
+      {% comment %} Active Filters {% endcomment %}
+      <div class="collection-grid__active-filters" data-active-filters style="display: none;">
+        <div class="active-filters__list" data-active-filters-list></div>
+      </div>
+
+      {% comment %} Products Grid {% endcomment %}
+      <div
+        class="collection-grid__products"
+        data-products-container
+        data-view-mode="{{ view_mode }}"
+        data-columns="{{ columns }}"
+      >
+        {% if products.size > 0 %}
+          {% for product in products %}
+            {% render 'product-card',
+              product: product,
+              layout: view_mode,
+              show_quick_view: enable_quick_view
+            %}
+          {% endfor %}
+        {% else %}
+          <div class="collection-grid__empty">
+            <svg class="collection-grid__empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <circle cx="11" cy="11" r="8"/>
+              <path d="m21 21-4.35-4.35"/>
+            </svg>
+            <h3 class="collection-grid__empty-title">{{ 'collections.no_products' | t }}</h3>
+            <p class="collection-grid__empty-description">{{ 'collections.no_products_description' | t }}</p>
+            <button type="button" class="button button--secondary" data-clear-filters>
+              {{ 'collections.clear_filters' | t }}
+            </button>
+          </div>
+        {% endif %}
+      </div>
+
+      {% comment %} Pagination {% endcomment %}
+      {% if products.size > products_per_page %}
+        <div class="collection-grid__pagination" data-pagination>
+          {% if pagination_type == 'pagination' %}
+            <nav class="pagination" aria-label="{{ 'collections.pagination' | t }}">
+              <button
+                type="button"
+                class="pagination__button pagination__button--prev"
+                data-pagination-prev
+                disabled
+              >
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <polyline points="15 18 9 12 15 6"/>
+                </svg>
+                {{ 'collections.previous' | t }}
+              </button>
+
+              <div class="pagination__pages" data-pagination-pages>
+                <button type="button" class="pagination__page pagination__page--active" data-page="1">1</button>
+              </div>
+
+              <button
+                type="button"
+                class="pagination__button pagination__button--next"
+                data-pagination-next
+              >
+                {{ 'collections.next' | t }}
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <polyline points="9 18 15 12 9 6"/>
+                </svg>
+              </button>
+            </nav>
+          {% elsif pagination_type == 'load_more' %}
+            <button
+              type="button"
+              class="collection-grid__load-more button button--secondary"
+              data-load-more
+            >
+              {{ 'collections.load_more' | t }}
+            </button>
+          {% elsif pagination_type == 'infinite' %}
+            <div class="collection-grid__infinite-trigger" data-infinite-trigger>
+              <div class="loading-spinner"></div>
+            </div>
+          {% endif %}
+        </div>
+      {% endif %}
+    </main>
+  </div>
+</div>
+
+<style>
+.collection-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  padding: 24px 0;
+}
+
+.collection-grid__header {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.collection-grid__header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.collection-grid__title-wrapper {
+  flex: 1;
+  min-width: 300px;
+}
+
+.collection-grid__title {
+  margin: 0 0 8px;
+  font-size: 32px;
+  font-weight: 700;
+}
+
+.collection-grid__description {
+  margin: 0;
+  font-size: 16px;
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+}
+
+.collection-grid__toolbar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.collection-grid__count {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+}
+
+.collection-grid__view-switcher {
+  display: flex;
+  gap: 4px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius-md);
+  padding: 4px;
+}
+
+.view-switcher__button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: transparent;
+  border: none;
+  border-radius: var(--border-radius-sm);
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.view-switcher__button:hover {
+  background: var(--color-background);
+}
+
+.view-switcher__button--active {
+  background: var(--color-primary);
+  color: white;
+}
+
+.view-switcher__button .icon {
+  width: 18px;
+  height: 18px;
+}
+
+.collection-grid__sorting {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.collection-grid__sort-label {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+}
+
+.collection-grid__sort-select {
+  padding: 8px 32px 8px 12px;
+  font-size: 14px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius-md);
+  cursor: pointer;
+}
+
+.collection-grid__body {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 32px;
+  align-items: start;
+}
+
+.collection-grid__sidebar {
+  position: sticky;
+  top: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.collection-grid__filters {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 20px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius-lg);
+}
+
+.filters__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.filters__title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.filters__clear {
+  padding: 0;
+  background: none;
+  border: none;
+  font-size: 13px;
+  color: var(--color-primary);
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.filters__clear:hover {
+  opacity: 0.8;
+  text-decoration: underline;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.filter-group__title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.filter-group__content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.filter-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.filter-option input[type="checkbox"] {
+  cursor: pointer;
+}
+
+.filter-option__count {
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+.price-range {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.price-range__input {
+  flex: 1;
+  padding: 8px 12px;
+  font-size: 14px;
+  background: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius-md);
+}
+
+.price-range__separator {
+  color: var(--color-text-muted);
+}
+
+.collection-grid__apply-filters {
+  width: 100%;
+  padding: 12px;
+}
+
+.collection-grid__main {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  min-width: 0;
+}
+
+.collection-grid__active-filters {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.active-filters__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.active-filter {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  font-size: 13px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius-full);
+}
+
+.active-filter__remove {
+  padding: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  line-height: 1;
+  color: var(--color-text-muted);
+}
+
+.collection-grid__products {
+  display: grid;
+  gap: 24px;
+}
+
+.collection-grid__products[data-view-mode="grid"] {
+  grid-template-columns: repeat(var(--columns, 4), 1fr);
+}
+
+.collection-grid__products[data-view-mode="list"] {
+  grid-template-columns: 1fr;
+}
+
+.collection-grid__empty {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 64px 24px;
+  text-align: center;
+}
+
+.collection-grid__empty-icon {
+  width: 64px;
+  height: 64px;
+  color: var(--color-text-muted);
+}
+
+.collection-grid__empty-title {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.collection-grid__empty-description {
+  margin: 0;
+  font-size: 16px;
+  color: var(--color-text-secondary);
+}
+
+.collection-grid__pagination {
+  display: flex;
+  justify-content: center;
+  padding: 24px 0;
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pagination__button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius-md);
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.pagination__button:hover:not(:disabled) {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: white;
+}
+
+.pagination__button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pagination__button .icon {
+  width: 16px;
+  height: 16px;
+}
+
+.pagination__pages {
+  display: flex;
+  gap: 4px;
+}
+
+.pagination__page {
+  min-width: 40px;
+  height: 40px;
+  padding: 0 12px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius-md);
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.pagination__page:hover {
+  border-color: var(--color-primary);
+}
+
+.pagination__page--active {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: white;
+}
+
+.collection-grid__load-more {
+  width: 100%;
+  max-width: 300px;
+  margin: 0 auto;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  margin: 0 auto;
+  border: 4px solid var(--color-border);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Mobile responsiveness */
+@media (max-width: 1024px) {
+  .collection-grid__products[data-view-mode="grid"] {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .collection-grid__body {
+    grid-template-columns: 1fr;
+  }
+
+  .collection-grid__sidebar {
+    position: static;
+  }
+
+  .collection-grid__products[data-view-mode="grid"] {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .collection-grid__products[data-view-mode="grid"] {
+    grid-template-columns: 1fr;
+  }
+}
+</style>
+
+<script>
+// Collection grid JavaScript will be added in the full implementation
+// This includes: filtering, sorting, pagination, view switching, etc.
+</script>

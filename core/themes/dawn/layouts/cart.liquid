@@ -1,0 +1,90 @@
+{%- comment -%}
+  Cart Page Layout
+  Used for full-page cart view
+{%- endcomment -%}
+
+<div class="cart-template">
+  {%- if settings.enable_breadcrumbs -%}
+    <div class="container">
+      {% render 'breadcrumbs' %}
+    </div>
+  {%- endif -%}
+
+  <div class="cart-page">
+    <div class="container">
+      <h1 class="cart-page__title">{{ 'cart.general.title' | t }}</h1>
+
+      {%- if cart.item_count > 0 -%}
+        <div class="cart-grid">
+          <!-- Cart Items -->
+          <div class="cart-items">
+            <div class="cart-items__header">
+              <span class="cart-items__header-product">{{ 'cart.label.product' | t }}</span>
+              <span class="cart-items__header-price">{{ 'cart.label.price' | t }}</span>
+              <span class="cart-items__header-quantity">{{ 'cart.label.quantity' | t }}</span>
+              <span class="cart-items__header-total">{{ 'cart.label.total' | t }}</span>
+            </div>
+
+            <div class="cart-items__list">
+              {%- for item in cart.items -%}
+                {% render 'cart-item', item: item, editable: true, show_remove: true %}
+              {%- endfor -%}
+            </div>
+
+            <!-- Continue Shopping -->
+            <div class="cart-items__footer">
+              <a href="/collections/all" class="button button--secondary">
+                {{ 'cart.general.continue_shopping' | t }}
+              </a>
+
+              {%- if settings.enable_cart_updates -%}
+                <button type="button" class="button button--secondary" data-cart-update-all>
+                  {{ 'cart.general.update' | t }}
+                </button>
+              {%- endif -%}
+            </div>
+          </div>
+
+          <!-- Cart Summary -->
+          <div class="cart-summary-wrapper">
+            {% render 'cart-summary',
+              cart: cart,
+              show_shipping: true,
+              show_note: settings.enable_cart_notes,
+              show_terms: settings.show_terms_on_cart
+            %}
+          </div>
+        </div>
+
+        <!-- Promo/Trust Badges -->
+        {%- if settings.show_cart_trust_badges -%}
+          <div class="cart-trust-badges">
+            {% section 'cart-trust-badges' %}
+          </div>
+        {%- endif -%}
+
+        <!-- You May Also Like -->
+        <div class="cart-recommendations">
+          {% section 'cart-recommendations' %}
+        </div>
+
+      {%- else -%}
+        <!-- Empty Cart -->
+        <div class="cart-empty">
+          <div class="cart-empty__icon">
+            <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <circle cx="9" cy="21" r="1"></circle>
+              <circle cx="20" cy="21" r="1"></circle>
+              <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+            </svg>
+          </div>
+          <h2 class="cart-empty__title">{{ 'cart.general.empty' | t }}</h2>
+          <p class="cart-empty__text">{{ 'cart.general.empty_description' | t }}</p>
+          <a href="/collections/all" class="button button--primary">
+            {{ 'cart.general.continue_shopping' | t }}
+          </a>
+        </div>
+      {%- endif -%}
+    </div>
+  </div>
+</div>

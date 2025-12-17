@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="{{ shop.locale }}" dir="{{ shop.language_direction | default: 'ltr' }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+  {%- if page_description -%}
+    <meta name="description" content="{{ page_description | escape }}">
+  {%- endif -%}
+
+  <title>
+    {{ page_title }}
+    {%- if current_tags %} &ndash; {{ 'general.meta.tags' | t: tags: current_tags | escape }}{%- endif -%}
+    {%- if current_page != 1 %} &ndash; {{ 'general.meta.page' | t: page: current_page }}{%- endif -%}
+    {%- unless page_title contains shop.name %} &ndash; {{ shop.name }}{%- endunless -%}
+  </title>
+
+  {%- if canonical_url -%}
+    <link rel="canonical" href="{{ canonical_url }}">
+  {%- endif -%}
+
+  <!-- Preconnect to CDN and third-party domains -->
+  <link rel="preconnect" href="{{ settings.cdn_url }}" crossorigin>
+  <link rel="dns-prefetch" href="{{ settings.cdn_url }}">
+
+  <!-- Theme CSS -->
+  <link rel="stylesheet" href="{{ 'theme.css' | asset_url }}" media="all">
+
+  <!-- Custom CSS from theme settings -->
+  {%- if settings.custom_css -%}
+    <style>{{ settings.custom_css }}</style>
+  {%- endif -%}
+
+  <!-- CSS Variables for theme customization -->
+  <style>
+    :root {
+      /* Colors */
+      --color-primary: {{ settings.color_primary | default: '#121212' }};
+      --color-secondary: {{ settings.color_secondary | default: '#6B7280' }};
+      --color-accent: {{ settings.color_accent | default: '#3B82F6' }};
+      --color-success: {{ settings.color_success | default: '#10B981' }};
+      --color-error: {{ settings.color_error | default: '#EF4444' }};
+      --color-background: {{ settings.color_background | default: '#FFFFFF' }};
+      --color-text: {{ settings.color_text | default: '#121212' }};
+
+      /* Typography */
+      --font-heading: {{ settings.font_heading | default: 'Inter, sans-serif' }};
+      --font-body: {{ settings.font_body | default: 'Inter, sans-serif' }};
+      --font-size-base: {{ settings.font_size_base | default: 16 }}px;
+      --font-heading-scale: {{ settings.font_heading_scale | default: 1.25 }};
+
+      /* Layout */
+      --page-width: {{ settings.page_width | default: 1280 }}px;
+      --spacing-sections: {{ settings.spacing_sections | default: 80 }}px;
+
+      /* Derived values */
+      --font-size-h1: calc(var(--font-size-base) * var(--font-heading-scale) * var(--font-heading-scale) * var(--font-heading-scale));
+      --font-size-h2: calc(var(--font-size-base) * var(--font-heading-scale) * var(--font-heading-scale));
+      --font-size-h3: calc(var(--font-size-base) * var(--font-heading-scale));
+      --font-size-h4: var(--font-size-base);
+    }
+  </style>
+
+  <!-- Favicon -->
+  {%- if shop.favicon -%}
+    <link rel="icon" type="image/png" href="{{ shop.favicon | img_url: '32x32' }}">
+    <link rel="apple-touch-icon" href="{{ shop.favicon | img_url: '180x180' }}">
+  {%- endif -%}
+
+  <!-- Open Graph / Social Media Meta Tags -->
+  <meta property="og:site_name" content="{{ shop.name }}">
+  <meta property="og:url" content="{{ canonical_url }}">
+  <meta property="og:title" content="{{ page_title }}">
+  <meta property="og:type" content="website">
+  {%- if page_description -%}
+    <meta property="og:description" content="{{ page_description | escape }}">
+  {%- endif -%}
+  {%- if page_image -%}
+    <meta property="og:image" content="{{ page_image | img_url: '1200x630' }}">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+  {%- endif -%}
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="{{ page_title }}">
+  {%- if page_description -%}
+    <meta name="twitter:description" content="{{ page_description | escape }}">
+  {%- endif -%}
+  {%- if page_image -%}
+    <meta name="twitter:image" content="{{ page_image | img_url: '1200x630' }}">
+  {%- endif -%}
+
+  <!-- Structured Data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": {{ shop.name | json }},
+    "url": {{ shop.url | json }},
+    {%- if shop.logo -%}
+      "logo": {{ shop.logo | img_url: '400x400' | json }},
+    {%- endif -%}
+    "sameAs": [
+      {%- if settings.social_facebook -%}{{ settings.social_facebook | json }}{%- endif -%}
+      {%- if settings.social_instagram -%},{{ settings.social_instagram | json }}{%- endif -%}
+      {%- if settings.social_twitter -%},{{ settings.social_twitter | json }}{%- endif -%}
+      {%- if settings.social_youtube -%},{{ settings.social_youtube | json }}{%- endif -%}
+    ]
+  }
+  </script>
+
+  {% content_for_header %}
+</head>
+
+<body class="template-{{ template | handleize }}" data-theme="dawn">
+  <!-- Skip to content for accessibility -->
+  <a href="#main-content" class="skip-to-content">
+    {{ 'accessibility.skip_to_content' | t }}
+  </a>
+
+  <!-- Header Section -->
+  {% section 'header' %}
+
+  <!-- Main Content -->
+  <main id="main-content" class="main-content" role="main" tabindex="-1">
+    {% content_for_layout %}
+  </main>
+
+  <!-- Footer Section -->
+  {% section 'footer' %}
+
+  <!-- Cart Drawer (if enabled) -->
+  {%- if settings.cart_type == 'drawer' -%}
+    <div id="cart-drawer" class="cart-drawer" aria-hidden="true">
+      <div class="cart-drawer__overlay" data-cart-drawer-close></div>
+      <div class="cart-drawer__content">
+        <div class="cart-drawer__header">
+          <h2 class="cart-drawer__title">{{ 'cart.general.title' | t }}</h2>
+          <button type="button" class="cart-drawer__close" aria-label="{{ 'cart.general.close' | t }}" data-cart-drawer-close>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+        <div class="cart-drawer__items" data-cart-items>
+          {%- if cart.item_count > 0 -%}
+            {%- for item in cart.items -%}
+              {% render 'cart-item', item: item, layout: 'compact' %}
+            {%- endfor -%}
+          {%- else -%}
+            <div class="cart-drawer__empty">
+              <p>{{ 'cart.general.empty' | t }}</p>
+              <a href="/collections/all" class="button">{{ 'cart.general.continue_shopping' | t }}</a>
+            </div>
+          {%- endif -%}
+        </div>
+        {%- if cart.item_count > 0 -%}
+          <div class="cart-drawer__footer">
+            {% render 'cart-summary', cart: cart, show_note: false, show_shipping: false %}
+          </div>
+        {%- endif -%}
+      </div>
+    </div>
+  {%- endif -%}
+
+  <!-- Theme JavaScript -->
+  <script src="{{ 'theme.js' | asset_url }}" defer></script>
+
+  <!-- Custom JavaScript from theme settings -->
+  {%- if settings.custom_js -%}
+    <script>{{ settings.custom_js }}</script>
+  {%- endif -%}
+
+  <!-- Predictive Search (if enabled) -->
+  {%- if settings.enable_predictive_search -%}
+    <script src="{{ 'predictive-search.js' | asset_url }}" defer></script>
+  {%- endif -%}
+</body>
+</html>

@@ -110,6 +110,7 @@ const plugins = defineNuxtConfig({
     resolve("./plugins/prismic.js"),
     resolve("./plugins/directus.js"),
     resolve("./plugins/storefront.js"),
+    resolve("./plugins/liquid.js"),
     resolve("./plugins/meilisearch.js"),
     resolve("./plugins/shopify.js"),
     resolve("./plugins/firebase.client.js"),

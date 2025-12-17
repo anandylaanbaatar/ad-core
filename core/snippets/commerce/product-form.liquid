@@ -1,0 +1,619 @@
+{% comment %}
+  Product Form Snippet
+
+  Product add-to-cart form with variant selector, quantity input, and inventory display.
+
+  Parameters:
+  - product (required): Product object
+  - current_variant (optional): Selected variant (defaults to first available)
+  - show_quantity (optional): boolean (default: true)
+  - show_inventory (optional): boolean (default: true)
+  - show_variant_images (optional): boolean (default: true)
+  - enable_dynamic_checkout (optional): boolean (default: false)
+
+  Usage:
+  {% render 'product-form', product: product, show_quantity: true %}
+{% endcomment %}
+
+{% assign show_quantity = show_quantity | default: true %}
+{% assign show_inventory = show_inventory | default: true %}
+{% assign show_variant_images = show_variant_images | default: true %}
+{% assign enable_dynamic_checkout = enable_dynamic_checkout | default: false %}
+
+{% if current_variant %}
+  {% assign selected_variant = current_variant %}
+{% else %}
+  {% assign selected_variant = product.variants | first %}
+{% endif %}
+
+<form
+  class="product-form"
+  data-product-form
+  data-product-id="{{ product.id }}"
+>
+  <input
+    type="hidden"
+    name="id"
+    value="{{ selected_variant.id }}"
+    data-variant-id
+  />
+
+  {% if product.variants.size > 1 %}
+    <div class="product-form__options">
+      {% comment %} Variant Selector {% endcomment %}
+      <div class="product-form__option">
+        <label class="product-form__label" for="variant-selector-{{ product.id }}">
+          {{ 'products.variant' | t }}
+        </label>
+
+        {% if product.variants.size <= 4 %}
+          {% comment %} Button-style selector for few variants {% endcomment %}
+          <div class="variant-selector variant-selector--buttons" role="radiogroup">
+            {% for variant in product.variants %}
+              <button
+                type="button"
+                class="variant-selector__option {% if variant.id == selected_variant.id %}variant-selector__option--active{% endif %}"
+                data-variant-id="{{ variant.id }}"
+                data-variant-sku="{{ variant.sku }}"
+                data-variant-price="{{ variant.price }}"
+                data-variant-available="{{ variant.available }}"
+                data-variant-image="{{ variant.image }}"
+                {% unless variant.available %}disabled{% endunless %}
+                aria-label="{{ variant.title }}"
+                role="radio"
+                aria-checked="{% if variant.id == selected_variant.id %}true{% else %}false{% endif %}"
+              >
+                {% if show_variant_images and variant.image %}
+                  <img
+                    src="{{ variant.image | img_url: 'small' }}"
+                    alt="{{ variant.title }}"
+                    class="variant-selector__image"
+                    width="48"
+                    height="48"
+                  />
+                {% endif %}
+                <span class="variant-selector__text">
+                  {{ variant.title }}
+                </span>
+                {% unless variant.available %}
+                  <span class="variant-selector__sold-out">
+                    {{ 'products.sold_out' | t }}
+                  </span>
+                {% endunless %}
+              </button>
+            {% endfor %}
+          </div>
+        {% else %}
+          {% comment %} Dropdown selector for many variants {% endcomment %}
+          <select
+            id="variant-selector-{{ product.id }}"
+            class="variant-selector variant-selector--dropdown"
+            name="variant"
+            data-variant-selector
+          >
+            {% for variant in product.variants %}
+              <option
+                value="{{ variant.id }}"
+                data-variant-sku="{{ variant.sku }}"
+                data-variant-price="{{ variant.price }}"
+                data-variant-available="{{ variant.available }}"
+                data-variant-image="{{ variant.image }}"
+                {% if variant.id == selected_variant.id %}selected{% endif %}
+                {% unless variant.available %}disabled{% endunless %}
+              >
+                {{ variant.title }}
+                {% if variant.available %}
+                  - {{ variant.price | money }}
+                {% else %}
+                  - {{ 'products.sold_out' | t }}
+                {% endif %}
+              </option>
+            {% endfor %}
+          </select>
+        {% endif %}
+      </div>
+    </div>
+  {% endif %}
+
+  {% if show_quantity %}
+    <div class="product-form__quantity">
+      <label class="product-form__label" for="quantity-{{ product.id }}">
+        {{ 'products.quantity' | t }}
+      </label>
+      <div class="quantity-selector">
+        <button
+          type="button"
+          class="quantity-selector__button quantity-selector__button--minus"
+          aria-label="{{ 'products.decrease_quantity' | t }}"
+          data-quantity-decrease
+        >
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+        </button>
+        <input
+          type="number"
+          id="quantity-{{ product.id }}"
+          name="quantity"
+          value="1"
+          min="1"
+          max="{{ selected_variant.inventory_quantity }}"
+          class="quantity-selector__input"
+          data-quantity-input
+          aria-label="{{ 'products.quantity' | t }}"
+        />
+        <button
+          type="button"
+          class="quantity-selector__button quantity-selector__button--plus"
+          aria-label="{{ 'products.increase_quantity' | t }}"
+          data-quantity-increase
+        >
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <line x1="12" y1="5" x2="12" y2="19"/>
+            <line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  {% endif %}
+
+  {% if show_inventory %}
+    <div class="product-form__inventory" data-inventory-display>
+      {% if selected_variant.available %}
+        {% if selected_variant.inventory_quantity <= 10 %}
+          <p class="product-form__availability product-form__availability--low">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+              <line x1="12" y1="9" x2="12" y2="13"/>
+              <line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+            {{ 'products.low_stock' | t }}: {{ selected_variant.inventory_quantity }} {{ 'products.left' | t }}
+          </p>
+        {% else %}
+          <p class="product-form__availability product-form__availability--in-stock">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+            {{ 'products.in_stock' | t }}
+          </p>
+        {% endif %}
+      {% else %}
+        <p class="product-form__availability product-form__availability--out-of-stock">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="15" y1="9" x2="9" y2="15"/>
+            <line x1="9" y1="9" x2="15" y2="15"/>
+          </svg>
+          {{ 'products.out_of_stock' | t }}
+        </p>
+      {% endif %}
+    </div>
+  {% endif %}
+
+  <div class="product-form__actions">
+    <button
+      type="submit"
+      class="product-form__submit button button--primary button--large"
+      {% unless selected_variant.available %}disabled{% endunless %}
+      data-add-to-cart
+    >
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+        <circle cx="9" cy="21" r="1"/>
+        <circle cx="20" cy="21" r="1"/>
+        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+      </svg>
+      <span data-add-to-cart-text>
+        {% if selected_variant.available %}
+          {{ 'products.add_to_cart' | t }}
+        {% else %}
+          {{ 'products.sold_out' | t }}
+        {% endif %}
+      </span>
+    </button>
+
+    {% if enable_dynamic_checkout %}
+      <button
+        type="button"
+        class="product-form__buy-now button button--secondary button--large"
+        {% unless selected_variant.available %}disabled{% endunless %}
+        data-buy-now
+      >
+        {{ 'products.buy_now' | t }}
+      </button>
+    {% endif %}
+  </div>
+
+  <div class="product-form__price" data-price-display>
+    <span class="product-form__price-label">{{ 'products.price' | t }}:</span>
+    <span class="product-form__price-value" data-price>{{ selected_variant.price | money }}</span>
+    {% if selected_variant.compare_at_price > selected_variant.price %}
+      <span class="product-form__price-compare" data-compare-price>
+        {{ selected_variant.compare_at_price | money }}
+      </span>
+    {% endif %}
+  </div>
+</form>
+
+<style>
+.product-form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.product-form__label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text);
+}
+
+.product-form__options {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.product-form__option {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Variant Selectors */
+.variant-selector--buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.variant-selector__option {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: var(--color-surface);
+  border: 2px solid var(--color-border);
+  border-radius: var(--border-radius-md);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.variant-selector__option:hover:not(:disabled) {
+  border-color: var(--color-primary);
+}
+
+.variant-selector__option--active {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: white;
+}
+
+.variant-selector__option:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.variant-selector__image {
+  width: 48px;
+  height: 48px;
+  object-fit: cover;
+  border-radius: var(--border-radius-sm);
+}
+
+.variant-selector__text {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.variant-selector__sold-out {
+  font-size: 12px;
+  color: var(--color-error);
+  margin-left: 4px;
+}
+
+.variant-selector--dropdown {
+  width: 100%;
+  padding: 12px 16px;
+  font-size: 14px;
+  background: var(--color-surface);
+  border: 2px solid var(--color-border);
+  border-radius: var(--border-radius-md);
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+}
+
+.variant-selector--dropdown:hover {
+  border-color: var(--color-primary);
+}
+
+.variant-selector--dropdown:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.1);
+}
+
+/* Quantity Selector */
+.product-form__quantity {
+  display: flex;
+  flex-direction: column;
+}
+
+.quantity-selector {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  width: fit-content;
+  border: 2px solid var(--color-border);
+  border-radius: var(--border-radius-md);
+  overflow: hidden;
+}
+
+.quantity-selector__button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  background: var(--color-surface);
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.quantity-selector__button:hover {
+  background: var(--color-primary);
+  color: white;
+}
+
+.quantity-selector__button .icon {
+  width: 18px;
+  height: 18px;
+  stroke-width: 2;
+}
+
+.quantity-selector__input {
+  width: 60px;
+  height: 44px;
+  text-align: center;
+  font-size: 16px;
+  font-weight: 500;
+  border: none;
+  border-left: 2px solid var(--color-border);
+  border-right: 2px solid var(--color-border);
+  background: var(--color-background);
+}
+
+.quantity-selector__input:focus {
+  outline: none;
+  background: var(--color-surface);
+}
+
+/* Remove arrows from number input */
+.quantity-selector__input::-webkit-inner-spin-button,
+.quantity-selector__input::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.quantity-selector__input[type=number] {
+  -moz-appearance: textfield;
+}
+
+/* Inventory Display */
+.product-form__inventory {
+  margin: -8px 0;
+}
+
+.product-form__availability {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 12px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: var(--border-radius-md);
+}
+
+.product-form__availability .icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.product-form__availability--in-stock {
+  background: rgba(34, 197, 94, 0.1);
+  color: var(--color-success);
+}
+
+.product-form__availability--low {
+  background: rgba(251, 146, 60, 0.1);
+  color: var(--color-warning);
+}
+
+.product-form__availability--out-of-stock {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--color-error);
+}
+
+/* Actions */
+.product-form__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.product-form__submit,
+.product-form__buy-now {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 24px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.product-form__submit .icon,
+.product-form__buy-now .icon {
+  width: 20px;
+  height: 20px;
+}
+
+.product-form__submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Price Display */
+.product-form__price {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: var(--color-surface);
+  border-radius: var(--border-radius-md);
+}
+
+.product-form__price-label {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+}
+
+.product-form__price-value {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.product-form__price-compare {
+  font-size: 18px;
+  color: var(--color-text-muted);
+  text-decoration: line-through;
+}
+</style>
+
+<script>
+// Product form JavaScript (attached to window for global access)
+if (typeof window !== 'undefined') {
+  window.initProductForm = function(formElement) {
+    const variantButtons = formElement.querySelectorAll('[data-variant-id]')
+    const variantSelect = formElement.querySelector('[data-variant-selector]')
+    const quantityInput = formElement.querySelector('[data-quantity-input]')
+    const decreaseBtn = formElement.querySelector('[data-quantity-decrease]')
+    const increaseBtn = formElement.querySelector('[data-quantity-increase]')
+    const addToCartBtn = formElement.querySelector('[data-add-to-cart]')
+    const priceDisplay = formElement.querySelector('[data-price]')
+    const comparePriceDisplay = formElement.querySelector('[data-compare-price]')
+    const inventoryDisplay = formElement.querySelector('[data-inventory-display]')
+    const addToCartText = formElement.querySelector('[data-add-to-cart-text]')
+    const hiddenVariantInput = formElement.querySelector('[data-variant-id]')
+
+    // Variant selection (buttons)
+    variantButtons?.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const variantId = btn.dataset.variantId
+        const price = btn.dataset.variantPrice
+        const available = btn.dataset.variantAvailable === 'true'
+
+        // Update active state
+        variantButtons.forEach(b => {
+          b.classList.remove('variant-selector__option--active')
+          b.setAttribute('aria-checked', 'false')
+        })
+        btn.classList.add('variant-selector__option--active')
+        btn.setAttribute('aria-checked', 'true')
+
+        // Update form
+        updateFormState(variantId, price, available)
+      })
+    })
+
+    // Variant selection (dropdown)
+    variantSelect?.addEventListener('change', (e) => {
+      const option = e.target.selectedOptions[0]
+      const variantId = option.value
+      const price = option.dataset.variantPrice
+      const available = option.dataset.variantAvailable === 'true'
+
+      updateFormState(variantId, price, available)
+    })
+
+    // Quantity controls
+    decreaseBtn?.addEventListener('click', () => {
+      const currentValue = parseInt(quantityInput.value)
+      if (currentValue > 1) {
+        quantityInput.value = currentValue - 1
+      }
+    })
+
+    increaseBtn?.addEventListener('click', () => {
+      const currentValue = parseInt(quantityInput.value)
+      const maxValue = parseInt(quantityInput.max)
+      if (currentValue < maxValue) {
+        quantityInput.value = currentValue + 1
+      }
+    })
+
+    // Add to cart
+    formElement.addEventListener('submit', async (e) => {
+      e.preventDefault()
+
+      const variantId = hiddenVariantInput.value
+      const quantity = quantityInput ? parseInt(quantityInput.value) : 1
+
+      // Emit custom event for cart integration
+      window.dispatchEvent(new CustomEvent('addToCart', {
+        detail: { variantId, quantity }
+      }))
+
+      // Show success feedback
+      const originalText = addToCartText.textContent
+      addToCartText.textContent = '✓ Added to cart'
+      addToCartBtn.classList.add('button--success')
+
+      setTimeout(() => {
+        addToCartText.textContent = originalText
+        addToCartBtn.classList.remove('button--success')
+      }, 2000)
+    })
+
+    function updateFormState(variantId, price, available) {
+      // Update hidden input
+      if (hiddenVariantInput) {
+        hiddenVariantInput.value = variantId
+      }
+
+      // Update price
+      if (priceDisplay && price) {
+        priceDisplay.textContent = formatMoney(parseInt(price))
+      }
+
+      // Update button state
+      if (addToCartBtn) {
+        addToCartBtn.disabled = !available
+        if (addToCartText) {
+          addToCartText.textContent = available ? 'Add to cart' : 'Sold out'
+        }
+      }
+    }
+
+    function formatMoney(cents) {
+      // Use window.Shopify.formatMoney if available, otherwise basic format
+      if (window.Shopify?.formatMoney) {
+        return window.Shopify.formatMoney(cents)
+      }
+      return `${(cents / 100).toFixed(2)} ₮`
+    }
+  }
+
+  // Auto-initialize all product forms
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('[data-product-form]').forEach(form => {
+      window.initProductForm(form)
+    })
+  })
+}
+</script>

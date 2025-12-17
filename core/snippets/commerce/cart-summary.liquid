@@ -1,0 +1,497 @@
+{% comment %}
+  Cart Summary Snippet
+
+  Displays cart totals, discounts, shipping estimate, and checkout button.
+
+  Parameters:
+  - cart (required): Cart object with items, totals, discounts
+  - show_shipping (optional): boolean - Show shipping calculator (default: true)
+  - show_note (optional): boolean - Show cart note field (default: true)
+  - show_terms (optional): boolean - Show terms checkbox (default: false)
+  - checkout_url (optional): string - Custom checkout URL
+
+  Usage:
+  {% render 'cart-summary', cart: cart, show_shipping: true %}
+{% endcomment %}
+
+{% assign show_shipping = show_shipping | default: true %}
+{% assign show_note = show_note | default: true %}
+{% assign show_terms = show_terms | default: false %}
+{% assign checkout_url = checkout_url | default: '/checkout' %}
+
+<div class="cart-summary" data-cart-summary>
+  {% comment %} Order Summary Header {% endcomment %}
+  <div class="cart-summary__header">
+    <h3 class="cart-summary__title">{{ 'cart.order_summary' | t }}</h3>
+    <p class="cart-summary__item-count">
+      {{ cart.item_count }}
+      {% if cart.item_count == 1 %}
+        {{ 'cart.item' | t }}
+      {% else %}
+        {{ 'cart.items' | t }}
+      {% endif %}
+    </p>
+  </div>
+
+  {% comment %} Subtotal and Discounts {% endcomment %}
+  <div class="cart-summary__totals">
+    <div class="cart-summary__line">
+      <span class="cart-summary__line-label">{{ 'cart.subtotal' | t }}</span>
+      <span class="cart-summary__line-value" data-subtotal>
+        {{ cart.subtotal_price | money }}
+      </span>
+    </div>
+
+    {% if cart.cart_level_discount_applications.size > 0 %}
+      {% for discount in cart.cart_level_discount_applications %}
+        <div class="cart-summary__line cart-summary__line--discount">
+          <span class="cart-summary__line-label">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/>
+              <line x1="7" y1="7" x2="7.01" y2="7"/>
+            </svg>
+            {{ discount.title }}
+          </span>
+          <span class="cart-summary__line-value cart-summary__line-value--success">
+            -{{ discount.total_allocated_amount | money }}
+          </span>
+        </div>
+      {% endfor %}
+    {% endif %}
+
+    {% if show_shipping %}
+      <div class="cart-summary__line cart-summary__line--estimate">
+        <span class="cart-summary__line-label">{{ 'cart.shipping' | t }}</span>
+        <span class="cart-summary__line-value" data-shipping-estimate>
+          {{ 'cart.calculated_at_checkout' | t }}
+        </span>
+      </div>
+    {% endif %}
+
+    <div class="cart-summary__line cart-summary__line--tax">
+      <span class="cart-summary__line-label">{{ 'cart.taxes' | t }}</span>
+      <span class="cart-summary__line-value" data-taxes>
+        {% if cart.taxes_included %}
+          {{ 'cart.included' | t }}
+        {% else %}
+          {{ 'cart.calculated_at_checkout' | t }}
+        {% endif %}
+      </span>
+    </div>
+  </div>
+
+  {% comment %} Total {% endcomment %}
+  <div class="cart-summary__total">
+    <span class="cart-summary__total-label">{{ 'cart.total' | t }}</span>
+    <span class="cart-summary__total-value" data-total>
+      {{ cart.total_price | money }}
+    </span>
+  </div>
+
+  {% comment %} Cart Note {% endcomment %}
+  {% if show_note %}
+    <div class="cart-summary__note">
+      <label for="cart-note" class="cart-summary__note-label">
+        {{ 'cart.add_note' | t }}
+      </label>
+      <textarea
+        id="cart-note"
+        name="note"
+        class="cart-summary__note-input"
+        placeholder="{{ 'cart.note_placeholder' | t }}"
+        rows="3"
+        data-cart-note
+      >{{ cart.note }}</textarea>
+    </div>
+  {% endif %}
+
+  {% comment %} Terms and Conditions {% endcomment %}
+  {% if show_terms %}
+    <div class="cart-summary__terms">
+      <label class="cart-summary__terms-label">
+        <input
+          type="checkbox"
+          name="terms"
+          class="cart-summary__terms-checkbox"
+          required
+          data-terms-checkbox
+        />
+        <span>
+          {{ 'cart.agree_to' | t }}
+          <a href="/pages/terms" target="_blank">{{ 'cart.terms_and_conditions' | t }}</a>
+        </span>
+      </label>
+    </div>
+  {% endif %}
+
+  {% comment %} Checkout Button {% endcomment %}
+  <div class="cart-summary__actions">
+    <button
+      type="button"
+      class="cart-summary__checkout button button--primary button--large"
+      {% if cart.item_count == 0 %}disabled{% endif %}
+      data-checkout-button
+    >
+      <span>{{ 'cart.checkout' | t }}</span>
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+        <line x1="5" y1="12" x2="19" y2="12"/>
+        <polyline points="12 5 19 12 12 19"/>
+      </svg>
+    </button>
+
+    <a href="/collections/all" class="cart-summary__continue">
+      {{ 'cart.continue_shopping' | t }}
+    </a>
+  </div>
+
+  {% comment %} Payment Icons {% endcomment %}
+  <div class="cart-summary__payment-icons">
+    <img src="/images/payment/visa.svg" alt="Visa" height="24" />
+    <img src="/images/payment/mastercard.svg" alt="Mastercard" height="24" />
+    <img src="/images/payment/qpay.svg" alt="QPay" height="24" />
+    <img src="/images/payment/storepay.svg" alt="StorePay" height="24" />
+  </div>
+
+  {% comment %} Trust Badges {% endcomment %}
+  <div class="cart-summary__trust-badges">
+    <div class="trust-badge">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+        <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+      </svg>
+      <span>{{ 'cart.secure_checkout' | t }}</span>
+    </div>
+    <div class="trust-badge">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+        <polyline points="9 10 12 13 16 9"/>
+      </svg>
+      <span>{{ 'cart.money_back_guarantee' | t }}</span>
+    </div>
+  </div>
+</div>
+
+<style>
+.cart-summary {
+  position: sticky;
+  top: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 24px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius-lg);
+}
+
+.cart-summary__header {
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.cart-summary__title {
+  margin: 0 0 4px;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.cart-summary__item-count {
+  margin: 0;
+  font-size: 14px;
+  color: var(--color-text-secondary);
+}
+
+.cart-summary__totals {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.cart-summary__line {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+}
+
+.cart-summary__line-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-text-secondary);
+}
+
+.cart-summary__line-label .icon {
+  width: 16px;
+  height: 16px;
+}
+
+.cart-summary__line-value {
+  font-weight: 500;
+  color: var(--color-text);
+}
+
+.cart-summary__line--discount {
+  color: var(--color-success);
+}
+
+.cart-summary__line--discount .cart-summary__line-label {
+  color: var(--color-success);
+}
+
+.cart-summary__line-value--success {
+  color: var(--color-success);
+}
+
+.cart-summary__line--estimate,
+.cart-summary__line--tax {
+  font-size: 13px;
+}
+
+.cart-summary__total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 0;
+  border-top: 2px solid var(--color-border);
+  border-bottom: 2px solid var(--color-border);
+}
+
+.cart-summary__total-label {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.cart-summary__total-value {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.cart-summary__note {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.cart-summary__note-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text);
+}
+
+.cart-summary__note-input {
+  width: 100%;
+  padding: 12px;
+  font-family: inherit;
+  font-size: 14px;
+  background: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius-md);
+  resize: vertical;
+  transition: border-color 0.2s ease;
+}
+
+.cart-summary__note-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.1);
+}
+
+.cart-summary__terms {
+  padding: 12px;
+  background: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius-md);
+}
+
+.cart-summary__terms-label {
+  display: flex;
+  align-items: start;
+  gap: 8px;
+  font-size: 13px;
+  line-height: 1.5;
+  cursor: pointer;
+}
+
+.cart-summary__terms-checkbox {
+  margin-top: 2px;
+  cursor: pointer;
+}
+
+.cart-summary__terms-label a {
+  color: var(--color-primary);
+  text-decoration: underline;
+}
+
+.cart-summary__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.cart-summary__checkout {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 16px 24px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.cart-summary__checkout .icon {
+  width: 18px;
+  height: 18px;
+}
+
+.cart-summary__checkout:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.cart-summary__continue {
+  display: block;
+  text-align: center;
+  font-size: 14px;
+  color: var(--color-primary);
+  text-decoration: none;
+  transition: opacity 0.2s ease;
+}
+
+.cart-summary__continue:hover {
+  opacity: 0.8;
+  text-decoration: underline;
+}
+
+.cart-summary__payment-icons {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 16px 0;
+  border-top: 1px solid var(--color-border);
+}
+
+.cart-summary__payment-icons img {
+  height: 24px;
+  width: auto;
+  opacity: 0.7;
+  transition: opacity 0.2s ease;
+}
+
+.cart-summary__payment-icons img:hover {
+  opacity: 1;
+}
+
+.cart-summary__trust-badges {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.trust-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
+.trust-badge .icon {
+  width: 16px;
+  height: 16px;
+  color: var(--color-success);
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+  .cart-summary {
+    position: static;
+    margin-top: 24px;
+  }
+}
+</style>
+
+<script>
+if (typeof window !== 'undefined') {
+  window.initCartSummary = function(summaryElement) {
+    const noteInput = summaryElement.querySelector('[data-cart-note]')
+    const termsCheckbox = summaryElement.querySelector('[data-terms-checkbox]')
+    const checkoutButton = summaryElement.querySelector('[data-checkout-button]')
+
+    let noteTimeout
+
+    // Cart note (debounced)
+    noteInput?.addEventListener('input', () => {
+      clearTimeout(noteTimeout)
+      noteTimeout = setTimeout(() => {
+        window.dispatchEvent(new CustomEvent('updateCartNote', {
+          detail: { note: noteInput.value }
+        }))
+      }, 1000)
+    })
+
+    // Terms checkbox
+    termsCheckbox?.addEventListener('change', () => {
+      checkoutButton.disabled = !termsCheckbox.checked
+    })
+
+    // Checkout button
+    checkoutButton?.addEventListener('click', () => {
+      // Check terms if required
+      if (termsCheckbox && !termsCheckbox.checked) {
+        alert('Please agree to the terms and conditions')
+        return
+      }
+
+      // Redirect to checkout
+      window.location.href = checkoutButton.dataset.checkoutUrl || '/checkout'
+    })
+
+    // Listen for cart updates
+    window.addEventListener('cart:updated', (event) => {
+      const cart = event.detail
+
+      // Update item count
+      const itemCount = summaryElement.querySelector('.cart-summary__item-count')
+      if (itemCount) {
+        const count = cart.item_count
+        const itemText = count === 1 ? 'item' : 'items'
+        itemCount.textContent = `${count} ${itemText}`
+      }
+
+      // Update subtotal
+      const subtotal = summaryElement.querySelector('[data-subtotal]')
+      if (subtotal) {
+        subtotal.textContent = formatMoney(cart.subtotal_price)
+      }
+
+      // Update total
+      const total = summaryElement.querySelector('[data-total]')
+      if (total) {
+        total.textContent = formatMoney(cart.total_price)
+      }
+
+      // Disable checkout if cart is empty
+      checkoutButton.disabled = cart.item_count === 0
+    })
+
+    function formatMoney(cents) {
+      if (window.Shopify?.formatMoney) {
+        return window.Shopify.formatMoney(cents)
+      }
+      return `${(cents / 100).toFixed(2)} ₮`
+    }
+  }
+
+  // Auto-initialize
+  document.addEventListener('DOMContentLoaded', () => {
+    const summary = document.querySelector('[data-cart-summary]')
+    if (summary) {
+      window.initCartSummary(summary)
+    }
+  })
+}
+</script>
