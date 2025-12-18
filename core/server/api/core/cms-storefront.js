@@ -2,7 +2,7 @@
  * Directus Storefront CMS API Proxy
  *
  * Routes requests to store.adcommerce.mn (storefront CMS)
- * Uses NUXT_DIRECTUS_STOREFRONT_TOKEN for authentication
+ * Uses NUXT_STOREFRONT_TOKEN for authentication
  *
  * Separate from /api/core/cms which handles admin/commerce operations
  */
@@ -19,7 +19,7 @@ export default defineEventHandler(async (event) => {
   const apiUrl =
     config.public.features?.directus?.storefront?.apiUrl ||
     "https://storefront.adcommerce.mn"
-  const token = config.storefrontToken || process.env.NUXT_STOREFRONT_TOKEN
+  const token = config.private?.storefrontToken
 
   if (!token) {
     console.error("[CMS Storefront API] Missing NUXT_STOREFRONT_TOKEN")

@@ -170,11 +170,11 @@ const getDirectusCMSConfig = async () => {
     config.features.directus?.storefront?.apiUrl ||
     config.features.directus?.admin?.apiUrl ||
     "https://storefront.adcommerce.mn"
-  const token = process.env.NUXT_DIRECTUS_STOREFRONT_TOKEN
+  const token = process.env.NUXT_STOREFRONT_TOKEN
 
   if (!token) {
     console.log(
-      "NUXT_DIRECTUS_STOREFRONT_TOKEN not found, skipping Directus CMS config"
+      "NUXT_STOREFRONT_TOKEN not found, skipping Directus CMS config"
     )
     return null
   }
@@ -222,7 +222,7 @@ const getDirectusCMSConfig = async () => {
 if (
   config.integrations.directus &&
   config.features.directus &&
-  process.env.NUXT_DIRECTUS_STOREFRONT_TOKEN &&
+  process.env.NUXT_STOREFRONT_TOKEN &&
   !mainConfig
 ) {
   directusCMSConfig = await getDirectusCMSConfig()
@@ -535,6 +535,19 @@ if (config.integrations.firebase) {
 //     preview: false,
 //   }
 // }
+
+/**
+ * Directus Storefront Token
+ * Add NUXT_STOREFRONT_TOKEN to private runtime config
+ */
+const storefrontToken = process.env.NUXT_STOREFRONT_TOKEN
+
+if (storefrontToken) {
+  if (!siteRuntimeConfig.private) {
+    siteRuntimeConfig.private = {}
+  }
+  siteRuntimeConfig.private.storefrontToken = storefrontToken
+}
 
 /**
  * 4. Payments
