@@ -83,6 +83,7 @@ export const useServicesStore = defineStore("services", {
       const user = useAuthStore().user
       const nuxtApp = useNuxtApp()
 
+      if (!nuxtApp.$stripe) return
       if (!user) return
 
       const customerId = user.customerId
