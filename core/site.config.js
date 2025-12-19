@@ -70,6 +70,10 @@ if (
     if (mainConfig.store_theme) {
       config.theme.type = mainConfig.store_theme
     }
+    // Theme Package (for multi-theme support)
+    if (mainConfig.store_theme_package) {
+      config.theme.package = mainConfig.store_theme_package
+    }
     if (mainConfig.store_url) {
       config.defaults.storeUrl = mainConfig.store_url
     }
@@ -435,6 +439,62 @@ if (config.features.prismic && !mainConfig && !directusCMSConfig) {
   }
 
   console.log("[Site Config] ::: Using Prismic Settings!")
+}
+
+/**
+ * Theme Resolution
+ * Priority: tenant DB theme.package > config theme.package > theme.local > default
+ */
+let themeLayerConfig = {
+  package: null,
+  local: "default",
+  path: null,
+}
+
+// 1. Check tenant DB for theme package (from mainConfig)
+if (mainConfig?.store_theme_package) {
+  themeLayerConfig.package = mainConfig.store_theme_package
+}
+
+// 2. Or use theme package from static config
+if (!themeLayerConfig.package && config.theme?.package) {
+  themeLayerConfig.package = config.theme.package
+}
+
+// 3. Use local theme from config (defaults to "default")
+if (!themeLayerConfig.package && config.theme?.local) {
+  themeLayerConfig.local = config.theme.local
+}
+
+// 4. Resolve theme path
+if (themeLayerConfig.package) {
+  try {
+    // Resolve from node_modules using dynamic import
+    const { createRequire } = await import("module")
+    const require = createRequire(import.meta.url)
+    const themePath = require.resolve(
+      `${themeLayerConfig.package}/nuxt.config.js`
+    )
+    themeLayerConfig.path = path.dirname(themePath)
+    console.log(`✅ [Site Config] Theme Package: ${themeLayerConfig.package}`)
+  } catch (e) {
+    console.warn(
+      `⚠️ [Site Config] Theme package not found: ${themeLayerConfig.package}, falling back to local`
+    )
+    themeLayerConfig.package = null
+  }
+}
+
+// 5. Fallback to local theme
+if (!themeLayerConfig.path) {
+  themeLayerConfig.path = path.resolve(`./themes/${themeLayerConfig.local}`)
+  console.log(`✅ [Site Config] Theme Local: ${themeLayerConfig.local}`)
+}
+
+// 6. Update config.extends to use resolved theme path
+// Only if not explicitly set in legacy mode
+if (!config.config.extends || config.config.extends.length === 0) {
+  config.config.extends = [themeLayerConfig.path]
 }
 
 /**
