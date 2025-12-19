@@ -3,10 +3,16 @@
 // https://docs.stripe.com/js/elements_object/create_without_intent
 // https://github.com/stripe-samples/subscription-use-cases/blob/main/fixed-price-subscriptions/client/vanillajs/change-plan.html
 
-import Stripe from "stripe"
-import { loadStripe } from "@stripe/stripe-js"
-
 export default defineNuxtPlugin(async () => {
+  // Early exit if Stripe integration is disabled
+  if (!useRuntimeConfig().public.integrations.stripe) {
+    return
+  }
+
+  // Dynamic imports - only load Stripe when enabled
+  const { default: Stripe } = await import("stripe")
+  const { loadStripe } = await import("@stripe/stripe-js")
+
   const getKeys = () => {
     let keys = {}
 
@@ -34,35 +40,26 @@ export default defineNuxtPlugin(async () => {
   const mode =
     process.env.NODE_ENV === "production" ? "Production Mode" : "Test Mode"
 
-  // Missing Key Checks
-  if (import.meta.client) {
-    if (!useRuntimeConfig().public.integrations.stripe) {
-      // console.log(`[Plugins] ::: [Stripe] ::: Not Initialized! ::: ${mode}`)
-      return
-    }
-    if (!useRuntimeConfig().public.features.payments) {
-      console.log("[Plugins] ::: [Stripe] ::: Payments Not Setup Yet!")
-      return
-    }
-    if (!useRuntimeConfig().public.features.payments.stripe) {
-      console.log("[Plugins] ::: [Stripe] ::: Missing Stripe Config!")
-      return
-    }
-    if (!KEYS_.value) {
-      console.log("[Plugins] ::: [Stripe] ::: Missing Stripe Key & Secret!")
-      return
-    }
-    if (KEYS_.value) {
-      if (!KEYS_.value.key || !KEYS_.value.secret) {
-        console.log("[Plugins] ::: [Stripe] ::: Missing Stripe Key & Secret!")
-        return
-      }
-    }
-    if (useRuntimeConfig().public.features.log) {
-      console.log(`[Plugins] ::: [Stripe] ::: Initialized! ::: ${mode}`)
-    }
-  } else {
+  // Server-side only
+  if (!import.meta.client) {
     return
+  }
+
+  // Missing Key Checks
+  if (!useRuntimeConfig().public.features.payments) {
+    console.log("[Plugins] ::: [Stripe] ::: Payments Not Setup Yet!")
+    return
+  }
+  if (!useRuntimeConfig().public.features.payments.stripe) {
+    console.log("[Plugins] ::: [Stripe] ::: Missing Stripe Config!")
+    return
+  }
+  if (!KEYS_.value || !KEYS_.value.key || !KEYS_.value.secret) {
+    console.log("[Plugins] ::: [Stripe] ::: Missing Stripe Key & Secret!")
+    return
+  }
+  if (useRuntimeConfig().public.features.log) {
+    console.log(`[Plugins] ::: [Stripe] ::: Initialized! ::: ${mode}`)
   }
 
   // Initialize Stripe
@@ -88,6 +85,7 @@ export default defineNuxtPlugin(async () => {
     )
   }
   if (!isValid) {
+    usePaymentStore().set("stripeDisabled", true)
     return { provide: { stripe: null } }
   }
 

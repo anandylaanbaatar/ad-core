@@ -23,11 +23,6 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
   // Set Collections
   const commerceStore = useCommerceStore()
 
-  // Server Init
-  if (import.meta.server && !commerceStore.serverInit) {
-    await commerceStore.setCollections()
-    commerceStore.set("serverInit", true)
-  }
   // Client Init
   if (import.meta.client && !commerceStore.clientInit) {
     // Check Store Plan
@@ -40,6 +35,7 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
       }
     }
 
+    await commerceStore.setCollections()
     await commerceStore.setOrderNumber()
     await commerceStore.setLocations()
     commerceStore.setSavedItems()

@@ -15,7 +15,7 @@ let mainConfig = null
  */
 
 const getCommerceConfig = async (storeId) => {
-  const url = config.features.directus.apiUrl
+  const url = config.features.directus?.admin?.apiUrl || config.features.directus?.apiUrl
   const fields = `
     *,
     locations.*,
