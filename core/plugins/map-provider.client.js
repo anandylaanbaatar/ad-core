@@ -3,10 +3,11 @@
  *
  * Orchestrates provider initialization and automatic fallback.
  * Exposes the active map provider to the application.
+ *
+ * This plugin consumes providers registered by integration plugins:
+ * - v1/integrations/googlemaps -> $googleMapsProvider
+ * - v1/integrations/leaflet -> $leafletProvider
  */
-
-import { GoogleMapsProvider } from '../utils/map/GoogleMapsProvider.js'
-import { LeafletProvider } from '../utils/map/LeafletProvider.js'
 
 export default defineNuxtPlugin(async (nuxtApp) => {
   // Only run on client side
@@ -14,40 +15,22 @@ export default defineNuxtPlugin(async (nuxtApp) => {
     return
   }
 
-  const config = useRuntimeConfig()
-  const coreStore = useCoreStore()
-
-  // Check feature flags
-  const googleMapsEnabled = config.public.features?.googleMaps
-  const leafletEnabled = config.public.features?.leaflet?.enabled
-
-  if (!googleMapsEnabled && !leafletEnabled) {
-    console.log('[MapProvider] No map providers enabled')
-    return
-  }
-
-  // Get Google Maps API key
-  const googleMapsKey = useState('googleMapKey', () => process.env.NUXT_GOOGLE_MAPS_TOKEN)
-
-  // Initialize providers
+  // Initialize providers from integration plugins
   const providers = {}
 
-  // Google Maps provider
-  if (googleMapsEnabled && googleMapsKey.value) {
-    providers.google = new GoogleMapsProvider({
-      apiKey: googleMapsKey.value,
-      cors: coreStore.cors
-    })
+  // Google Maps provider (registered by googlemaps integration)
+  if (nuxtApp.$googleMapsProvider) {
+    providers.google = nuxtApp.$googleMapsProvider
   }
 
-  // Leaflet provider
-  if (leafletEnabled) {
-    providers.leaflet = new LeafletProvider({
-      nominatimUrl: config.public.features?.leaflet?.nominatimUrl,
-      osrmUrl: config.public.features?.leaflet?.osrmUrl,
-      tileUrl: config.public.features?.leaflet?.tileUrl,
-      attribution: config.public.features?.leaflet?.attribution
-    })
+  // Leaflet provider (registered by leaflet integration)
+  if (nuxtApp.$leafletProvider) {
+    providers.leaflet = nuxtApp.$leafletProvider
+  }
+
+  if (Object.keys(providers).length === 0) {
+    console.log('[MapProvider] No map providers registered')
+    return
   }
 
   // Determine active provider with automatic fallback

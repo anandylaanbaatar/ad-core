@@ -1,11 +1,11 @@
-import moment from "moment"
-
-export default defineNuxtPlugin(() => {
+/**
+ * QPay Integration Plugin
+ *
+ * This plugin is only loaded when integrations.qpay = true
+ * (conditionally registered via v1/integrations/qpay layer)
+ */
+export default defineNuxtPlugin(async () => {
   if (import.meta.client) {
-    if (!useRuntimeConfig().public.integrations.qpay) {
-      // console.log("[Plugins] ::: [QPay] ::: Not Initialized!")
-      return
-    }
     if (!useRuntimeConfig().public.features.payments) {
       console.log("[Plugins] ::: [Qpay] ::: Payments Not Setup Yet!")
       return
@@ -20,6 +20,9 @@ export default defineNuxtPlugin(() => {
   } else {
     return
   }
+
+  // Dynamic import - only load moment when QPay is enabled
+  const { default: moment } = await import("moment")
 
   // Token
   const getToken = async () => {

@@ -94,7 +94,7 @@ export default {
       this.form.loading = true
 
       try {
-        await this.$notifications.loops.lists.subscribe({
+        await this.$loops.lists.subscribe({
           email: this.form.fields.email,
           formId: features().notifications.loops.mailingFormId,
           listId: features().notifications.loops.mailingListId,

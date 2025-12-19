@@ -1,15 +1,17 @@
-// https://docs.stripe.com/api/payment_intents?lang=node
-// https://docs.stripe.com/api/checkout/sessions/object?lang=node
-// https://docs.stripe.com/js/elements_object/create_without_intent
-// https://github.com/stripe-samples/subscription-use-cases/blob/main/fixed-price-subscriptions/client/vanillajs/change-plan.html
+/**
+ * Stripe Integration Plugin
+ *
+ * This plugin is only loaded when integrations.stripe = true
+ * (conditionally registered via v1/integrations/stripe layer)
+ *
+ * https://docs.stripe.com/api/payment_intents?lang=node
+ * https://docs.stripe.com/api/checkout/sessions/object?lang=node
+ * https://docs.stripe.com/js/elements_object/create_without_intent
+ * https://github.com/stripe-samples/subscription-use-cases/blob/main/fixed-price-subscriptions/client/vanillajs/change-plan.html
+ */
 
 export default defineNuxtPlugin(async () => {
-  // Early exit if Stripe integration is disabled
-  if (!useRuntimeConfig().public.integrations.stripe) {
-    return
-  }
-
-  // Dynamic imports - only load Stripe when enabled
+  // Dynamic imports - only load Stripe when integration layer is active
   const { default: Stripe } = await import("stripe")
   const { loadStripe } = await import("@stripe/stripe-js")
 

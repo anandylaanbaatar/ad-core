@@ -1,6 +1,4 @@
-import algoliasearch from "algoliasearch"
-
-export default defineNuxtPlugin(() => {
+export default defineNuxtPlugin(async () => {
   const APP_ID_ = useState("appId", () => process.env.NUXT_ALGOLIA_APP_ID)
   const APP_KEY_ = useState("appKey", () => process.env.NUXT_ALGOLIA_APP_KEY)
 
@@ -28,6 +26,9 @@ export default defineNuxtPlugin(() => {
   } else {
     return
   }
+
+  // Dynamic import - only load Algolia when enabled
+  const { default: algoliasearch } = await import("algoliasearch")
 
   const APP_ID = APP_ID_.value
   const APP_KEY = APP_KEY_.value

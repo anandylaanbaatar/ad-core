@@ -5,7 +5,7 @@
  * Implements MapProviderInterface with full feature parity to Google Maps.
  */
 
-import { MapProviderInterface } from './MapProviderInterface.js'
+import { MapProviderInterface } from '../../../core/utils/map/MapProviderInterface.js'
 import { NominatimService } from '../services/nominatim.js'
 
 export class LeafletProvider extends MapProviderInterface {

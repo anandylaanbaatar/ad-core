@@ -1,18 +1,25 @@
+/**
+ * StorePay Server API Route
+ *
+ * This route is only registered when the StorePay integration layer is loaded
+ */
 import { defineEventHandler, readBody } from "h3"
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
-  const sandboxUrl = `https://merchant-sandbox.qpay.mn/v2`
-  const baseUrl = `https://merchant.qpay.mn/v2`
+  const base = `https://service.storepay.mn:8778`
+  const baseUrl = `${base}/lend-merchant`
   const config = useRuntimeConfig(event)
 
-  if (!config.private.qpay) return
+  if (!config.private.storepay) return
 
-  const keys = config.private.qpay
+  const keys = config.private.storepay
   const base_token = keys.token
   const token = body.token
+  const username = keys.storeUsername
+  const password = keys.storePassword
 
-  let url = `${baseUrl}/invoice`
+  let url = `${baseUrl}`
   let options = {
     method: "POST",
     headers: {
@@ -23,31 +30,33 @@ export default defineEventHandler(async (event) => {
 
   // Create Invoice
   if (body.type === "getToken") {
-    url = `${baseUrl}/auth/token`
+    url = `${base}/merchat-uaa/oauth/token?grant_type=password&username=${username}&password=${password}`
     options = {
       method: "POST",
       headers: {
+        "Content-Type": "application/json",
         Authorization: `Basic ${base_token}`,
       },
     }
   } else if (body.type === "createInvoice") {
+    url = `${baseUrl}/merchant/loan`
     options.method = "POST"
     options.body = JSON.stringify(body.data)
 
     // Cancel Invoice
   } else if (body.type === "cancelInvoice") {
-    url = `${baseUrl}/invoice/${body.invoiceId}`
-    options.method = "DELETE"
-
-    // Check Payment
-  } else if (body.type === "checkPayment") {
-    url = `${baseUrl}/payment/check`
+    url = `${baseUrl}/merchant/account/cancel`
     options.method = "POST"
     options.body = JSON.stringify(body.data)
 
-    // Payment List
-  } else if (body.type === "paymentList") {
-    url = `${baseUrl}/payment/list`
+    // Check Payment
+  } else if (body.type === "checkPayment") {
+    url = `${baseUrl}/merchant/loan/check/${body.invoiceId}`
+    options.method = "GET"
+
+    // User Check Possible Amount
+  } else if (body.type === "checkPossibleAmount") {
+    url = `${baseUrl}/user/possibleAmount`
     options.method = "POST"
     options.body = JSON.stringify(body.data)
   }

@@ -1,10 +1,14 @@
-// https://github.com/goshippo/shippo-javascript-sdk
-// https://github.com/goshippo/shippo-javascript-sdk/blob/main/docs/sdks/ratesatcheckout/README.md#create
-// https://docs.goshippo.com/shippoapi/public-api/#operation/CreateLiveRate
-
-import { Shippo } from "shippo"
-
-export default defineNuxtPlugin(() => {
+/**
+ * Shippo Integration Plugin
+ *
+ * This plugin is only loaded when integrations.shippo = true
+ * (conditionally registered via v1/integrations/shippo layer)
+ *
+ * https://github.com/goshippo/shippo-javascript-sdk
+ * https://github.com/goshippo/shippo-javascript-sdk/blob/main/docs/sdks/ratesatcheckout/README.md#create
+ * https://docs.goshippo.com/shippoapi/public-api/#operation/CreateLiveRate
+ */
+export default defineNuxtPlugin(async () => {
   const KEY = useState("shippoKey", () =>
     process.env.NODE_ENV === "production"
       ? process.env.NUXT_SHIPPO_KEY
@@ -12,19 +16,20 @@ export default defineNuxtPlugin(() => {
   )
 
   if (import.meta.client) {
-    if (!useRuntimeConfig().public.integrations.shippo) {
-      // console.log("[Plugins] ::: [Shippo] ::: Not Initialized!")
-      return
-    }
     if (!KEY.value) {
       console.log("[Plugins] ::: [Shippo] ::: Missing Integration Key!")
       return
     }
 
-    console.log("[Plugins] ::: [Shippo] ::: Initialized!")
+    if (useRuntimeConfig().public.features.log) {
+      console.log("[Plugins] ::: [Shippo] ::: Initialized!")
+    }
   } else {
     return
   }
+
+  // Dynamic import - only load shippo when integration is enabled
+  const { Shippo } = await import("shippo")
 
   const key = KEY.value
   const shippo = new Shippo({

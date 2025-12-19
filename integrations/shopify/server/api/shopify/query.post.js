@@ -1,7 +1,7 @@
-import { createAdminRestApiClient } from "@shopify/admin-api-client"
-import { createGraphQLClient } from "@shopify/graphql-client"
-import { createAdminApiClient } from "@shopify/admin-api-client"
 import { defineEventHandler, readBody } from "h3"
+
+// Dynamic imports for Shopify - only loaded when integration is enabled
+let createAdminRestApiClient, createGraphQLClient, createAdminApiClient
 
 // https://github.com/Shopify/shopify-app-js/tree/565d1142edbfabba8ad516214f597778f7cfb521/packages/api-clients/admin-api-client#rest-client
 // https://shopify.dev/docs/api/storefront/2024-07/queries/collection
@@ -2053,8 +2053,18 @@ const getQuery = (type, body) => {
 }
 
 export default defineEventHandler(async (event) => {
-  const bodyData = await readBody(event)
   const config = useRuntimeConfig(event)
+
+  // Dynamically import Shopify packages (layer is only loaded when integration is enabled)
+  if (!createAdminApiClient) {
+    const adminModule = await import("@shopify/admin-api-client")
+    const graphqlModule = await import("@shopify/graphql-client")
+    createAdminRestApiClient = adminModule.createAdminRestApiClient
+    createAdminApiClient = adminModule.createAdminApiClient
+    createGraphQLClient = graphqlModule.createGraphQLClient
+  }
+
+  const bodyData = await readBody(event)
   let keys = config.private.shopify
   let body = bodyData
 

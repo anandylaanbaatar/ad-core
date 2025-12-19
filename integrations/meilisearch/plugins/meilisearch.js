@@ -1,13 +1,13 @@
-import { MeiliSearch } from "meilisearch"
-
-export default defineNuxtPlugin(() => {
+/**
+ * Meilisearch Integration Plugin
+ *
+ * This plugin is only loaded when integrations.meilisearch = true
+ * (conditionally registered via v1/integrations/meilisearch layer)
+ */
+export default defineNuxtPlugin(async () => {
   const KEY = useState("appKey", () => process.env.NUXT_MEILISEARCH_API_KEY)
 
   if (import.meta.client) {
-    if (!useRuntimeConfig().public.integrations.meilisearch) {
-      // console.log("[Plugins] ::: [Meilisearch] ::: Not Initialized!")
-      return
-    }
     if (!useRuntimeConfig().public.features.meilisearch) {
       console.log("[Plugins] ::: [Meilisearch] ::: Missing Config!")
       return
@@ -17,12 +17,15 @@ export default defineNuxtPlugin(() => {
       return
     }
 
-    // if (useRuntimeConfig().public.features.log) {
-    console.log("[Plugins] ::: [Meilisearch] ::: Initialized!")
-    // }
+    if (useRuntimeConfig().public.features.log) {
+      console.log("[Plugins] ::: [Meilisearch] ::: Initialized!")
+    }
   } else {
     return
   }
+
+  // Dynamic import - only load meilisearch when integration is enabled
+  const { MeiliSearch } = await import("meilisearch")
 
   const API_KEY = KEY.value
   const API_HOST = useRuntimeConfig().public.features.meilisearch.host

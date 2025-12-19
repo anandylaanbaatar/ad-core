@@ -1,58 +1,4 @@
 import { watch } from "vue"
-import { initializeApp, getApps } from "firebase/app"
-import {
-  getAuth,
-  signInWithPopup,
-  signInWithRedirect,
-  getRedirectResult,
-  GoogleAuthProvider,
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  signInWithCustomToken,
-  sendPasswordResetEmail,
-  verifyPasswordResetCode,
-  confirmPasswordReset,
-  sendEmailVerification,
-  updateProfile,
-  signOut,
-  getAdditionalUserInfo,
-  applyActionCode,
-  setPersistence,
-  browserLocalPersistence,
-} from "firebase/auth"
-import { getFirestore } from "firebase/firestore"
-import {
-  getDatabase,
-  ref,
-  ref as vdbRef,
-  child,
-  onChildAdded,
-  onChildChanged,
-  off,
-  get,
-  set,
-  onValue,
-  push,
-  update,
-  remove,
-  onDisconnect,
-  serverTimestamp,
-  // runTransaction
-} from "firebase/database"
-// import {
-//   useDatabaseList,
-//   useDatabaseObject,
-//   VueFire,
-//   VueFireDatabaseOptionsAPI,
-//   VueFireFirestoreOptionsAPI,
-// } from "vuefire"
-// import { getMessaging, onMessage, getToken } from "firebase/messaging"
-import {
-  getAnalytics,
-  isSupported,
-  logEvent,
-  setUserProperties,
-} from "firebase/analytics"
 
 export default defineNuxtPlugin(async (nuxtApp) => {
   const CONFIG = useState(
@@ -72,6 +18,53 @@ export default defineNuxtPlugin(async (nuxtApp) => {
   if (useRuntimeConfig().public.features.log) {
     console.log("[Plugins] ::: [Firebase] ::: Initialized!")
   }
+
+  // Dynamic imports - only load Firebase when enabled
+  const { initializeApp, getApps } = await import("firebase/app")
+  const {
+    getAuth,
+    signInWithPopup,
+    signInWithRedirect,
+    getRedirectResult,
+    GoogleAuthProvider,
+    createUserWithEmailAndPassword,
+    signInWithEmailAndPassword,
+    signInWithCustomToken,
+    sendPasswordResetEmail,
+    verifyPasswordResetCode,
+    confirmPasswordReset,
+    sendEmailVerification,
+    updateProfile,
+    signOut,
+    getAdditionalUserInfo,
+    applyActionCode,
+    setPersistence,
+    browserLocalPersistence,
+  } = await import("firebase/auth")
+  const { getFirestore } = await import("firebase/firestore")
+  const {
+    getDatabase,
+    ref,
+    ref: vdbRef,
+    child,
+    onChildAdded,
+    onChildChanged,
+    off,
+    get,
+    set,
+    onValue,
+    push,
+    update,
+    remove,
+    onDisconnect,
+    serverTimestamp,
+  } = await import("firebase/database")
+  const {
+    getAnalytics,
+    isSupported,
+    logEvent,
+    setUserProperties,
+  } = await import("firebase/analytics")
 
   const runtimeConfig = useRuntimeConfig()
   const isProduction = process.env.NODE_ENV === "production"

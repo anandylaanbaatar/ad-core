@@ -1,9 +1,11 @@
+/**
+ * StorePay Integration Plugin
+ *
+ * This plugin is only loaded when integrations.storepay = true
+ * (conditionally registered via v1/integrations/storepay layer)
+ */
 export default defineNuxtPlugin(() => {
   if (import.meta.client) {
-    if (!useRuntimeConfig().public.integrations.storepay) {
-      // console.log("[Plugins] ::: [Storepay] ::: Not Initialized!")
-      return
-    }
     if (!useRuntimeConfig().public.features.payments) {
       console.log("[Plugins] ::: [Storepay] ::: Payments Not Setup Yet!")
       return

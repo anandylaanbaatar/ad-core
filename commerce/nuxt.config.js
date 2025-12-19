@@ -1,6 +1,7 @@
 import { defu } from "defu"
 import { createResolver } from "@nuxt/kit"
 import { defineNuxtConfig } from "nuxt/config"
+
 const { resolve } = createResolver(import.meta.url)
 
 console.log("[Layer] :: Adding AD Commerce - v2.0.0")
@@ -28,7 +29,10 @@ const servers = defineNuxtConfig({
 })
 
 const plugins = defineNuxtConfig({
-  plugins: [resolve("./plugins/shippo.js"), resolve("./plugins/commerce.js")],
+  plugins: [
+    // Note: Shippo plugin is now in v1/integrations/shippo layer
+    resolve("./plugins/commerce.js"),
+  ],
 })
 
 export default defu(config, middlewares, modules, servers, plugins)

@@ -1,5 +1,7 @@
-import { createGraphQLClient } from "@shopify/graphql-client"
 import { defineEventHandler, readBody } from "h3"
+
+// Dynamic import for Shopify - only loaded when integration is enabled
+let createGraphQLClient
 
 const getIds = (id) => {
   let ids = id.split("/")
@@ -236,8 +238,15 @@ const getQuery = (type, options) => {
 }
 
 export default defineEventHandler(async (event) => {
-  const body = await readBody(event)
   const config = useRuntimeConfig(event)
+
+  // Dynamically import Shopify packages (layer is only loaded when integration is enabled)
+  if (!createGraphQLClient) {
+    const graphqlModule = await import("@shopify/graphql-client")
+    createGraphQLClient = graphqlModule.createGraphQLClient
+  }
+
+  const body = await readBody(event)
   let keys = config.private.shopify
 
   // Override Keys

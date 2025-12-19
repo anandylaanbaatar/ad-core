@@ -1,15 +1,19 @@
-import moment from "moment-timezone"
-
-export default defineNuxtPlugin((nuxtApp) => {
+/**
+ * Shopify Integration Plugin
+ *
+ * This plugin is only loaded when integrations.shopify = true
+ * (conditionally registered via v1/integrations/shopify layer)
+ */
+export default defineNuxtPlugin(async (nuxtApp) => {
+  // Log initialization (layer is only loaded when integration is enabled)
   if (import.meta.client) {
-    if (!useRuntimeConfig().public.integrations.shopify) {
-      // console.log("[Plugins] ::: [Shopify] ::: Not Initialized!")
-      return
-    }
     if (useRuntimeConfig().public.features.log) {
       console.log("[Plugins] ::: [Shopify] ::: Initialized!")
     }
   }
+
+  // Dynamic import - only load moment-timezone when Shopify is enabled
+  const { default: moment } = await import("moment-timezone")
 
   /**
    * Utils
@@ -17,7 +21,7 @@ export default defineNuxtPlugin((nuxtApp) => {
 
   const fetchData = async (data) => {
     return new Promise(async (resolve, reject) => {
-      await $fetch("/api/query", {
+      await $fetch("/api/shopify/query", {
         method: "post",
         body: data,
       })

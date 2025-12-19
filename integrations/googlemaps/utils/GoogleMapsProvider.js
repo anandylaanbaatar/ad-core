@@ -5,7 +5,7 @@
  * Maintains backward compatibility with current implementation.
  */
 
-import { MapProviderInterface } from './MapProviderInterface.js'
+import { MapProviderInterface } from '../../../core/utils/map/MapProviderInterface.js'
 
 export class GoogleMapsProvider extends MapProviderInterface {
   constructor(config = {}) {

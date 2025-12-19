@@ -2,9 +2,27 @@ import { defu } from "defu"
 import { createResolver } from "@nuxt/kit"
 import { defineNuxtConfig } from "nuxt/config"
 import Aura from "@primevue/themes/aura"
+import { readFileSync } from "fs"
+import { resolve as pathResolve } from "path"
+
 const { resolve } = createResolver(import.meta.url)
 
-console.log("[Layer] :: Adding AD Core - v2.1.1")
+// Load site config to conditionally register plugins
+let siteConfig = { integrations: {}, features: {} }
+try {
+  const configPath = pathResolve(process.cwd(), "config/site.config.json")
+  siteConfig = JSON.parse(readFileSync(configPath, "utf-8"))
+} catch (e) {
+  console.warn("[Layer] :: Could not load site.config.json, using defaults")
+}
+
+const integrations = siteConfig.integrations || {}
+
+// Prevent duplicate logging during Nuxt layer resolution
+if (!globalThis.__AD_CORE_LOADED__) {
+  globalThis.__AD_CORE_LOADED__ = true
+  console.log("[Layer] :: Adding AD Core - v2.1.1")
+}
 
 /**
  * Middleware
@@ -31,7 +49,7 @@ const app = defineNuxtConfig({
     "flexboxgrid/css/flexboxgrid.min.css",
     "primeicons/primeicons.css",
     "@splidejs/vue-splide/css",
-    "leaflet/dist/leaflet.css",
+    // Note: Leaflet CSS is now handled by v1/integrations/leaflet layer
     resolve("./assets/scss/app.scss"),
   ],
 
@@ -103,16 +121,17 @@ const modules = defineNuxtConfig(modulesConfig)
 const plugins = defineNuxtConfig({
   plugins: [
     resolve("./plugins/utils.js"),
-    resolve("./plugins/algolia.js"),
+    // Conditionally load integration plugins
+    ...(integrations.algolia ? [resolve("./plugins/algolia.js")] : []),
     resolve("./plugins/map-provider.client.js"),
     resolve("./plugins/address.js"),
     resolve("./plugins/currency.js"),
-    resolve("./plugins/prismic.js"),
-    resolve("./plugins/directus.js"),
-    resolve("./plugins/storefront.js"),
-    resolve("./plugins/meilisearch.js"),
-    resolve("./plugins/shopify.js"),
-    resolve("./plugins/firebase.client.js"),
+    ...(integrations.prismic ? [resolve("./plugins/prismic.js")] : []),
+    ...(integrations.directus ? [resolve("./plugins/directus.js")] : []),
+    ...(integrations.storefront ? [resolve("./plugins/storefront.js")] : []),
+    // Note: Meilisearch plugin is now in v1/integrations/meilisearch layer
+    // Note: Shopify plugin is now in v1/integrations/shopify layer
+    ...(integrations.firebase ? [resolve("./plugins/firebase.client.js")] : []),
     resolve("./plugins/forms.js"),
     resolve("./plugins/general.client.js"),
     resolve("./plugins/notifications.js"),

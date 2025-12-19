@@ -21,9 +21,10 @@ const modules = defineNuxtConfig({
 
 const plugins = defineNuxtConfig({
   plugins: [
-    resolve("./plugins/qpay.js"),
-    resolve("./plugins/storepay.js"),
-    resolve("./plugins/stripe.js"),
+    // Note: Payment provider plugins are now in v1/integrations:
+    // - v1/integrations/qpay
+    // - v1/integrations/storepay
+    // - v1/integrations/stripe
     resolve("./plugins/payment.js"),
   ],
 })

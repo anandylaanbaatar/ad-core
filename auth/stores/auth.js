@@ -308,7 +308,7 @@ export const useAuthStore = defineStore("auth", {
 
       try {
         let userId = null
-        const loopUser = await useNuxtApp().$notifications.loops.user.find(
+        const loopUser = await useNuxtApp().$loops.user.find(
           userData.email
         )
 
@@ -325,7 +325,7 @@ export const useAuthStore = defineStore("auth", {
 
         // Create User
         if (!loopUser) {
-          userId = await useNuxtApp().$notifications.loops.user.create(
+          userId = await useNuxtApp().$loops.user.create(
             userUpdateData
           )
 
@@ -347,7 +347,7 @@ export const useAuthStore = defineStore("auth", {
           }
 
           if (isUpdate) {
-            userId = await useNuxtApp().$notifications.loops.user.update(
+            userId = await useNuxtApp().$loops.user.update(
               userUpdateData
             )
 
