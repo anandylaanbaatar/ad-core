@@ -36,19 +36,27 @@ export default defineNuxtPlugin(async (nuxtApp) => {
   // Determine active provider with automatic fallback
   let activeProvider = null
   let activeProviderName = null
+  let savedPreference = null
 
   // Check localStorage for saved preference
   if (typeof localStorage !== 'undefined') {
     const saved = localStorage.getItem('mapProvider')
     if (saved && providers[saved]) {
+      savedPreference = saved
       activeProviderName = saved
+      console.log(`[MapProvider] Using saved preference: ${saved}`)
+    } else if (saved && !providers[saved]) {
+      // Clear stale preference if provider is no longer available
+      console.log(`[MapProvider] Clearing stale preference: ${saved} (provider not available)`)
+      localStorage.removeItem('mapProvider')
     }
   }
 
   // Try to initialize providers in order of preference
+  // Default: Leaflet first (fast loading), then upgrade to Google Maps if available
   const preferredOrder = activeProviderName
     ? [activeProviderName, ...Object.keys(providers).filter(k => k !== activeProviderName)]
-    : ['google', 'leaflet'].filter(k => providers[k])
+    : ['leaflet', 'google'].filter(k => providers[k])
 
   for (const providerName of preferredOrder) {
     const provider = providers[providerName]
@@ -71,6 +79,26 @@ export default defineNuxtPlugin(async (nuxtApp) => {
   if (!activeProvider) {
     console.error('[MapProvider] No map providers available')
     return
+  }
+
+  // If Leaflet was initialized (no saved preference) and Google Maps is available, try to upgrade
+  // This ensures Leaflet loads fast, but we switch to Google Maps if properly configured
+  if (activeProviderName === 'leaflet' && providers.google && !savedPreference) {
+    console.log('[MapProvider] Leaflet loaded as default, checking if Google Maps is available...')
+
+    // Try initializing Google Maps in the background
+    setTimeout(async () => {
+      const googleProvider = providers.google
+      const googleInitialized = await googleProvider.initialize()
+
+      if (googleInitialized && googleProvider.available) {
+        console.log('[MapProvider] Google Maps is available and configured, saving preference for next session')
+        // Save Google as preference for next time (don't switch mid-session to avoid UI disruption)
+        if (typeof localStorage !== 'undefined') {
+          localStorage.setItem('mapProvider', 'google')
+        }
+      }
+    }, 1000) // Delay check to not block initial load
   }
 
   // Save preference to localStorage

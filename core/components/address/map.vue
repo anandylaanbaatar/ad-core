@@ -19,7 +19,7 @@
           :placeholder="$utils.t('Search address')"
           class="searchAddressInput"
         />
-        <InputGroupAddon class="findAddressInput p-0 m-0 bg-transparent w-12rem">
+        <InputGroupAddon class="p-0 m-0 bg-transparent w-12rem">
           <Button
             :label="$utils.t('Find Address')"
             icon="pi pi-map-marker"
@@ -66,6 +66,30 @@
 </template>
 
 <script>
+/**
+ * Shared Address Map Component
+ *
+ * This component provides a unified map interface that automatically uses
+ * Leaflet (OpenStreetMap) or Google Maps based on availability and configuration.
+ *
+ * Provider Priority:
+ * 1. Load Leaflet first for fast initial rendering (no API key required)
+ * 2. Check if Google Maps is properly configured (NUXT_GOOGLE_MAPS_TOKEN)
+ * 3. If Google Maps works, save preference for next session
+ *
+ * The fallback logic is handled by the map-provider.client.js plugin which:
+ * - Initializes Leaflet first for fast loading
+ * - Checks if Google Maps is available in the background
+ * - Saves Google Maps as preference for subsequent visits if available
+ *
+ * Usage:
+ * <AddressMap :address="addressObject" @geocode="handleGeocode" @loading="handleLoading" />
+ *
+ * Events:
+ * - geocode: Emitted when an address is selected/pinned, returns parsed address object
+ * - loading: Emitted when geocoding starts/ends, returns boolean
+ */
+
 import {
   parseGooglePlace,
   parseFormattedAddress,
@@ -74,12 +98,24 @@ import {
 import { useMapProvider } from "~/v1/core/composables/useMapProvider.js"
 
 export default {
+  name: 'AddressMap',
+
   props: {
     address: {
       type: [String, Object],
       default: null,
     },
+    // Default map center (Ulaanbaatar, Mongolia)
+    defaultPosition: {
+      type: Object,
+      default: () => ({
+        lat: 47.9173341,
+        lng: 106.9155,
+      }),
+    },
   },
+
+  emits: ['geocode', 'loading'],
 
   data() {
     return {
@@ -102,10 +138,15 @@ export default {
   },
 
   async mounted() {
+    console.log("[AddressMap] Address:", this.address)
+
+    // Set default position
+    this.mapPosition = { ...this.defaultPosition }
+
     // Wait for map provider to be available
     const providerReady = await this.waitForMapProvider()
     if (!providerReady) {
-      console.error("[Map] No map provider available after waiting")
+      console.error("[AddressMap] No map provider available after waiting")
       return
     }
 
@@ -114,7 +155,7 @@ export default {
     const { providerName, switchProvider } = useMapProvider()
     const currentProvider = providerName?.value
 
-    console.log("[Map] Current provider:", currentProvider)
+    console.log("[AddressMap] Current provider:", currentProvider)
 
     // Default to Leaflet - only use Google Maps if explicitly set as the provider
     if (currentProvider === 'google') {
@@ -122,9 +163,10 @@ export default {
       const googleReady = await this.waitForGoogleMaps()
       if (googleReady) {
         this.isLeaflet = false
-        console.log("[Map] Using Google Maps")
+        console.log("[AddressMap] Using Google Maps")
       } else {
-        console.warn("[Map] Google Maps not available, falling back to Leaflet")
+        console.warn("[AddressMap] Google Maps not available, falling back to Leaflet")
+        // Try to switch to Leaflet provider
         if (switchProvider) {
           await switchProvider('leaflet')
         }
@@ -133,11 +175,8 @@ export default {
     } else {
       // Use Leaflet for 'leaflet' provider or if no provider is set
       this.isLeaflet = true
-      console.log("[Map] Using Leaflet (default)")
+      console.log("[AddressMap] Using Leaflet (default)")
     }
-
-    await this.getUserGeo()
-    await this.checkDefaultAddress()
 
     this.initMap()
   },
@@ -171,13 +210,13 @@ export default {
       while (Date.now() - startTime < timeout) {
         const { provider } = useMapProvider()
         if (provider?.value) {
-          console.log("[Map] Map provider is ready")
+          console.log("[AddressMap] Map provider is ready")
           return true
         }
         await new Promise(resolve => setTimeout(resolve, 100))
       }
 
-      console.warn("[Map] Map provider not available after", timeout, "ms")
+      console.warn("[AddressMap] Map provider not available after", timeout, "ms")
       return false
     },
 
@@ -191,13 +230,13 @@ export default {
 
       while (Date.now() - startTime < timeout) {
         if (typeof window !== 'undefined' && window.google && window.google.maps) {
-          console.log("[Map] Google Maps API is ready")
+          console.log("[AddressMap] Google Maps API is ready")
           return true
         }
         await new Promise(resolve => setTimeout(resolve, 100))
       }
 
-      console.warn("[Map] Google Maps API not available after", timeout, "ms")
+      console.warn("[AddressMap] Google Maps API not available after", timeout, "ms")
       return false
     },
 
@@ -208,51 +247,37 @@ export default {
       this.marker = null
       this.formattedAddress = null
       this.userGeoInfo = null
-      this.mapPosition = {
-        lat: 47.9173341,
-        lng: 106.9155,
-      }
-    },
-
-    async getUserGeo() {
-      const store = useCommerceStore()
-
-      if (store.userLocation) {
-        this.mapPosition = {
-          lat: store.userLocation.latitude,
-          lng: store.userLocation.longitude,
-        }
-      }
+      this.mapPosition = { ...this.defaultPosition }
     },
 
     async getBrowserLocation() {
-      console.log("[Map] Getting browser location...")
+      console.log("[AddressMap] Getting browser location...")
 
       if (!this.map) {
-        console.error("[Map] Map not initialized yet")
+        console.error("[AddressMap] Map not initialized yet")
         return
       }
 
       try {
         const position = await this.$address.getBrowserLocation()
 
-        console.log("Get Browser Location ::: ", position)
+        console.log("[AddressMap] Browser location:", position)
 
         if (position) {
           if (this.isLeaflet) {
-            console.log("[Map] Updating Leaflet map with browser location")
+            console.log("[AddressMap] Updating Leaflet map with browser location")
             this.map.setView([position.lat, position.lng], 18)
             await this.setMarkerLeaflet(position)
             await this.geoCoderByLatLngLeaflet(position.lat, position.lng)
           } else {
-            console.log("[Map] Updating Google map with browser location")
+            console.log("[AddressMap] Updating Google map with browser location")
             this.map.setZoom(18)
             this.map.setCenter(position)
             this.setMarker(position)
             this.geoCoderByLatLng(position.lat, position.lng)
           }
         } else {
-          console.warn("[Map] No position returned from browser")
+          console.warn("[AddressMap] No position returned from browser")
           this.$nuxt.$bus?.$emit("toast", {
             severity: "warn",
             summary: this.$utils.t("Location Access"),
@@ -260,7 +285,7 @@ export default {
           })
         }
       } catch (error) {
-        console.error("[Map] Failed to get browser location:", error)
+        console.error("[AddressMap] Failed to get browser location:", error)
         this.$nuxt.$bus?.$emit("toast", {
           severity: "error",
           summary: this.$utils.t("Error"),
@@ -269,12 +294,12 @@ export default {
       }
     },
 
-    async geoCoderByAddress(full_address) {
-      if (!full_address) return
+    async geoCoderByAddress(address) {
+      if (!address) return
 
-      const res = await this.$address.addressToLatLng(full_address)
+      const res = await this.$address.addressToLatLng(address)
 
-      console.log("Address ::: Geocode from address to lat lng: ", res)
+      console.log("[AddressMap] Geocode from address to lat lng:", res)
 
       if (res && res.results && res.results.length > 0) {
         this.mapPosition = {
@@ -317,6 +342,8 @@ export default {
             lat: parseFloat(this.address.lat),
             lng: parseFloat(this.address.lng),
           }
+        } else if (typeof this.address === 'string') {
+          await this.geoCoderByAddress(this.address)
         } else if (this.address.full_address) {
           await this.geoCoderByAddress(this.address.full_address)
         }
@@ -326,6 +353,8 @@ export default {
     // Map Initialization
     initMap() {
       setTimeout(async () => {
+        await this.checkDefaultAddress()
+
         if (this.isLeaflet) {
           await this.setMapLeaflet()
           await this.setMarkerLeaflet()
@@ -355,6 +384,8 @@ export default {
             lng: parseFloat(this.address.lng),
           }
         }
+
+        console.log("[AddressMap] Set Map with address:", this.address)
       }
 
       this.map = new Map(document.getElementById("map"), {
@@ -376,6 +407,13 @@ export default {
       })
     },
 
+    setCoordinates(lat, lng) {
+      this.mapPosition = {
+        lat: lat,
+        lng: lng,
+      }
+    },
+
     setAutoComplete() {
       this.autocomplete = new google.maps.places.Autocomplete(
         document.getElementById("searchAddress"),
@@ -393,6 +431,7 @@ export default {
       )
       this.autocomplete.bindTo("bounds", this.map)
 
+      // Events
       this.autocomplete.addListener("place_changed", () => {
         this.infowindow.close()
 
@@ -439,6 +478,7 @@ export default {
         draggable: true,
       })
 
+      // Events
       marker.addListener("click", (event) => {
         const position = event.latLng
         this.map.setCenter(position)
@@ -457,9 +497,11 @@ export default {
     },
 
     setMapItems(place) {
+      // Set Map
       this.map.setZoom(18)
       this.map.setCenter(place.geometry.location)
 
+      // Set Marker
       this.setMarker(place.geometry.location)
 
       this.marker.setPlace({
@@ -468,11 +510,40 @@ export default {
       })
       this.marker.setVisible(true)
 
+      // Set InfoWindow
       const infowindowContent = document.getElementById("infowindow-content")
+
       infowindowContent.children["place-address"].textContent =
         place.formatted_address
 
+      // Set Visible Address
       this.formattedAddress = place.formatted_address
+    },
+
+    // Results and Address Mapping
+    formatPlace(place) {
+      let formData = parseGooglePlace(place)
+
+      // Fallback for empty address1 and address2 using formatted_address
+      if (place.formatted_address) {
+        if (!formData.address1 || !formData.address2) {
+          const fullAddress = parseFormattedAddress(
+            place.formatted_address,
+            formData.country
+          )
+
+          if (!formData.address1) {
+            formData.address1 = fullAddress.address1
+          }
+          if (!formData.address2) {
+            formData.address2 = fullAddress.address2
+          }
+
+          console.log("[AddressMap] Full Address:", formData, fullAddress)
+        }
+      }
+
+      this.$emit("geocode", formData)
     },
 
     // Leaflet Methods
@@ -480,7 +551,7 @@ export default {
       const { provider } = useMapProvider()
 
       if (!provider?.value) {
-        console.error('[Map] Leaflet provider not available')
+        console.error('[AddressMap] Leaflet provider not available')
         return
       }
 
@@ -495,6 +566,7 @@ export default {
         zoom: mapZoom,
       })
 
+      // Map click event
       this.map.on('click', async (e) => {
         const { lat, lng } = e.latlng
         await this.setMarkerLeaflet({ lat, lng })
@@ -507,7 +579,7 @@ export default {
       const { provider } = useMapProvider()
 
       if (!provider?.value) {
-        console.error('[Map] Leaflet provider not available for marker')
+        console.error('[AddressMap] Leaflet provider not available for marker')
         return
       }
 
@@ -522,6 +594,7 @@ export default {
       this.marker = provider.value.createMarker(latlng, { draggable: true })
       this.marker.addTo(this.map)
 
+      // Marker events
       this.marker.on('click', (e) => {
         const { lat, lng } = e.target.getLatLng()
         this.map.setView([lat, lng], 18)
@@ -538,22 +611,25 @@ export default {
       const { provider } = useMapProvider()
 
       if (!provider?.value) {
-        console.error('[Map] Leaflet provider not available for geocoding')
+        console.error('[AddressMap] Leaflet provider not available for geocoding')
         return
       }
 
+      // Set loading state
       this.isLoading = true
       this.$emit('loading', true)
 
       try {
+        // Use reverse geocoding for coordinates to address
         const result = await provider.value.latLngToAddress(lat, lng)
 
         if (result) {
           this.formatPlaceLeaflet(result)
         }
       } catch (error) {
-        console.error('[Map] Reverse geocoding failed:', error)
+        console.error('[AddressMap] Reverse geocoding failed:', error)
       } finally {
+        // Clear loading state
         this.isLoading = false
         this.$emit('loading', false)
       }
@@ -562,6 +638,7 @@ export default {
     formatPlaceLeaflet(place) {
       const { parseNominatimPlace } = useAddressParsing()
 
+      // Check if this is a Nominatim result
       const formData = place._nominatim
         ? parseNominatimPlace(place._nominatim)
         : parseNominatimPlace(place)
@@ -571,30 +648,35 @@ export default {
 
     // Leaflet Autocomplete Methods
     setupLeafletAutocomplete() {
+      // Wait for next tick to ensure component is fully mounted
       this.$nextTick(() => {
+        // PrimeVue InputText: access the actual input element
         const searchInput = this.$refs.searchAddress?.$el
 
-        console.log('[Map] Setting up Leaflet autocomplete', searchInput)
+        console.log('[AddressMap] Setting up Leaflet autocomplete', searchInput)
 
         if (!searchInput) {
-          console.warn('[Map] Search input not found')
+          console.warn('[AddressMap] Search input not found')
           return
         }
 
+        // Add input event listener
         searchInput.addEventListener('input', this.handleSearchInput)
         searchInput.addEventListener('focus', this.handleSearchFocus)
 
+        // Close results on outside click
         document.addEventListener('click', this.handleOutsideClick)
 
-        console.log('[Map] Leaflet autocomplete setup complete')
+        console.log('[AddressMap] Leaflet autocomplete setup complete')
       })
     },
 
     handleSearchInput(event) {
       const value = event.target.value.trim()
 
-      console.log('[Map] Search input changed:', value)
+      console.log('[AddressMap] Search input changed:', value)
 
+      // Clear previous timer
       if (this.searchDebounceTimer) {
         clearTimeout(this.searchDebounceTimer)
       }
@@ -602,9 +684,13 @@ export default {
       if (!value || value.length < 3) {
         this.searchResults = []
         this.showSearchResults = false
+        console.log('[AddressMap] Search value too short or empty')
         return
       }
 
+      console.log('[AddressMap] Scheduling search for:', value)
+
+      // Debounce search (300ms)
       this.searchDebounceTimer = setTimeout(async () => {
         await this.searchAddress(value)
       }, 300)
@@ -627,22 +713,24 @@ export default {
     },
 
     async searchAddress(query) {
-      console.log('[Map] Searching for:', query)
+      console.log('[AddressMap] Searching for:', query)
 
       try {
         const result = await this.$address.typeSearchGoogle(query)
 
-        console.log('[Map] Search results:', result)
+        console.log('[AddressMap] Search results:', result)
 
         if (result && result.predictions) {
+          console.log('[AddressMap] Found predictions:', result.predictions.length)
           this.searchResults = result.predictions
           this.showSearchResults = true
         } else {
+          console.warn('[AddressMap] No predictions found in result')
           this.searchResults = []
           this.showSearchResults = false
         }
       } catch (error) {
-        console.error('[Map] Search failed:', error)
+        console.error('[AddressMap] Search failed:', error)
         this.searchResults = []
         this.showSearchResults = false
       }
@@ -656,15 +744,18 @@ export default {
 
       this.showSearchResults = false
 
+      // Set loading state
       this.isLoading = true
       this.$emit('loading', true)
 
+      // Get full place details
       try {
         const geocodeResult = await this.$address.addressToLatLng(result.description)
 
         if (geocodeResult && geocodeResult.results && geocodeResult.results.length > 0) {
           const place = geocodeResult.results[0]
 
+          // Update map position
           const position = {
             lat: place.geometry.location.lat,
             lng: place.geometry.location.lng
@@ -673,38 +764,16 @@ export default {
           this.map.setView([position.lat, position.lng], 18)
           await this.setMarkerLeaflet(position)
 
+          // Format and emit the address
           this.formatPlaceLeaflet(place)
         }
       } catch (error) {
-        console.error('[Map] Failed to geocode selected result:', error)
+        console.error('[AddressMap] Failed to geocode selected result:', error)
       } finally {
+        // Clear loading state
         this.isLoading = false
         this.$emit('loading', false)
       }
-    },
-
-    // Results and Address Mapping
-    formatPlace(place) {
-      let formData = parseGooglePlace(place)
-
-      // Fallback for empty address1 and address2 using formatted_address
-      if (place.formatted_address) {
-        if (!formData.address1 || !formData.address2) {
-          const fullAddress = parseFormattedAddress(
-            place.formatted_address,
-            formData.country
-          )
-
-          if (!formData.address1) {
-            formData.address1 = fullAddress.address1
-          }
-          if (!formData.address2) {
-            formData.address2 = fullAddress.address2
-          }
-        }
-      }
-
-      this.$emit("geocode", formData)
     },
   },
 }

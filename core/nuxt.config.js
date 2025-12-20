@@ -25,6 +25,19 @@ if (!globalThis.__AD_CORE_LOADED__) {
 }
 
 /**
+ * Integration Layers (conditionally loaded based on config)
+ */
+const integrationLayers = []
+
+if (integrations.leaflet) {
+  integrationLayers.push(resolve("../integrations/leaflet"))
+}
+
+if (integrations.googlemaps) {
+  integrationLayers.push(resolve("../integrations/googlemaps"))
+}
+
+/**
  * Middleware
  */
 
@@ -39,6 +52,9 @@ const middlewares = defineNuxtConfig({
 const app = defineNuxtConfig({
   target: "static",
   components: true,
+
+  // Conditionally extend integration layers
+  extends: integrationLayers,
 
   alias: {
     "@core": resolve("./assets/scss"),
