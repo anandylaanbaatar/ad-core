@@ -432,6 +432,24 @@ export default {
         return
       }
 
+      // Ensure customer exists before saving address
+      let customerId = this.customer?.id
+      if (!customerId) {
+        // Create or fetch customer first
+        await useCommerceStore().setUser()
+        customerId = useCommerceStore().customer?.id
+
+        if (!customerId) {
+          this.$bus.$emit("toast", {
+            severity: "error",
+            summary: this.$utils.t("Address"),
+            detail: this.$utils.t("Unable to save address. Customer not found."),
+          })
+          this.loading = false
+          return
+        }
+      }
+
       let formData = {
         title: null,
         status: "published",
@@ -455,7 +473,7 @@ export default {
           formData.id = this.address.id
 
           const customerUpdate = await this.$directus.customer.update({
-            id: this.customer.id,
+            id: customerId,
             addresses: {
               update: [formData],
             },
@@ -478,7 +496,7 @@ export default {
           // Create
         } else {
           const customerUpdate = await this.$directus.customer.update({
-            id: this.customer.id,
+            id: customerId,
             addresses: {
               create: [formData],
             },
