@@ -435,9 +435,9 @@ export default {
       let formData = {
         title: null,
         status: "published",
-        first_name: this.customer.first_name,
-        last_name: this.customer.last_name,
-        phone: this.customer.phone,
+        first_name: this.customer?.first_name || this.account?.firstName || null,
+        last_name: this.customer?.last_name || this.account?.lastName || null,
+        phone: this.customer?.phone || this.account?.phone || null,
         address1: this.form.address.address1,
         address2: this.form.address.address2,
         city: this.form.address.city,
@@ -449,62 +449,63 @@ export default {
         lng: this.form.address.lng,
       }
 
-      // Update
-      if (this.isEditMode) {
-        formData.id = this.address.id
+      try {
+        // Update
+        if (this.isEditMode) {
+          formData.id = this.address.id
 
-        const customerUpdate = await this.$directus.customer.update({
-          id: this.customer.id,
-          addresses: {
-            update: [formData],
-          },
-        })
+          const customerUpdate = await this.$directus.customer.update({
+            id: this.customer.id,
+            addresses: {
+              update: [formData],
+            },
+          })
 
-        console.log("Address ::: Updated ::: ", customerUpdate)
+          console.log("Address ::: Updated ::: ", customerUpdate)
 
-        if (customerUpdate.success && customerUpdate.data) {
-          // // Set Default Address
-          // if (
-          //   !customerUpdate.default_address &&
-          //   this.form.address.isDefaultAddress
-          // ) {
-          //   await this.saveDefaultAddress(
-          //     customerUpdate.data.addresses[
-          //       customerUpdate.data.addresses.length - 1
-          //     ]
-          //   )
-          // }
+          if (customerUpdate.success && customerUpdate.data) {
+            this.$bus.$emit("updateAccount")
+            await useCommerceStore().setUser()
+            this.$bus.$emit("toast", {
+              severity: "success",
+              summary: this.$utils.t("Address"),
+              detail: this.$utils.t("Successfully updated address."),
+            })
+            this.$emit("close")
+          } else {
+            throw new Error(customerUpdate.error || "Failed to update address")
+          }
+          // Create
+        } else {
+          const customerUpdate = await this.$directus.customer.update({
+            id: this.customer.id,
+            addresses: {
+              create: [formData],
+            },
+          })
 
-          this.$bus.$emit("updateAccount")
-          await useCommerceStore().setUser()
+          console.log("Address ::: Create ::: ", customerUpdate)
+
+          if (customerUpdate.success && customerUpdate.data) {
+            this.$bus.$emit("updateAccount")
+            await useCommerceStore().setUser()
+            this.$bus.$emit("toast", {
+              severity: "success",
+              summary: this.$utils.t("Address"),
+              detail: this.$utils.t("Successfully saved address."),
+            })
+            this.$emit("close")
+          } else {
+            throw new Error(customerUpdate.error || "Failed to save address")
+          }
         }
-        // Create
-      } else {
-        const customerUpdate = await this.$directus.customer.update({
-          id: this.customer.id,
-          addresses: {
-            create: [formData],
-          },
+      } catch (error) {
+        console.error("Address ::: Error ::: ", error)
+        this.$bus.$emit("toast", {
+          severity: "error",
+          summary: this.$utils.t("Address"),
+          detail: this.$utils.t("Failed to save address. Please try again."),
         })
-
-        console.log("Address ::: Create ::: ", customerUpdate)
-
-        if (customerUpdate.success && customerUpdate.data) {
-          // // Set Default Address
-          // if (
-          //   !customerUpdate.default_address &&
-          //   this.form.address.isDefaultAddress
-          // ) {
-          //   await this.saveDefaultAddress(
-          //     customerUpdate.data.addresses[
-          //       customerUpdate.data.addresses.length - 1
-          //     ]
-          //   )
-          // }
-
-          this.$bus.$emit("updateAccount")
-          await useCommerceStore().setUser()
-        }
       }
 
       this.loading = false

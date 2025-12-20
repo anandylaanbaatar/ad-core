@@ -284,8 +284,20 @@ export const parseNominatimPlace = (result) => {
   const isMongolia = country === "Mongolia" || country === "Монгол"
 
   if (isMongolia) {
-    // Mongolia: Use suburb/neighbourhood for district (e.g., "Sukhbaatar District")
-    province = addr.suburb || addr.neighbourhood || addr.county || ""
+    // Mongolia: Use city_district/district/suburb/neighbourhood for district (e.g., "Chingeltei", "Sukhbaatar District")
+    province = addr.city_district || addr.district || addr.suburb || addr.neighbourhood || addr.county || ""
+
+    // Fallback: Parse district from display_name if not found in address fields
+    // Format: "Street, District, City, Zip, Country"
+    if (!province && result.display_name) {
+      const parts = result.display_name.split(',').map(p => p.trim())
+      // Find the part that comes before the city (Ulaanbaatar)
+      const cityIndex = parts.findIndex(p => p === city || p === 'Ulaanbaatar' || p === 'Улаанбаатар')
+      if (cityIndex > 1) {
+        // District is typically the part right before the city
+        province = parts[cityIndex - 1]
+      }
+    }
   } else {
     // International: Use state/county
     province = addr.state || addr.county || ""
