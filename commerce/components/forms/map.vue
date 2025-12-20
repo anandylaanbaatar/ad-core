@@ -560,11 +560,34 @@ export default {
     },
 
     formatPlaceLeaflet(place) {
-      const { parseNominatimPlace } = useAddressParsing()
+      const { parseNominatimPlace, parseGooglePlace, parseFormattedAddress } = useAddressParsing()
 
-      const formData = place._nominatim
-        ? parseNominatimPlace(place._nominatim)
-        : parseNominatimPlace(place)
+      let formData
+
+      // Check if this is a Google Geocode result (has address_components)
+      if (place.address_components) {
+        formData = parseGooglePlace(place)
+
+        // Fallback for empty address1 and address2 using formatted_address
+        if (place.formatted_address && (!formData.address1 || !formData.address2)) {
+          const fullAddress = parseFormattedAddress(place.formatted_address, formData.country)
+          if (!formData.address1) {
+            formData.address1 = fullAddress.address1
+          }
+          if (!formData.address2) {
+            formData.address2 = fullAddress.address2
+          }
+        }
+      } else if (place._nominatim) {
+        // Nominatim result with _nominatim wrapper
+        formData = parseNominatimPlace(place._nominatim)
+      } else if (place.address) {
+        // Direct Nominatim result (has address object)
+        formData = parseNominatimPlace(place)
+      } else {
+        // Fallback to Nominatim parser
+        formData = parseNominatimPlace(place)
+      }
 
       this.$emit("geocode", formData)
     },

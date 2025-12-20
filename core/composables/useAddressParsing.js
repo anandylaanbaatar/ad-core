@@ -211,22 +211,45 @@ export const parseFormattedAddress = (formatted, country = null) => {
     detectedCountry === "Монгол"
 
   if (isMongolia) {
-    // Mongolia format: "Building, Street, District, City ZIP, Mongolia"
-    const cityZip = parts.pop() || ""
-    const districtKhoroo = parts.pop() || ""
-    const address2 = parts.shift() || ""
-    const address1 = parts.join(", ")
+    // Mongolia format examples:
+    // "Ц.Жигжиджавын гудамж, Chingeltei, Ulaanbaatar, 15160, Mongolia"
+    // "УБ хотын банк, Картын төв, Peace Avenue, Baga Toirog, Sükhbaatar, Ulaanbaatar, 15160, Mongolia"
+    // Strategy: Work backwards - city+zip, province, address1, then address2 is leftovers
 
-    // Split city + zip
-    const cityZipParts = cityZip.split(" ")
-    const zipcode = cityZipParts.pop() || ""
-    const city = cityZipParts.join(" ")
+    // Remove zip if it's a separate part at the end
+    let zipcode = ""
+    if (parts.length > 0 && /^\d+$/.test(parts[parts.length - 1])) {
+      zipcode = parts.pop() || ""
+    }
+
+    // Next is city (or city+zip combined)
+    let city = ""
+    if (parts.length > 0) {
+      const cityPart = parts.pop() || ""
+      // Check if city contains zip (e.g., "Ulaanbaatar 15160")
+      const cityZipMatch = cityPart.match(/^(.+?)\s+(\d+)$/)
+      if (cityZipMatch) {
+        city = cityZipMatch[1]
+        if (!zipcode) zipcode = cityZipMatch[2]
+      } else {
+        city = cityPart
+      }
+    }
+
+    // Next is province/district
+    const province = parts.length > 0 ? parts.pop() || "" : ""
+
+    // Next is address1 (street)
+    const address1 = parts.length > 0 ? parts.pop() || "" : ""
+
+    // Everything remaining is address2 (building, place name, etc.)
+    const address2 = parts.length > 0 ? parts.join(", ") : ""
 
     return {
       address1,
       address2,
       city,
-      province: districtKhoroo,
+      province,
       country: detectedCountry,
       zipcode,
     }
@@ -258,124 +281,27 @@ export const parseFormattedAddress = (formatted, country = null) => {
  * @returns {Object} Standardized address object
  */
 export const parseNominatimPlace = (result) => {
-  if (!result || !result.address) {
-    return {
-      address1: "",
-      address2: "",
-      street: "",
-      city: "",
-      province: "",
-      zip: "",
-      country: "",
-      location: null,
-      formatted_address: result?.display_name || "",
-    }
+  const emptyResult = {
+    address1: "",
+    address2: "",
+    street: "",
+    city: "",
+    province: "",
+    zip: "",
+    country: "",
+    location: null,
+    formatted_address: result?.display_name || "",
   }
 
-  const addr = result.address
+  if (!result) return emptyResult
 
-  // Extract common fields
-  const country = addr.country || ""
-  const zip = addr.postcode || ""
-  const city = addr.city || addr.town || addr.village || ""
+  const addr = result.address || {}
+  const displayName = result.display_name || ""
 
-  // Province/State: Handle Mongolia-specific vs international
-  let province = ""
-  const isMongolia = country === "Mongolia" || country === "Монгол"
-
-  if (isMongolia) {
-    // Mongolia: Use city_district/district/suburb/neighbourhood for district (e.g., "Chingeltei", "Sukhbaatar District")
-    province = addr.city_district || addr.district || addr.suburb || addr.neighbourhood || addr.county || ""
-
-    // Fallback: Parse district from display_name if not found in address fields
-    // Format: "Street, District, City, Zip, Country"
-    if (!province && result.display_name) {
-      const parts = result.display_name.split(',').map(p => p.trim())
-      // Find the part that comes before the city (Ulaanbaatar)
-      const cityIndex = parts.findIndex(p => p === city || p === 'Ulaanbaatar' || p === 'Улаанбаатар')
-      if (cityIndex > 1) {
-        // District is typically the part right before the city
-        province = parts[cityIndex - 1]
-      }
-    }
-  } else {
-    // International: Use state/county
-    province = addr.state || addr.county || ""
-  }
-
-  // Build address components
-  let address1 = "" // Street address with house number
-  let address2 = "" // Building, unit, floor, or place name
-  let street = ""
-
-  // Address1: Street address (house_number + road)
-  if (addr.house_number && addr.road) {
-    address1 = `${addr.house_number} ${addr.road}`
-    street = addr.road
-  } else if (addr.road) {
-    address1 = addr.road
-    street = addr.road
-  } else if (addr.house_number) {
-    address1 = addr.house_number
-  }
-
-  // Address2: Building/unit/floor/place name details
-  const buildingParts = []
-
-  // Check for building name or premise
-  if (addr.building) {
-    buildingParts.push(addr.building)
-  } else if (addr.premise) {
-    buildingParts.push(addr.premise)
-  }
-
-  // Check for unit/apartment number
-  if (addr.unit) {
-    buildingParts.push(`Unit ${addr.unit}`)
-  } else if (addr.apartment) {
-    buildingParts.push(`Apt ${addr.apartment}`)
-  }
-
-  // Check for floor/level
-  if (addr.floor) {
-    buildingParts.push(`Floor ${addr.floor}`)
-  } else if (addr.level) {
-    buildingParts.push(`Level ${addr.level}`)
-  }
-
-  // Combine building parts into address2
-  if (buildingParts.length > 0) {
-    address2 = buildingParts.join(", ")
-  }
-
-  // Fallback: If no street address but have premise, use it as address1
-  if (!address1 && addr.premise) {
-    address1 = addr.premise
-  }
-
-  // Additional fallback: Parse display_name if address1 is still empty
-  if (!address1 && result.display_name) {
-    const parts = result.display_name.split(',').map(p => p.trim())
-    if (parts.length > 0) {
-      // First part is usually the most specific address
-      const firstPart = parts[0]
-
-      // If the first part looks like a building name (contains letters and is short)
-      // and there's a second part that looks like a street, use accordingly
-      if (parts.length > 1 && firstPart.length < 20 && /[A-Za-z]/.test(firstPart)) {
-        const possibleStreet = parts[1]
-        // Check if second part looks like a street (has numbers)
-        if (/\d/.test(possibleStreet)) {
-          address1 = possibleStreet // Street address
-          address2 = firstPart // Building/place name
-        } else {
-          address1 = firstPart
-        }
-      } else {
-        address1 = firstPart
-      }
-    }
-  }
+  // Extract basic fields from geocoding
+  let country = addr.country || ""
+  let zip = addr.postcode || ""
+  let street = addr.road || ""
 
   // Extract location coordinates
   let location = null
@@ -386,10 +312,143 @@ export const parseNominatimPlace = (result) => {
     }
   }
 
+  const isMongolia = country === "Mongolia" || country === "Монгол"
+
+  // For Mongolia: Use full address parsing (more reliable than geocoding fields)
+  if (isMongolia && displayName) {
+    const parts = displayName.split(',').map(p => p.trim())
+
+    // Work backwards from the end:
+    // Format: "Place, Place2, Street, SubDistrict, District, City, Zip, Country"
+
+    // Remove country
+    if (parts.length > 0 && (parts[parts.length - 1] === 'Mongolia' || parts[parts.length - 1] === 'Монгол')) {
+      parts.pop()
+    }
+
+    // Remove zip (if numeric)
+    if (parts.length > 0 && /^\d+$/.test(parts[parts.length - 1])) {
+      zip = parts.pop()
+    }
+
+    // City is next (Ulaanbaatar)
+    let city = ""
+    if (parts.length > 0) {
+      const lastPart = parts[parts.length - 1]
+      if (lastPart === 'Ulaanbaatar' || lastPart === 'Улаанбаатар' || lastPart.includes('Ulaanbaatar') || lastPart.includes('Улаанбаатар')) {
+        city = parts.pop()
+      }
+    }
+
+    // Known districts in Ulaanbaatar
+    const knownDistricts = [
+      'Sükhbaatar', 'Sukhbaatar', 'Сүхбаатар',
+      'Chingeltei', 'Чингэлтэй',
+      'Bayanzürkh', 'Bayanzurkh', 'Баянзүрх',
+      'Khan-Uul', 'Хан-Уул',
+      'Songinokhairkhan', 'Сонгинохайрхан',
+      'Bayangol', 'Баянгол',
+      'Nalaikh', 'Налайх',
+      'Bagakhangai', 'Багахангай',
+      'Baganuur', 'Багануур'
+    ]
+
+    // Helper to check if a string looks like a street
+    const looksLikeStreet = (str) => {
+      const lower = str.toLowerCase()
+      return str.includes('гудамж') ||
+             str.includes('өргөн чөлөө') ||
+             str.includes('зам') ||
+             lower.includes('street') ||
+             lower.includes('avenue') ||
+             lower.includes('road')
+    }
+
+    // Find and remove province (known district)
+    let province = ""
+    for (let i = parts.length - 1; i >= 0; i--) {
+      const part = parts[i]
+      if (knownDistricts.some(d => part === d || part.includes(d))) {
+        province = parts.splice(i, 1)[0]
+        break
+      }
+    }
+
+    // Find and remove address1 (street) - look for street patterns
+    let address1 = ""
+    for (let i = parts.length - 1; i >= 0; i--) {
+      const part = parts[i]
+      if (looksLikeStreet(part)) {
+        address1 = parts.splice(i, 1)[0]
+        break
+      }
+    }
+
+    // If no street pattern found, take the last part as address1
+    if (!address1 && parts.length > 0) {
+      address1 = parts.pop()
+    }
+
+    // If no known district found, take the last remaining part as province
+    if (!province && parts.length > 0) {
+      province = parts.pop()
+    }
+
+    // Address2 is everything remaining (place names, building names, etc.)
+    let address2 = ""
+    if (parts.length > 0) {
+      address2 = parts.join(', ')
+    }
+
+    return {
+      address1: address1,
+      address2: address2,
+      street: street || address1,
+      city: city,
+      province: province,
+      zip: zip,
+      country: country,
+      location: location,
+      formatted_address: displayName,
+    }
+  }
+
+  // For international addresses: use geocoding fields
+  let city = addr.city || addr.town || addr.village || ""
+  let province = addr.state || addr.county || ""
+  let address1 = ""
+  let address2 = ""
+
+  // Address1 from geocoding (street address)
+  if (addr.house_number && addr.road) {
+    address1 = `${addr.house_number} ${addr.road}`
+  } else if (addr.road) {
+    address1 = addr.road
+  } else if (addr.house_number) {
+    address1 = addr.house_number
+  }
+
+  // Address2 from geocoding (building/place name)
+  const buildingParts = []
+  if (addr.amenity) buildingParts.push(addr.amenity)
+  else if (addr.shop) buildingParts.push(addr.shop)
+  else if (addr.office) buildingParts.push(addr.office)
+  else if (addr.tourism) buildingParts.push(addr.tourism)
+  else if (addr.leisure) buildingParts.push(addr.leisure)
+
+  if (addr.building && addr.building !== 'yes') buildingParts.push(addr.building)
+  else if (addr.premise) buildingParts.push(addr.premise)
+
+  if (addr.house_name) buildingParts.push(addr.house_name)
+
+  if (buildingParts.length > 0) {
+    address2 = buildingParts.join(", ")
+  }
+
   // Build standardized output (matches Google Places format)
   return {
-    address1: address1, // Street address
-    address2: address2, // Building/unit/place name
+    address1: address1,
+    address2: address2,
     street: street || address1,
     city: city,
     province: province,
