@@ -38,12 +38,12 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
           authStore.set("userLoggedIn", true)
         }
 
-        // Commerce User
-        if (theme().type === "commerce") {
-          await useCommerceStore().setUser()
-        }
-
         // console.log("[Middleware] ::: [Auth] ::: User Set! ", newUserData)
+      }
+
+      // Commerce User - always ensure commerce store is synced when user is logged in
+      if (theme().type === "commerce" && !useCommerceStore().customer) {
+        await useCommerceStore().setUser()
       }
       // Check if email verified!
       if (authStore.user) {

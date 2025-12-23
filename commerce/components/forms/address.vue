@@ -475,7 +475,7 @@ export default {
           const customerUpdate = await this.$directus.customer.update({
             id: customerId,
             addresses: {
-              update: [formData],
+              update: [{ id: this.address.junction_id, addresses_id: formData }],
             },
           })
 
@@ -498,7 +498,7 @@ export default {
           const customerUpdate = await this.$directus.customer.update({
             id: customerId,
             addresses: {
-              create: [formData],
+              create: [{ addresses_id: formData }],
             },
           })
 

@@ -91,7 +91,7 @@ export default defineNuxtPlugin((nuxtApp) => {
     else if (id === "customers") {
       options.fields = `
         *,
-        addresses.id,
+        addresses.*,
         addresses.addresses_id.*,
         orders.*,
         orders.line_items.line_items_id.*,

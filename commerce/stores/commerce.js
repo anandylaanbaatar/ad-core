@@ -129,14 +129,14 @@ export const useCommerceStore = defineStore("commerce", {
       // const tenantId =
       //   useRuntimeConfig().public.features?.multitenancy?.tenantId
 
-      // console.log("[Commerce] ::: UserData ::: ", user, userData)
+      console.log("[Commerce] ::: setUser called ::: userData:", userData)
 
       // 1. Check Customer Exists
       const customerData = await nuxtApp.$directus.customer.item({
         uid: userData.uid,
       })
 
-      // console.log("[Commerce] ::: Customer Exists ::: ", customerData)
+      console.log("[Commerce] ::: Customer API Response ::: ", customerData)
 
       // Check Customer
       if (
@@ -145,6 +145,8 @@ export const useCommerceStore = defineStore("commerce", {
         customerData.data.length
       ) {
         customer = customerData.data[0]
+
+        console.log("[Commerce] ::: Customer Raw Addresses ::: ", customer.addresses)
 
         // Flatten M2M addresses (from junction table structure)
         if (customer.addresses && Array.isArray(customer.addresses)) {
@@ -161,6 +163,8 @@ export const useCommerceStore = defineStore("commerce", {
               return junctionItem
             })
             .filter(Boolean)
+
+          console.log("[Commerce] ::: Customer Flattened Addresses ::: ", customer.addresses)
         }
 
         // Update and Set
