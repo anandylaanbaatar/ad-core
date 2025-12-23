@@ -146,6 +146,23 @@ export const useCommerceStore = defineStore("commerce", {
       ) {
         customer = customerData.data[0]
 
+        // Flatten M2M addresses (from junction table structure)
+        if (customer.addresses && Array.isArray(customer.addresses)) {
+          customer.addresses = customer.addresses
+            .map((junctionItem) => {
+              // M2M structure: { id: junctionId, addresses_id: { ...addressData } }
+              if (junctionItem.addresses_id) {
+                return {
+                  ...junctionItem.addresses_id,
+                  junction_id: junctionItem.id, // Keep junction ID for delete operations
+                }
+              }
+              // Already flat structure (fallback)
+              return junctionItem
+            })
+            .filter(Boolean)
+        }
+
         // Update and Set
         let updates = {}
         if (customer.first_name !== userData.firstName) {

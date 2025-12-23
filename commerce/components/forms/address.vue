@@ -553,7 +553,7 @@ export default {
           const customerAddressDelete =
             await this.$directus.customer.address.delete({
               id: this.addressItem.id,
-              cid: this.address.id,
+              cid: this.addressItem.junction_id,
             })
 
           console.log("Delete Customer Address ::: ", customerAddressDelete)
