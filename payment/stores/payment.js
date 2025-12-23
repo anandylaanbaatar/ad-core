@@ -107,68 +107,24 @@ export const usePaymentStore = defineStore("payment", {
         }
       }
 
-      // 2. Get CustomerId in Stripe by Email
-      if (!customerId) {
-        if (userData && userData.email) {
-          const stripeCustomerId = await nuxtApp.$stripe.customer.get(
-            userData.email
-          )
+      // REMOVED: Steps 2 & 3 - Stripe customer creation now handled by Firebase Cloud Function
+      //
+      // The centralized auth API + cloud function automatically creates Stripe customers
+      // during user signup. This client-side logic is no longer needed.
+      //
+      // If customerId is not found in Firebase, it means:
+      // - User was created before the cloud function was deployed, OR
+      // - Cloud function failed to create the Stripe customer
+      //
+      // In these cases, we'll log a warning but won't create the customer client-side.
+      // The cloud function will handle retry logic and non-blocking execution.
 
-          if (stripeCustomerId) {
-            customerId = stripeCustomerId
-
-            // Save User Customer Id
-            let customerIdPath = `users/${userData.uid}`
-
-            if (isMultitenant && tenantId) {
-              customerIdPath = `users/${userData.uid}/${tenantId}`
-            }
-            let updates = {}
-
-            if (isTestMode) {
-              updates = {
-                test_customerId: customerId,
-              }
-              this.test_customerId = customerId
-            } else {
-              updates = {
-                customerId: customerId,
-              }
-            }
-
-            await nuxtApp.$fire.actions.update(customerIdPath, updates)
-          }
-        }
-      }
-
-      // 3. Create CustomerId in Stripe by Email
-      if (!customerId) {
-        if (userData && userData.email) {
-          const stripeCustomer = await nuxtApp.$stripe.customer.create(
-            userData.email
-          )
-
-          if (stripeCustomer) {
-            customerId = stripeCustomer.id
-
-            // Save User Customer Id
-            let customerIdPath = `users/${userData.uid}`
-
-            if (isMultitenant && tenantId) {
-              customerIdPath = `users/${userData.uid}/${tenantId}`
-            }
-            let updates = {
-              customerId: customerId,
-            }
-            if (isTestMode) {
-              updates = {
-                test_customerId: customerId,
-              }
-            }
-
-            await nuxtApp.$fire.actions.update(customerIdPath, updates)
-          }
-        }
+      if (!customerId && userData && userData.email) {
+        console.warn(
+          "[Payment Store] ::: Stripe customer ID not found for user:",
+          userData.uid,
+          "- Cloud function should have created it during signup"
+        )
       }
 
       if (customerId) {
@@ -177,7 +133,12 @@ export const usePaymentStore = defineStore("payment", {
 
       return customerId
     },
+    /**
+     * DEPRECATED: getStripeCustomerId - read-only lookup now handled by setStripeCustomerId
+     * Kept for backwards compatibility but no longer actively used.
+     */
     async getStripeCustomerId(email) {
+      console.warn("[Payment Store] ::: getStripeCustomerId is deprecated")
       return new Promise(async (resolve) => {
         const nuxtApp = useNuxtApp()
 
@@ -194,22 +155,14 @@ export const usePaymentStore = defineStore("payment", {
         }
       })
     },
+
+    /**
+     * DEPRECATED: createStripeCustomerId - now handled by Firebase Cloud Function
+     * This method should not be called. Cloud function creates Stripe customers automatically.
+     */
     async createStripeCustomerId(email) {
-      return new Promise(async (resolve) => {
-        const nuxtApp = useNuxtApp()
-
-        if (!nuxtApp.$stripe) {
-          resolve(null)
-        }
-
-        const customer = await nuxtApp.$stripe.customer.create(email)
-
-        if (customer && customer.id) {
-          resolve(customer.id)
-        } else {
-          resolve(null)
-        }
-      })
+      console.error("[Payment Store] ::: createStripeCustomerId is DEPRECATED - use centralized auth API")
+      return null
     },
   },
 })

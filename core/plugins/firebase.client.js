@@ -646,16 +646,32 @@ export default defineNuxtPlugin(async (nuxtApp) => {
         })
     })
   }
-  const resendEmailVerification = async () => {
-    return new Promise((resolve, reject) => {
-      sendEmailVerification(auth.currentUser)
-        .then(() => {
-          resolve(true)
-        })
-        .catch((err) => {
-          reject(err)
-        })
-    })
+  const resendEmailVerification = async (options = {}) => {
+    const user = auth.currentUser
+    if (!user) throw new Error("No authenticated user")
+
+    try {
+      // Use custom branded email API
+      const response = await $fetch("/api/auth/send-verification-email", {
+        method: "POST",
+        body: {
+          email: user.email,
+          displayName: user.displayName,
+          tenantUrl: options.tenantUrl || window.location.origin,
+          storeName: options.storeName || useAppConfig()?.name,
+          logoUrl: options.logoUrl || useAppConfig()?.theme?.logoUrl,
+        },
+      })
+
+      if (!response.success) {
+        throw new Error(response.error || "Failed to send verification email")
+      }
+
+      return true
+    } catch (err) {
+      console.error("[Firebase] ::: Resend verification error:", err)
+      throw err
+    }
   }
 
   /**

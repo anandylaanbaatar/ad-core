@@ -377,43 +377,78 @@ export default {
       const formData = this.getFormData()
 
       try {
-        const user = await this.$fire.actions.signUp(formData)
-        const emailId = user.email.split("@")[0]
+        // NEW: Call centralized auth API instead of Firebase SDK
+        const apiUrl = useRuntimeConfig().public.apiUrl || 'https://api.adcommerce.mn'
 
-        let newUser = user
-        newUser.username = emailId
-        newUser.phoneCode = this.formOptional.phoneCode
-        newUser.phone = `${newUser.phoneCode}${formData.phone}`
+        // Determine signup source and tenant ID
+        const isStorefront = !!features().multitenancy?.tenantId
+        const signupSource = isStorefront ? 'storefront' : 'platform'
+        const tenantId = features().multitenancy?.tenantId || 'adcommerce'
 
-        if (!newUser.firstName) {
-          newUser.firstName = formData.firstName
-        }
-        if (!newUser.lastName) {
-          newUser.lastName = formData.lastName
-        }
-        if (!newUser.displayName) {
-          newUser.displayName = `${formData.firstName} ${formData.lastName}`
-        }
-        if (!newUser.phoneNumber) {
-          newUser.phoneNumber = formData.phone
+        const response = await $fetch(`${apiUrl}/auth/signup`, {
+          method: 'POST',
+          body: {
+            email: formData.email,
+            password: formData.password,
+            displayName: `${formData.firstName} ${formData.lastName}`,
+            firstName: formData.firstName,
+            lastName: formData.lastName,
+            phone: formData.phone ? `${this.formOptional.phoneCode}${formData.phone}` : null,
+            phoneCode: this.formOptional.phoneCode,
+            acceptsMarketing: formData.acceptsMarketing,
+            signupSource: signupSource,
+            tenantId: tenantId,
+            isManualCustomer: false
+          }
+        })
+
+        if (!response.success) {
+          throw new Error(response.error || 'Signup failed')
         }
 
-        await this.$fire.actions.resendEmailVerification()
-        await useAuthStore().saveUserFirebase(newUser)
+        // Login with custom token returned from API
+        await this.$fire.actions.loginWithToken(response.customToken)
 
-        // Commerce User
+        // Get updated user data from Firebase
+        const userData = await this.$fire.actions.user()
+
+        // Set user in store (cloud function has already created all integrations)
+        await useAuthStore().setUserFirebase(userData)
+
+        // Commerce User (fetch existing customer created by cloud function)
         if (theme().type === "commerce") {
           await useCommerceStore().setUser()
+        }
+
+        // Send branded verification email
+        try {
+          await $fetch("/api/auth/send-verification-email", {
+            method: "POST",
+            body: {
+              email: formData.email,
+              displayName: `${formData.firstName} ${formData.lastName}`,
+              tenantUrl: window.location.origin,
+              storeName: useAppConfig()?.name,
+              logoUrl: useAppConfig()?.theme?.logoUrl,
+            },
+          })
+        } catch (emailErr) {
+          console.error("[SignUp] Failed to send verification email:", emailErr)
+          // Don't block signup if email fails
         }
 
         this.afterSignUp()
       } catch (err) {
         console.log("SignUp ::: Error :: ", err)
 
-        let msg = err.code
+        let msg = err.message || err.code || 'Signup failed'
 
-        if (msg === "auth/email-already-in-use") {
+        if (msg.includes("email-already-in-use")) {
           msg = `Email already in use`
+        } else if (msg.includes("weak-password")) {
+          msg = `Password should be at least 6 characters`
+        } else if (msg.includes("invalid-email")) {
+          msg = `Invalid email address`
         }
 
         this.errors["system"] = [

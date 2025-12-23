@@ -254,41 +254,10 @@ export const useAuthStore = defineStore("auth", {
        * Notifications
        */
 
-      // Check Loops User Set
-      if (integrations().loops && userData.email) {
-        if (features().notifications.loops && useNuxtApp().$notifications) {
-          let isSet = false
-
-          // Check Loops User Id
-          if (features().multitenancy && features().multitenancy.tenantId) {
-            const tenantId = features().multitenancy.tenantId
-
-            if (userData[tenantId]) {
-              if (userData[tenantId].loopsUserId) {
-                const userId = userData[tenantId].loopsUserId
-                isSet = true
-
-                // console.log("[Store] ::: [Auth] ::: Loops User Id :::", userId)
-              }
-            }
-          } else {
-            if (userData.loopsUserId) {
-              const userId = userData.loopsUserId
-              isSet = true
-
-              console.log("[Store] ::: [Auth] ::: Loops User Id :::", userId)
-            }
-          }
-
-          // Check Loops User - NON-BLOCKING (run in background)
-          if (!isSet) {
-            // Run Loops API calls in background to avoid blocking auth flow
-            this.syncLoopsUser(userData).catch((error) => {
-              console.error("[Store] ::: [Auth] ::: Loops sync error (non-blocking):", error)
-            })
-          }
-        }
-      }
+      // REMOVED: Loops sync logic - now handled by Firebase Cloud Function
+      // The centralized auth API + cloud function automatically creates Loops contacts
+      // for platform signups and manual customers during user creation.
+      // Client-side sync is no longer needed.
 
       // Update User Data
       if (Object.keys(updates).length > 0) {
@@ -301,105 +270,16 @@ export const useAuthStore = defineStore("auth", {
     },
 
     /**
-     * Sync user with Loops email service (non-blocking background task)
+     * DEPRECATED: Loops sync - now handled by Firebase Cloud Function
+     *
+     * This method is no longer used. Loops contact creation is now handled automatically
+     * by the centralized auth API and Firebase Cloud Functions during user signup.
+     *
+     * Keeping this method commented for reference during migration period.
      */
-    async syncLoopsUser(userData) {
-      const uid = userData.uid
-
-      try {
-        let userId = null
-        const loopUser = await useNuxtApp().$loops.user.find(
-          userData.email
-        )
-
-        // Check Mailing List
-        let mailingLists = {}
-        mailingLists[features().notifications.loops.listId] = true
-        let userUpdateData = {
-          userId: userData.uid,
-          email: userData.email,
-          firstName: userData.firstName ? userData.firstName : null,
-          lastName: userData.lastName ? userData.lastName : null,
-          mailingLists: mailingLists,
-        }
-
-        // Create User
-        if (!loopUser) {
-          userId = await useNuxtApp().$loops.user.create(
-            userUpdateData
-          )
-
-          console.log(
-            "[Store] ::: [Auth] ::: New Loops User Id :::",
-            userId
-          )
-
-          // Update User
-        } else {
-          let isUpdate = false
-
-          if (loopUser.mailingLists) {
-            if (
-              !loopUser.mailingLists[features().notifications.loops.listId]
-            ) {
-              isUpdate = true
-            }
-          }
-
-          if (isUpdate) {
-            userId = await useNuxtApp().$loops.user.update(
-              userUpdateData
-            )
-
-            console.log(
-              "[Store] ::: [Auth] ::: Found Loops User Id and Updated :::",
-              userId
-            )
-          }
-        }
-
-        // Add to updates
-        if (userId) {
-          let updates = {}
-
-          if (features().multitenancy && features().multitenancy.tenantId) {
-            const tenantId = features().multitenancy.tenantId
-
-            if (!userData[tenantId]) {
-              updates[tenantId] = {
-                loopsUserId: userId,
-              }
-            } else {
-              updates[tenantId] = { ...userData[tenantId] }
-              updates[tenantId].loopsUserId = userId
-            }
-          } else {
-            updates.loopsUserId = userId
-          }
-
-          // Update Firebase in background
-          await useNuxtApp().$fire.actions.update(`/users/${uid}`, updates)
-
-          // Update local store state
-          if (this.user && this.user.uid === uid) {
-            const updatedUser = { ...this.user }
-            if (features().multitenancy && features().multitenancy.tenantId) {
-              const tenantId = features().multitenancy.tenantId
-              if (!updatedUser[tenantId]) {
-                updatedUser[tenantId] = {}
-              }
-              updatedUser[tenantId].loopsUserId = userId
-            } else {
-              updatedUser.loopsUserId = userId
-            }
-            this.user = updatedUser
-          }
-
-          console.log("[Store] ::: [Auth] ::: Loops user synced in background")
-        }
-      } catch (error) {
-        console.error("[Store] ::: [Auth] ::: Loops sync failed:", error)
-      }
-    },
+    // async syncLoopsUser(userData) {
+    //   // REMOVED - Cloud function handles Loops integration automatically
+    //   console.warn("[Store] ::: [Auth] ::: syncLoopsUser is deprecated - use centralized auth API")
+    // },
   },
 })

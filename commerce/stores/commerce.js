@@ -190,23 +190,25 @@ export const useCommerceStore = defineStore("commerce", {
           }
         }
       } else {
-        // Create and Set
-        const customerCreate = await nuxtApp.$directus.customer.create({
-          uid: userData.uid,
-          tenants: userData.tenants,
-          first_name: userData.firstName || null,
-          last_name: userData.lastName || null,
-          email: userData.email || null,
-          phone: userData.phone || null,
-          is_email_subscribed: userData.acceptsMarketing,
-          is_sms_subscribed: userData.phone ? true : false,
-        })
+        // REMOVED: Customer creation now handled by Firebase Cloud Function
+        //
+        // The centralized auth API + cloud function automatically creates Directus customers
+        // during user signup. This client-side logic is no longer needed.
+        //
+        // If customer is not found in Directus, it means:
+        // - User was created before the cloud function was deployed, OR
+        // - Cloud function failed to create the Directus customer
+        //
+        // In these cases, log a warning. The cloud function handles retry logic.
 
-        console.log("[Commerce] ::: Customer Created ::: ", customerCreate)
+        console.warn(
+          "[Commerce Store] ::: Directus customer not found for user:",
+          userData.uid,
+          "- Cloud function should have created it during signup"
+        )
 
-        if (customerCreate.success && customerCreate.data) {
-          customer = customerCreate.data
-        }
+        // Set customer to null - user can still browse but won't have customer-specific features
+        customer = null
       }
 
       this.customer = customer

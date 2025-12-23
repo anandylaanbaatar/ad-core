@@ -29,6 +29,15 @@
           </div>
         </div>
       </div>
+
+      <Button
+        severity="secondary"
+        class="sm absolute right-0 bottom-0 m-4"
+        icon="pi pi-sign-out"
+        iconPos="right"
+        label="Logout"
+        @click="logout"
+      ></Button>
     </div>
   </AppLayout>
 </template>
@@ -81,6 +90,9 @@ export default {
       setTimeout(() => {
         this.sendingEmail = false
       }, 3000)
+    },
+    async logout() {
+      await useAuthStore().logout()
     },
   },
 }
