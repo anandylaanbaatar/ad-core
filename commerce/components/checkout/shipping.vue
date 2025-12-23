@@ -377,7 +377,7 @@ export default {
       if (type === "address") {
         this.options.distance = null
         await this.calculateAddresses()
-        useCommerceStore().set("shippingAmount", this.shippingLine.price)
+        useCommerceStore().set("shippingAmount", this.shippingLine?.price || 0)
       }
 
       console.log("Select Item ::: ", this.options)

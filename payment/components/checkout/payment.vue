@@ -185,20 +185,23 @@ export default {
         this.options.address &&
         this.options.distance
       ) {
-        if (this.options.distance.price <= this.shippingLines[0].price) {
-          return this.shippingLines[0]
-        } else if (this.options.distance.price >= this.shippingLines[3].price) {
-          return this.shippingLines[3]
-        } else if (this.options.distance.price <= this.shippingLines[1].price) {
-          return this.shippingLines[1]
-        } else if (this.options.distance.price <= this.shippingLines[2].price) {
-          return this.shippingLines[2]
+        const local = this.shippingLines.find((i) => i.id === "local")
+        const provincial = this.shippingLines.find((i) => i.id === "provincial")
+        const international = this.shippingLines.find(
+          (i) => i.id === "international"
+        )
+
+        if (local && this.options.distance.price <= local.price) {
+          return local
+        } else if (
+          international &&
+          this.options.distance.price >= international.price
+        ) {
+          return international
+        } else if (provincial && this.options.distance.price <= provincial.price) {
+          return provincial
         }
       }
-
-      // if (this.options.shipping === "address" && this.options.address) {
-      //   return this.shippingLines[0]
-      // }
 
       return null
     },

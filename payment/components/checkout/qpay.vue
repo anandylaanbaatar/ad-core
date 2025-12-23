@@ -158,6 +158,13 @@ export default {
 
     // QPay Payment
     async setQPayToken() {
+      // Check if QPay plugin is available
+      if (!this.$qpay) {
+        this.error = this.$utils.t("QPay payment is not configured")
+        console.error("[QPay] Plugin not initialized - check integrations.qpay config")
+        return false
+      }
+
       // QPay Token
       let qpay_token = localStorage.getItem("qpay_token")
       let qpayData = null
@@ -184,13 +191,20 @@ export default {
       }
 
       // Set Payment Token
-      this.payment.accessToken = qpayData.access_token
+      if (qpayData) {
+        this.payment.accessToken = qpayData.access_token
+      }
+      return true
     },
     async createQPayInvoice() {
       this.payment.loading = true
       this.payment.invoiceId = `${this.invoiceNumber}` // Set Store Invoice Number
 
-      await this.setQPayToken()
+      const tokenSet = await this.setQPayToken()
+      if (!tokenSet) {
+        this.payment.loading = false
+        return
+      }
 
       let qpayInvoice = {
         invoice_code: this.invoiceCode,
