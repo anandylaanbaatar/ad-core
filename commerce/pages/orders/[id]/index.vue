@@ -35,19 +35,19 @@
                 {{ $utils.formatDateTime(order.date_created) }}
               </p>
 
-              <p v-if="order.updatedAt" class="font3">
+              <p v-if="order.date_updated" class="font3">
                 {{ $utils.t("Updated Date") }}:
-                {{ $utils.formatDateTime(order.updatedAt) }}
+                {{ $utils.formatDateTime(order.date_updated) }}
               </p>
 
-              <p v-if="order.cancelledAt" class="font3">
+              <p v-if="order.canceled_at" class="font3">
                 {{ $utils.t("Cancelled Date") }}:
-                {{ $utils.formatDateTime(order.cancelledAt) }}
+                {{ $utils.formatDateTime(order.canceled_at) }}
               </p>
 
-              <p v-if="order.closedAt" class="font3">
-                {{ $utils.t("Closed Date") }}:
-                {{ $utils.formatDateTime(order.closedAt) }}
+              <p v-if="order.completed_at" class="font3">
+                {{ $utils.t("Completed Date") }}:
+                {{ $utils.formatDateTime(order.completed_at) }}
               </p>
             </div>
           </div>
@@ -60,12 +60,15 @@
 
                 <h3 class="mb-2">{{ $utils.t("Account") }}</h3>
 
-                <template v-if="customer.id === order.customer">
-                  <p v-if="customer.email" class="font3">
-                    {{ customer.email }}
+                <template v-if="order.customer">
+                  <p v-if="order.customer.first_name || order.customer.last_name" class="font3">
+                    {{ order.customer.first_name }} {{ order.customer.last_name }}
                   </p>
-                  <p v-if="customer.phone" class="font3">
-                    {{ $utils.formatPhone(customer.phone) }}
+                  <p v-if="order.customer.email" class="font3">
+                    {{ order.customer.email }}
+                  </p>
+                  <p v-if="order.customer.phone" class="font3">
+                    {{ $utils.formatPhone(order.customer.phone) }}
                   </p>
                 </template>
               </div>
@@ -99,16 +102,21 @@
                   {{ $currency.format(order.total) }}
                 </p>
 
+                <p v-if="order.payment?.method" class="font3">
+                  {{ $utils.t("Method") }}:
+                  {{ order.payment.method.toUpperCase() }}
+                </p>
+
                 <Tag
-                  v-if="order.payment_status === 'paid'"
+                  v-if="order.payment?.status === 'paid'"
                   severity="success"
                   class="mt-2"
                 >
                   {{ $utils.t("Paid") }}
                 </Tag>
                 <Tag
-                  v-else-if="order.displayFinancialStatus === 'REFUNDED'"
-                  severity="success"
+                  v-else-if="order.payment?.status === 'refunded'"
+                  severity="info"
                   class="mt-2"
                 >
                   {{ $utils.t("Refunded") }}
@@ -128,11 +136,15 @@
 
                 <h3 class="mb-2">{{ $utils.t("Shipping Information") }}</h3>
 
-                <div v-if="order.shipping" class="c-list-items mb-2">
-                  {{ order.shipping }}
-                </div>
+                <p v-if="order.shipping_method" class="font3 mb-2">
+                  {{ order.shipping_method }}
+                </p>
 
-                <Tag v-if="order.cancelReason" severity="danger" class="mb-1">
+                <p v-if="order.shipping_address?.full_address" class="font3 mb-2">
+                  {{ order.shipping_address.full_address }}
+                </p>
+
+                <Tag v-if="order.canceled_at" severity="danger" class="mb-1">
                   {{ $utils.t("Cancelled") }}
                 </Tag>
                 <Tag
@@ -206,14 +218,9 @@ export default {
   },
 
   computed: {
-    customer() {
-      return useCommerceStore().customer
-    },
     lineItems() {
-      if (this.order) {
-        if (this.order.line_items) {
-          return this.order.line_items
-        }
+      if (this.order?.line_items) {
+        return this.order.line_items.map((item) => item.line_items_id).filter(Boolean)
       }
       return []
     },
@@ -222,7 +229,7 @@ export default {
         let count = 0
 
         for (let i = 0; i < this.lineItems.length; i++) {
-          count += this.lineItems[i].quantity
+          count += this.lineItems[i]?.quantity || 0
         }
 
         return count

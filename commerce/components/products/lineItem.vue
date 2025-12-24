@@ -17,14 +17,14 @@
       <div class="content">
         <div>
           <p class="font2 title">
-            {{ $utils.addDots(item.product.title, 23) }}
+            {{ $utils.addDots(item.product?.title, 23) }}
           </p>
           <p class="font2 price">
             {{ $currency.format(item.price) }}
           </p>
         </div>
 
-        <Tag severity="warn" class="ml-3">{{ item.product_variant.sku }}</Tag>
+        <Tag v-if="item.product_variant?.sku" severity="warn" class="ml-3">{{ item.product_variant.sku }}</Tag>
       </div>
     </div>
   </div>
@@ -48,8 +48,8 @@ export default {
       if (this.item) {
         if (this.item.product_variant?.image) {
           return this.item.product_variant.image.url
-        } else if (this.item.product.featured_image?.url) {
-          return this.item.product.featured_image?.url
+        } else if (this.item.product?.featured_image?.url) {
+          return this.item.product.featured_image.url
         }
       }
       return false
