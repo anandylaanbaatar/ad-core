@@ -122,6 +122,13 @@ export const useCommerceStore = defineStore("commerce", {
       const nuxtApp = useNuxtApp()
       let customer = null
 
+      // Guard: Don't proceed if user data is not available
+      if (!userData) {
+        console.log("[Commerce] ::: setUser called but userData is null, skipping")
+        this.customer = null
+        return
+      }
+
       const isArraysEqual = (a, b) => {
         return a.length === b.length && a.every((val, i) => val === b[i])
       }

@@ -46,7 +46,7 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
         await useCommerceStore().setUser()
       }
       // Check if email verified!
-      if (authStore.user) {
+      if (authStore.user && user) {
         if (!user.emailVerified) {
           // if (to.path !== "/secure/verify-email") {
           //   return navigateTo({
